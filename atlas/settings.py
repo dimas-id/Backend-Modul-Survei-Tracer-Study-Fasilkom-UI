@@ -33,7 +33,7 @@ PRODUCTION = os.environ.get('DJANGO_ENV') == 'production'
 TESTING = 'test' in sys.argv
 DEBUG = not PRODUCTION
 
-DEPLOYMENT_ROOT_URI = 'nda-atlas.herokuapp.com'
+DEPLOYMENT_ROOT_URI = ''
 DEPLOYMENT_ROOT_URL = 'https://' + DEPLOYMENT_ROOT_URI
 
 # Application definition
@@ -107,11 +107,12 @@ WSGI_APPLICATION = 'atlas.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'db',
-        'PORT': 5432,
+        'ENGINE': os.getenv('SQL_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.getenv('SQL_DATABASE', os.path.join(BASE_DIR, 'db.sqlite3')),
+        'USER': os.getenv('SQL_USER', 'user'),
+        'PASSWORD': os.getenv('SQL_PASSWORD', 'password'),
+        'HOST': os.getenv('SQL_HOST', 'localhost'),
+        'PORT': os.getenv('SQL_PORT', '5432'),
     }
 }
 

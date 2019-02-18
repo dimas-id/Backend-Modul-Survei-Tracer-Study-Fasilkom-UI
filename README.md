@@ -1,3 +1,2 @@
-# b3-atlas
-
-backend service for alumni data integration
+# Project B3
+## Atlas Service

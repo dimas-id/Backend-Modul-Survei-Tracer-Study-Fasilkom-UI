@@ -4,10 +4,10 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from rest_framework.authentication import authenticate
 
-from atlas.apps.account.models import Account
+from atlas.apps.account.models import User
 
 
-class AuthTokenSerializer(serializers.Serializer):
+class AuthSerializer(serializers.Serializer):
     email = serializers.CharField(label=_('Email'))
     password = serializers.CharField(
         label=_('Password'), style={'input_type': 'password'}, trim_whitespace=False
@@ -41,10 +41,10 @@ class AuthTokenSerializer(serializers.Serializer):
         return attrs
 
 
-class AccountSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Account
+        model = User
         fields = (
             'name',
             'first_name',

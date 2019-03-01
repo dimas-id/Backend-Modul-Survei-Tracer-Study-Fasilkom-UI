@@ -14,13 +14,14 @@ import os
 import sys
 import environ
 
+from datetime import timedelta
 from atlas.common.utils.slug import slugify
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-root = environ.Path(__file__) - 2  # three folder back (/a/b/ - 3 = /)
-environ.Env.read_env('.env')  # reading .env file
+base = environ.Path(__file__) - 2 # two folders back (/a/b/ - 2 = /)
+environ.Env.read_env(env_file=base('.env')) # reading .env file
 env = environ.Env(DEBUG=(bool, False),)  # set default values and casting
 
 # Quick-start development settings - unsuitable for production
@@ -76,10 +77,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
-AUTH_USER_MODEL = 'account.Account'
-AUTH_USER_MODEL_LOOKUP_FIELD = 'username'
-
 ROOT_URLCONF = 'atlas.urls'
 
 TEMPLATES = [
@@ -106,12 +103,12 @@ WSGI_APPLICATION = 'atlas.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('SQL_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': os.getenv('SQL_DATABASE', os.path.join(BASE_DIR, 'db.sqlite3')),
-        'USER': os.getenv('SQL_USER', 'user'),
-        'PASSWORD': os.getenv('SQL_PASSWORD', 'password'),
-        'HOST': os.getenv('SQL_HOST', 'localhost'),
-        'PORT': os.getenv('SQL_PORT', '5432'),
+        'ENGINE': os.environ.get('SQL_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.environ.get('DB_DATABASE'),
+        'USER': os.environ.get('DB_USER', 'user'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'password'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
@@ -153,6 +150,11 @@ CORS_ORIGIN_WHITELIST = ('localhost:3000',
                          '127.0.0.1:3000',)
 CORS_ORIGIN_ALLOW_ALL = True
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'rest_framework_simplejwt.authentication.JWTAuthentication',)
+AUTH_USER_MODEL = 'account.User'
+AUTH_USER_MODEL_LOOKUP_FIELD = 'username'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -171,6 +173,27 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+
+    'AUTH_HEADER_TYPES': ('JWT',),
+    'USER_ID_FIELD': 'id',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
 
 
 # Internationalization

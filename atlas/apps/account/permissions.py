@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAdminUser
 from rest_framework.permissions import BasePermission
 
-from atlas.apps.account.models import Account
+from atlas.apps.account.models import User
 
 class IsAdminOrStaff(BasePermission):
 
@@ -10,7 +10,7 @@ class IsAdminOrStaff(BasePermission):
             request.user.is_staff
 
 
-class IsAccountOwner(BasePermission):
+class IsUserOwner(BasePermission):
 
-    def has_object_permission(self, request, view, obj: Account):
+    def has_object_permission(self, request, view, obj: User):
         return not request.user.is_anonymous() and request.user.id == obj.id

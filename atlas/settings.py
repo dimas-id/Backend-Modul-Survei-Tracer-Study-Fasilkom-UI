@@ -1,4 +1,3 @@
-from atlas.common.utils.slug import slugify
 '''
 Django settings for atlas project.
 
@@ -14,6 +13,8 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 import sys
 import environ
+
+from atlas.common.utils.slug import slugify
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -46,7 +47,6 @@ MODULES = [
     'corsheaders',
     'django_extensions',
     'rest_framework',
-    'rest_framework.authtoken',
     'storages',
     'whitenoise.runserver_nostatic',
 ]
@@ -77,7 +77,6 @@ MIDDLEWARE = [
 ]
 
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
-AUTHENTICATION_TOKEN_EXPIRES_DURATION = 8  # 8 hours
 AUTH_USER_MODEL = 'account.Account'
 AUTH_USER_MODEL_LOOKUP_FIELD = 'username'
 
@@ -133,26 +132,19 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
-        'atlas.apps.account.authentication.ExpiringTokenAuthentication'
     ),
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.ScopedRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'login': '15/min',
+        # 'login': '15/min',
     },
 }
 
 # django autoslug
 AUTOSLUG_SLUGIFY_FUNCTION = slugify
 
-
-if PRODUCTION:
-    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
-        'rest_framework.renderers.JSONRenderer',)
-
 SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
-
 
 # hosts and cors
 

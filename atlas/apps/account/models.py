@@ -11,19 +11,13 @@ from atlas.apps.account.managers import UserManager
 from atlas.apps.account.utils import slugify_username
 
 
-class Account(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable):
+class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable):
     """
-    Represents account and authentication model
+    Represents User and authentication model
     """
-
-    phone_regex = RegexValidator(
-        regex=r'^\+?\d{9,15}$',
-        message='Only digits are allowed. Country code are optional. ' 'Up to 15 digits allowed.',
-    )
-
     # required fields
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
+    first_name = models.CharField(max_length=256)
+    last_name = models.CharField(max_length=256)
     email = models.EmailField(unique=True)
     username = AutoSlugField(always_update=True,
                              sep="",
@@ -32,12 +26,7 @@ class Account(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable):
                              unique=True,
                              editable=False)
 
-    # additional informatin
-    phone_number = models.CharField(
-        max_length=15, validators=[phone_regex], null=True, blank=True)
-
     # some metas
-    is_staff = models.BooleanField('Staff', default=False)
     is_superuser = models.BooleanField('Superuser', default=False)
     is_active = models.BooleanField(default=True)
 

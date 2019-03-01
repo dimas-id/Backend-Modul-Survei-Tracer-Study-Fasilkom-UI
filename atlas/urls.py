@@ -14,13 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from atlas.admin import admin
+from atlas.admin import admin_site
 
 from atlas.common.utils.urls import includer
 
 include = includer('atlas')
 
 urlpatterns = [
-    path('__admin__/', admin.urls),
+    path('__admin__/', admin_site.urls),
     path('api/', include('api'))
 ]

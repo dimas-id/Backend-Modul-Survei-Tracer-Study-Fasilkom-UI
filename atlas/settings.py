@@ -154,7 +154,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'rest_framework_simplejwt.authentication.JWTAuthentication',)
 AUTH_USER_MODEL = 'account.User'
-AUTH_USER_MODEL_LOOKUP_FIELD = 'username'
+AUTH_USER_MODEL_LOOKUP_FIELD = 'email'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators

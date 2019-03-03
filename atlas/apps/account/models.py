@@ -44,9 +44,32 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
     #       @todo linkedin_id
 
     # some metas
-    is_superuser = models.BooleanField(_('Superuser'), default=False)
-    is_staff = models.BooleanField(_('Staff'), default=False)
-    is_active = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(
+        _('Superuser status'),
+        default=False,
+        help_text=_(
+            'Designates that this user has all permissions without '
+            'explicitly assigning them.'
+        ))
+    is_staff = models.BooleanField(
+        _('Staff status'),
+        default=False,
+        help_text=_(
+            'Designates that this user can login to administrator site.'
+        ))
+    is_active = models.BooleanField(
+        _('Active status'),
+        default=True,
+        help_text=_(
+            'Designates that if this user is not active, then can\'t login.'
+        ))
+    is_verified = models.BooleanField(
+        _('Verified status'),
+        default=False,
+        help_text=_(
+            'Designates that if this user is not verified,'
+            'then can\'t access other services except Account Service'
+        ))
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = (
@@ -62,13 +85,6 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
         returns full name
         """
         return f'{self.first_name} {self.last_name}'
-
-    @property
-    def is_verified(self):
-        """
-        @todo implement this later,
-        """
-        return False
 
     @property
     def is_paired_sso(self):

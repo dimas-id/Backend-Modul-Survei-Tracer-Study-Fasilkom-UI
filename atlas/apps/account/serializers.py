@@ -1,47 +1,31 @@
-from django.conf import settings
+from django.utils import timezone
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.password_validation import (
+    CommonPasswordValidator,
+    MinimumLengthValidator,
+    NumericPasswordValidator,
+    UserAttributeSimilarityValidator,
+)
 
 from rest_framework import serializers
-from rest_framework.authentication import authenticate
 
-from atlas.apps.account.models import User
+from atlas.apps.account.services import AuthService
+from atlas.apps.account.models import UserProfile
+
+User = get_user_model()
 
 
-class AuthSerializer(serializers.Serializer):
-    email = serializers.CharField(label=_('Email'))
-    password = serializers.CharField(
-        label=_('Password'), style={'input_type': 'password'}, trim_whitespace=False
-    )
+class UserProfileSerializer(serializers.ModelSerializer):
 
-    def validate(self, attrs):
-        email = attrs.get('email')
-        password = attrs.get('password')
-
-        if email and password:
-            user = authenticate(
-                request=self.context.get('request'), email=email.lower(), password=password)
-
-            # The authenticate call simply returns None for is_active=False
-            # users. (Assuming the default ModelBackend authentication
-            # backend.)
-            if not user:
-                msg = _('Unable to log in with provided credentials.')
-                raise serializers.ValidationError(msg, code='authorization')
-        else:
-            msg = {}
-            if not email:
-                msg['email'] = ['This field is required.']
-
-            if not password:
-                msg['password'] = ['This field is required.']
-
-            raise serializers.ValidationError(msg, code='authorization')
-
-        attrs['user'] = user
-        return attrs
+    class Meta:
+        model = UserProfile
+        exclude = ('user',)
 
 
 class UserSerializer(serializers.ModelSerializer):
+
+    profile = UserProfileSerializer()
 
     class Meta:
         model = User
@@ -49,18 +33,75 @@ class UserSerializer(serializers.ModelSerializer):
             'name',
             'first_name',
             'last_name',
-            'phone_number',
             'email',
             'username',
-            'last_login'
+            'profile',
+            'last_login',
+            'is_verified',
+            'is_active',
+            'is_staff',
+            'is_superuser',
+            'is_verified',
         )
 
         read_only_fields = (
             'name',
             'email',
             'username',
+            'last_login',
             'is_active',
             'is_staff',
             'is_superuser',
-            'last_login'
+            'is_verified',
         )
+
+
+class RegisterUserSerializer(serializers.Serializer):
+    username_field = User.USERNAME_FIELD
+
+    # auth
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    # profile
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    birthplace = serializers.CharField()
+    birthdate = serializers.DateField()
+
+    # academic data
+    ui_sso_npm = serializers.CharField(max_length=16, required=False)
+    latest_csui_generation = serializers.IntegerField()
+
+    def create(self, validated_data):
+        auth_service = AuthService()
+        request = self.context.get('request')
+        return auth_service.registerPublicUser(
+            request, identifier=validated_data[self.username_field], **validated_data)
+
+    def validate(self, attrs):
+        identifier = attrs.get(self.username_field)
+        password = attrs.get('password')
+        request = self.context.get('request')
+
+        error = {}
+        if self.username_field == 'email':
+            attrs[self.username_field] = identifier = identifier.lower()
+            if identifier.endswith('@ui.ac.id'):
+                error[self.username_field] = [
+                    'Can\'t register using UI email.']
+
+        MinimumLengthValidator(min_length=8).validate(password)
+        CommonPasswordValidator().validate(password)
+        UserAttributeSimilarityValidator(password, request.user)
+        NumericPasswordValidator().validate(password)
+
+        if attrs['latest_csui_generation'] < 0 or attrs['latest_csui_generation'] > timezone.now().year:
+            error['latest_csui_generation'] = [
+                'There is no such generation yet']
+
+        if len(error) > 0:
+            raise serializers.ValidationError(
+                error, code='invalid_registration')
+
+        return attrs

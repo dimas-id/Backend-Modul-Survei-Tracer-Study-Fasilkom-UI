@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.utils.translation import ugettext as _
+from django.conf import settings
 
 from autoslug import AutoSlugField
 
@@ -102,14 +103,14 @@ class UserProfile(AbstractTimestampable):
     Represents User Profile, we store all personal related information here.
     """
     GRADUATION_CHOICES = (
-        ("TL", "Tidak Lulus"),
-        ("BL", "Belum Lulus"),
-        ("SL", "Sudah Lulus"),
+        ('TL', 'Tidak Lulus'),
+        ('BL', 'Belum Lulus'),
+        ('SL', 'Sudah Lulus'),
     )
-    GENDER_CHOICES = (("M", "Male"), ("F", "Female"))
+    GENDER_CHOICES = (('M', 'Male'), ('F', 'Female'))
 
     user = models.OneToOneField(
-        related_name='profile', to=User, on_delete=models.CASCADE)
+        primary_key=True, related_name='profile', to=User, on_delete=models.CASCADE)
 
     # personal info
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
@@ -122,18 +123,17 @@ class UserProfile(AbstractTimestampable):
     residence_city = models.CharField(max_length=128, null=True, blank=True)
     residence_country = models.CharField(max_length=128, null=True, blank=True)
 
-    # angkatan
-    # if user has bachelor degree from Fasilkom UI, then use the
-    # angkatan when user was still undergraduate.
-    # else if user doesnt
+    # academic for validation purpose
     latest_csui_generation = models.SmallIntegerField(
         _('Angkatan'), null=True, blank=True)
+    latest_csui_program = models.CharField(
+        _('Prodi'), max_length=64, blank=True)
     latest_csui_graduation_status = models.CharField(
-        _("Kelulusan"), choices=GRADUATION_CHOICES, max_length=1, null=True, blank=True)
+        _('Kelulusan'), choices=GRADUATION_CHOICES, max_length=2, blank=True)
 
     # others
     profile_pic_url = models.URLField(
-        _('Profile Picture'), null=True, blank=True)
+        _('Profile Picture'), blank=True, default=settings.DEFAULT_PROFILE_PIC)
     website_url = models.URLField(null=True, blank=True)
 
     def __str__(self):

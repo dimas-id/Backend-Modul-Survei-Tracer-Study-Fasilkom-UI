@@ -20,8 +20,8 @@ from atlas.common.utils.slug import slugify
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-base = environ.Path(__file__) - 2 # two folders back (/a/b/ - 2 = /)
-environ.Env.read_env(env_file=base('.env')) # reading .env file
+base = environ.Path(__file__) - 2  # two folders back (/a/b/ - 2 = /)
+environ.Env.read_env(env_file=base('.env'))  # reading .env file
 env = environ.Env(DEBUG=(bool, False),)  # set default values and casting
 
 # Quick-start development settings - unsuitable for production
@@ -146,7 +146,8 @@ SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 
 # hosts and cors
 
-ALLOWED_HOSTS = ('localhost', '127.0.0.1', '192.168.99.100', DEPLOYMENT_ROOT_URI)
+ALLOWED_HOSTS = ('localhost', '127.0.0.1',
+                 '192.168.99.100', DEPLOYMENT_ROOT_URI)
 CORS_ORIGIN_WHITELIST = ('localhost:3000',
                          '127.0.0.1:3000',)
 CORS_ORIGIN_ALLOW_ALL = True
@@ -219,6 +220,12 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+DEFAULT_PROFILE_PIC = f'{MEDIA_URL}img/default-profile-pic.jpeg'
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # @todo: amazon s3 for storage

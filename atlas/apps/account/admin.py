@@ -32,7 +32,7 @@ class UserAdmin(ModelAdminSuperuser):
 # profile
 @register(UserProfile, site=admin_site)
 class UserProfileAdmin(ModelAdminSuperuser):
-    list_display = ('id',)
+    list_display = ('user', 'gender', 'birthplace', 'birthdate', 'residence_city', 'residence_country')
 
 # register default models
 admin_site.register(Group, admin_class=ModelAdminSuperuser)

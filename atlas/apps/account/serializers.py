@@ -7,6 +7,7 @@ from django.contrib.auth.password_validation import (
     NumericPasswordValidator,
     UserAttributeSimilarityValidator,
 )
+from django.db import transaction
 
 from rest_framework import serializers
 
@@ -24,12 +25,33 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     profile = UserProfileSerializer()
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        """
+        Update User data and User Profile data
+        """
+
+        # updating profile data
+        profile_data = validated_data.pop(User.PROFILE_FIELD)
+        if profile_data:
+            profile = instance.profile
+            for profile_attr in profile_data.keys():
+                # set attr profile with newest information from profile_data
+                setattr(profile, profile_attr, profile_data[profile_attr])
+            # little bit expensive to save all attribute
+            # because not all attr in profile_data is valid
+            # we cant set .save(update_fields=...)
+            profile.save()
+
+        # updating user data
+        return super().update(instance, validated_data)
 
     class Meta:
         model = User
         fields = (
+            'id',
             'name',
             'first_name',
             'last_name',
@@ -79,17 +101,26 @@ class RegisterUserSerializer(serializers.Serializer):
     latest_csui_program = serializers.CharField()
 
     def create(self, validated_data):
+        """
+        create user based on validated data
+        """
         auth_service = AuthService()
         request = self.context.get('request')
         return auth_service.registerPublicUser(
             request, identifier=validated_data[self.username_field], **validated_data)
 
     def validate(self, attrs):
+        """
+        Validate data that anonymous send in registration.
+        Raise serializers.ValidationException if data is not valid.
+        """
         identifier = attrs.get(self.username_field)
         password = attrs.get('password')
         request = self.context.get('request')
 
         error = {}
+
+        # normalize email
         if self.username_field == 'email':
             attrs[self.username_field] = identifier = identifier.lower()
             if identifier.endswith('@ui.ac.id'):
@@ -101,8 +132,10 @@ class RegisterUserSerializer(serializers.Serializer):
         UserAttributeSimilarityValidator(password, request.user)
         NumericPasswordValidator().validate(password)
 
-        if User.objects.filter(**{self.username_field: attrs[self.username_field]}).exists():
-            error[self.username_field] = [f'{self.username_field} is already exists']
+        # validate identifier (email/username) is unique
+        if User.objects.filter(**{self.username_field: identifier}).exists():
+            error[self.username_field] = [
+                f'{self.username_field} is already exists']
 
         if len(error) > 0:
             raise serializers.ValidationError(

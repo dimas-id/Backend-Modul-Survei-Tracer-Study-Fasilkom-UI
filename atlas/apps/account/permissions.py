@@ -41,15 +41,9 @@ class IsAdminOrStaff(BasePermission):
             request.user.is_staff
 
 
-class IsUserOwner(BasePermission):
+class HasPriviledgeToAccessUser(BasePermission):
 
     def has_object_permission(self, request, view, obj: User):
-        return not request.user.is_anonymous and request.user.id == obj.id
-
-
-class HasPriviledgeToMutateProfile(BasePermission):
-
-    def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
-        return request.user.profile == obj
+        return not request.user.is_anonymous and request.user.id == obj.id

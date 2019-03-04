@@ -76,6 +76,7 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
         ))
 
     USERNAME_FIELD = 'email'
+    PROFILE_FIELD = 'profile'
     REQUIRED_FIELDS = (
         'first_name',
         'last_name'

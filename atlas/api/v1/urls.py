@@ -6,7 +6,7 @@ from rest_framework_simplejwt.views import (
 from atlas.api.v1.views import general
 
 from atlas.api.v1.views.account import (
-    UserDetailView, UserCreateView, UserProfileDetailView)
+    UserDetailView, UserCreateView)
 
 general = [
     path('', general.api_v1, name='general-v1'),
@@ -19,9 +19,7 @@ auth = [
 
 account = [
     path('register', UserCreateView.as_view(), name='account_register'),
-    path('user', UserDetailView.as_view(), name='account_user_detail'),
-    path('user/<username>', UserProfileDetailView.as_view(),
-         name='account_user_profile_detail')
+    path('user/<username>', UserDetailView.as_view(), name='account_user_detail'),
 ]
 
 

@@ -8,7 +8,7 @@ from atlas.apps.account.models import (User, UserProfile)
 # account
 @register(User, site=admin_site)
 class UserAdmin(ModelAdminSuperuser):
-    list_display = ('id', 'email', 'first_name', 'last_name', 'profile')
+    list_display = ('id', 'email', 'username', 'first_name', 'last_name', 'profile')
 
     def has_view_or_change_permission(self, request, obj=None):
         return super().has_view_or_change_permission(request, obj=obj) \

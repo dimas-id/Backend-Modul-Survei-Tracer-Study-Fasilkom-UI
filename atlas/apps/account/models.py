@@ -23,7 +23,10 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128)
     email = models.EmailField(unique=True)
-    username = AutoSlugField(always_update=True,
+
+    # public ID
+    # default DB index is True
+    username = AutoSlugField(always_update=False,
                              sep="",
                              slugify=slugify_username,
                              populate_from='name',

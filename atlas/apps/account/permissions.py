@@ -1,7 +1,7 @@
 from django.conf import settings
 
-from rest_framework.permissions import IsAdminUser
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import (
+    IsAdminUser, BasePermission, SAFE_METHODS)
 
 from atlas.apps.account.models import User
 
@@ -45,3 +45,11 @@ class IsUserOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj: User):
         return not request.user.is_anonymous and request.user.id == obj.id
+
+
+class HasPriviledgeToMutateProfile(BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user.profile == obj

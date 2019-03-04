@@ -20,7 +20,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        exclude = ('user',)
+        exclude = ('user', 'latest_csui_graduation_status',)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -60,6 +60,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterUserSerializer(serializers.Serializer):
     username_field = User.USERNAME_FIELD
+    MIN_GENERATION = 1986
 
     # auth
     email = serializers.EmailField()
@@ -73,7 +74,9 @@ class RegisterUserSerializer(serializers.Serializer):
 
     # academic data
     ui_sso_npm = serializers.CharField(max_length=16, required=False)
-    latest_csui_generation = serializers.IntegerField()
+    latest_csui_generation = serializers.IntegerField(
+        min_value=MIN_GENERATION, max_value=timezone.now().year)
+    latest_csui_program = serializers.CharField()
 
     def create(self, validated_data):
         auth_service = AuthService()
@@ -98,9 +101,8 @@ class RegisterUserSerializer(serializers.Serializer):
         UserAttributeSimilarityValidator(password, request.user)
         NumericPasswordValidator().validate(password)
 
-        if attrs['latest_csui_generation'] < 0 or attrs['latest_csui_generation'] > timezone.now().year:
-            error['latest_csui_generation'] = [
-                'There is no such generation yet']
+        if User.objects.filter(**{self.username_field: attrs[self.username_field]}).exists():
+            error[self.username_field] = [f'{self.username_field} is already exists']
 
         if len(error) > 0:
             raise serializers.ValidationError(

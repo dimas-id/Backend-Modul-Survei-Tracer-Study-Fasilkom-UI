@@ -7,7 +7,6 @@ from django.contrib.auth import (
 from django.http import HttpRequest
 from django.utils.translation import ugettext_lazy as _
 
-from rest_framework.exceptions import ValidationError
 from rest_framework.authentication import authenticate
 
 User = get_user_model()
@@ -32,15 +31,11 @@ class AuthService:
         """
 
         # for now just register the user
-        try:
-            user = User.objects.create_user(
-                password=password, email=identifier, first_name=first_name,
-                last_name=last_name, ui_sso_npm=ui_sso_npm)
+        user = User.objects.create_user(
+            password=password, email=identifier, first_name=first_name,
+            last_name=last_name, ui_sso_npm=ui_sso_npm)
             # user = authenticate(request, **{self.username_field: getattr(user,
             #                                                       self.username_field), 'password': password})
-        except IntegrityError:
-            raise ValidationError(
-                detail={self.username_field: [f'{self.username_field} is already exists']})
 
         for attr in profile:
             setattr(user.profile, attr, profile[attr])

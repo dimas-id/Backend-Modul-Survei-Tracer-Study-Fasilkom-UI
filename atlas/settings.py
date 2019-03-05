@@ -42,6 +42,7 @@ DEPLOYMENT_ROOT_URL = 'https://' + DEPLOYMENT_ROOT_URI
 APPS = [
     'atlas',
     'atlas.apps.account',
+    'atlas.apps.experience',
 ]
 
 MODULES = [

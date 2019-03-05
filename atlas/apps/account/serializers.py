@@ -13,6 +13,7 @@ from rest_framework import serializers
 
 from atlas.apps.account.services import AuthService
 from atlas.apps.account.models import UserProfile
+from atlas.apps.experience.serializers import PositionSerializer, EducationSerializer
 
 User = get_user_model()
 
@@ -26,6 +27,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer()
+
+    positions = PositionSerializer(many=True)
+    educations = EducationSerializer(many=True)
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -58,6 +62,8 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'username',
             'profile',
+            'positions',
+            'educations',
             'groups',
             'last_login',
             'is_verified',
@@ -71,6 +77,8 @@ class UserSerializer(serializers.ModelSerializer):
             'name',
             'email',
             'username',
+            'positions',
+            'educations',
             'groups',
             'last_login',
             'is_active',

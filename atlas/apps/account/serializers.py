@@ -127,6 +127,7 @@ class RegisterUserSerializer(serializers.Serializer):
                 error[self.username_field] = [
                     'Can\'t register using UI email.']
 
+        # validate password to minimum
         MinimumLengthValidator(min_length=8).validate(password)
         CommonPasswordValidator().validate(password)
         UserAttributeSimilarityValidator(password, request.user)

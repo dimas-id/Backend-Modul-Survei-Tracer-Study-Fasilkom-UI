@@ -120,6 +120,8 @@ class UserProfile(AbstractTimestampable):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     phone_number = models.CharField(
         max_length=15, validators=[PhoneRegex()], null=True, blank=True)
+
+    # todo: remove birthplace
     birthplace = models.CharField(max_length=128)
     birthdate = models.DateField(null=True)
 
@@ -152,3 +154,55 @@ def create_user_profile_on_new_user(sender, instance: User, created, **kwargs):
     """
     if created:
         UserProfile.objects.create(user=instance)
+
+
+class UserPreference(AbstractTimestampable):
+    """
+    Represent user preference, add other preference later if we need.
+    """
+    user = models.OneToOneField(
+        related_name='preference', to=User, on_delete=models.CASCADE)
+
+    # preferences
+    should_send_newsletter = models.BooleanField(
+        _('Send Newsletter'),
+        default=True,
+        help_text=_(
+            'Designates that if this is active, '
+            'then user should receive email about Newsletter.'
+        ))
+    should_send_event = models.BooleanField(
+        _('Send Event Update'),
+        default=True,
+        help_text=_(
+            'Designates that if this is active, '
+            'then user should receive email about Event update.'
+        ))
+    should_send_vacancy = models.BooleanField(
+        _('Send Vacancy Update'),
+        default=True,
+        help_text=_(
+            'Designates that if this is active, '
+            'then user should receive email about Vacancy update.'
+        ))
+    should_send_donation_info = models.BooleanField(
+        _('Send Donation Information'),
+        default=True,
+        help_text=_(
+            'Designates that if this is active, '
+            'then user should receive email about Donation information.'
+        ))
+    should_send_update = models.BooleanField(
+        _('Send General Update'),
+        default=True,
+        help_text=_(
+            'Designates that if this is active, '
+            'then user should receive email about General update.'
+        ))
+    could_contact_me = models.BooleanField(
+        _('Contact the person, personally'),
+        default=False,
+        help_text=_(
+            'Designates that if this is active, '
+            'then we could contact user as Fasilkom UI about matter.'
+        ))

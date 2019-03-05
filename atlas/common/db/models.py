@@ -53,18 +53,6 @@ class AbstractPrimaryUUIDable(models.Model):
         return str(self.id)
 
 
-class AbstractCategory(models.Model):
-    title = models.CharField(max_length=256)
-    description = models.TextField(blank=True, default='')
-    is_active = models.BooleanField(default=True)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return self.title
-
-
 class AbstractAddress(models.Model):
     street = models.CharField("Street", max_length=256)
     district = models.CharField(

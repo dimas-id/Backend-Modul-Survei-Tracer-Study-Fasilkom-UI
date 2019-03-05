@@ -146,16 +146,6 @@ class UserProfile(AbstractTimestampable):
         return f'{self.user.name} ({self.latest_csui_generation})'
 
 
-@receiver(post_save, sender=User, dispatch_uid='user_profile_creation')
-@transaction.atomic
-def create_user_profile_on_new_user(sender, instance: User, created, **kwargs):
-    """
-    Create UserProfile for every new User
-    """
-    if created:
-        UserProfile.objects.create(user=instance)
-
-
 class UserPreference(AbstractTimestampable):
     """
     Represent user preference, add other preference later if we need.
@@ -206,3 +196,14 @@ class UserPreference(AbstractTimestampable):
             'Designates that if this is active, '
             'then we could contact user as Fasilkom UI about matter.'
         ))
+
+
+@receiver(post_save, sender=User, dispatch_uid='user_profile_creation')
+@transaction.atomic
+def create_user_profile_on_new_user(sender, instance: User, created, **kwargs):
+    """
+    Create UserProfile and UserPreference for every new User
+    """
+    if created:
+        UserProfile.objects.create(user=instance)
+        UserPreference.objects.create(user=instance)

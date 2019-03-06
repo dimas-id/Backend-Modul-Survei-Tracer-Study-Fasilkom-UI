@@ -30,6 +30,9 @@ pytz = "*"
 django-rest-camel = "*"
 django-environ = "*"
 djangorestframework-simplejwt = "*"
+coreapi = "*"
+pygments = "*"
+markdown = "*"
 
 [requires]
 python_version = "3.6.7"

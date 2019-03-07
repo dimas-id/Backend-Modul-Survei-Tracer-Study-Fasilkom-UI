@@ -197,6 +197,9 @@ class UserPreference(AbstractTimestampable):
             'then we could contact user as Fasilkom UI about matter.'
         ))
 
+    def __str__(self):
+        return self.user.name
+
 
 @receiver(post_save, sender=User, dispatch_uid='user_profile_creation')
 @transaction.atomic

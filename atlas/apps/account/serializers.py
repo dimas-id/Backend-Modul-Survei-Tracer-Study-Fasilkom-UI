@@ -12,7 +12,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from atlas.apps.account.services import AuthService
-from atlas.apps.account.models import UserProfile
+from atlas.apps.account.models import UserProfile, UserPreference
 from atlas.apps.experience.serializers import PositionSerializer, EducationSerializer
 
 User = get_user_model()
@@ -23,6 +23,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         exclude = ('user', 'latest_csui_graduation_status',)
+
+
+class UserPreferenceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserPreference
+        exclude = ('user',)
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -13,38 +13,17 @@ from atlas.apps.experience.models import Position, Education
 User = get_user_model()
 
 
-class PositionListCreateView(ListCreateAPIView):
-    """
-    post:
-    Create position
-
-    get:
-    Return list of position owned by user
-    """
+class AbstractExperienceListCreateView(ListCreateAPIView):
     permission_classes = (IsOwnerOfExperience,)
-    serializer_class = PositionSerializer
+    model_class = None
+    serializer_class = None
     lookup_field = 'username'
 
-    def get_queryset(self):
+    def get_model_class(self):
         """
-        Return a queryset based on user
+        Return model class defined
         """
-        user = get_object_or_404(
-            User, **{self.lookup_field: self.kwargs[self.lookup_field]})
-        return Position.objects.filter(owner=user)
-
-
-class EducationListCreateView(ListCreateAPIView):
-    """
-    post:
-    Create education
-
-    get:
-    Return list of education owned by user
-    """
-    permissions_classes = (IsOwnerOfExperience,)
-    serializer_class = EducationSerializer
-    lookup_field = 'username'
+        return self.model_class
 
     def get_queryset(self):
         """
@@ -54,4 +33,28 @@ class EducationListCreateView(ListCreateAPIView):
         # therefore, we query the user.
         user = get_object_or_404(
             User, **{self.lookup_field: self.kwargs[self.lookup_field]})
-        return Position.objects.filter(owner=user)
+        return self.model_class.objects.filter(owner=user)
+
+
+class PositionListCreateView(AbstractExperienceListCreateView):
+    """
+    post:
+    Create position
+
+    get:
+    Return list of position owned by user
+    """
+    model_class = Position
+    serializer_class = PositionSerializer
+
+
+class EducationListCreateView(AbstractExperienceListCreateView):
+    """
+    post:
+    Create education
+
+    get:
+    Return list of education owned by user
+    """
+    model_class = Education
+    serializer_class = EducationSerializer

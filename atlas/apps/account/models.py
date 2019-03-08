@@ -120,9 +120,6 @@ class UserProfile(AbstractTimestampable):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     phone_number = models.CharField(
         max_length=15, validators=[PhoneRegex()], null=True, blank=True)
-
-    # todo: remove birthplace
-    birthplace = models.CharField(max_length=128)
     birthdate = models.DateField(null=True)
 
     # Residence
@@ -130,7 +127,7 @@ class UserProfile(AbstractTimestampable):
     residence_country = models.CharField(max_length=128, null=True, blank=True)
 
     # academic for validation purpose
-    latest_csui_generation = models.SmallIntegerField(
+    latest_csui_class = models.SmallIntegerField(
         _('Angkatan'), null=True, blank=True)
     latest_csui_program = models.CharField(
         _('Prodi'), max_length=64, blank=True)
@@ -145,7 +142,7 @@ class UserProfile(AbstractTimestampable):
     website_url = models.URLField(null=True, blank=True)
 
     def __str__(self):
-        return f'{self.user.name} ({self.latest_csui_generation})'
+        return f'{self.user.name} ({self.latest_csui_class})'
 
 
 class UserPreference(AbstractTimestampable):

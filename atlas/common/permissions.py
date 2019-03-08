@@ -24,7 +24,7 @@ class IsOwnerOfObject(BasePermission):
         Check object level permission.
         Check if the object is owned by authenticated user.
         """
-        user_of_the_object = getattr(obj, self.get_user_field(), default=None)
+        user_of_the_object = getattr(obj, self.get_user_field(), None)
         # if user None, just return False
         # and let the view handle the rest
         return user_of_the_object is not None \

@@ -37,4 +37,4 @@ class Education(AbstractDateCreatedRecordable):
     location_name = models.CharField(_('Location'), max_length=64)
 
     date_started = models.DateField(_('Date Started'))
-    date_ended = models.DateField(_('Date Ended'), null=True, blank=True)
+    date_ended = models.DateField(_('Date Ended'))

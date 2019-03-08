@@ -106,12 +106,11 @@ class RegisterUserSerializer(serializers.Serializer):
     # profile
     first_name = serializers.CharField()
     last_name = serializers.CharField()
-    birthplace = serializers.CharField()
     birthdate = serializers.DateField()
 
     # academic data
     ui_sso_npm = serializers.CharField(max_length=16, required=False)
-    latest_csui_generation = serializers.IntegerField(
+    latest_csui_class = serializers.IntegerField(
         min_value=MIN_GENERATION, max_value=timezone.now().year)
     latest_csui_program = serializers.CharField()
 

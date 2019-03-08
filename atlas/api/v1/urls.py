@@ -27,8 +27,13 @@ account = [
 experience = [
     path('users/<username>/positions', experience.PositionListCreateView.as_view(),
          name='experience_position_list_create'),
+    path('users/<username>/positions/<pk>', experience.PositionDetailView.as_view(),
+         name='experience_position_detail'),
+
     path('users/<username>/educations', experience.EducationListCreateView.as_view(),
          name='experience_education_list_create'),
+    path('users/<username>/educations/<pk>', experience.EducationDetailView.as_view(),
+         name='experience_education_detail'),
 ]
 
 urlpatterns = [] + general + auth + account + experience

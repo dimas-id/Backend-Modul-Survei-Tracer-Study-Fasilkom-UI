@@ -16,7 +16,7 @@ class Position(AbstractDateCreatedRecordable):
 
     title = models.CharField(_('Title'), max_length=64)
     company_name = models.CharField(_('Company'), max_length=64)
-    description = models.TextField(_('Description'), max_length=64)
+    description = models.TextField(_('Description'))
     location_name = models.CharField(_('Location'), max_length=64)
     industry_name = models.CharField(_('Industry'), max_length=64)
 

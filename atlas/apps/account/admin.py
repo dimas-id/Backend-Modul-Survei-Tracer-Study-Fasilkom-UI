@@ -35,6 +35,4 @@ class UserProfileAdmin(ModelAdminSuperuser):
     list_display = ('user', 'gender', 'birthdate', 'latest_csui_class','residence_city', 'residence_country')
 
 # register default models
-admin_site.register(Group, admin_class=ModelAdminSuperuser)
-admin_site.register(Permission, admin_class=ModelAdminSuperuser)
 admin_site.register(UserPreference)

@@ -13,9 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import django_rq
+
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import include as __include__
 
 from rest_framework.documentation import include_docs_urls
 
@@ -27,5 +30,6 @@ include = includer('atlas')
 urlpatterns = [
     path('__admin__/', admin_site.urls),
     path('__docs__/', include_docs_urls(title='Atlas API')),
+    path('django-rq/', __include__('django_rq.urls')),
     path('api/', include('api')),
 ]

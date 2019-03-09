@@ -50,6 +50,7 @@ MODULES = [
     'django_extensions',
     'rest_framework',
     'storages',
+    'django_rq',
 ]
 
 INSTALLED_APPS = (
@@ -159,6 +160,16 @@ REST_FRAMEWORK = {
 
 # django autoslug
 AUTOSLUG_SLUGIFY_FUNCTION = slugify
+
+# django-rq
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 360,
+    },
+}
 
 SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 

@@ -11,7 +11,7 @@ from django.db import transaction
 
 from rest_framework import serializers
 
-from atlas.apps.account.services import AuthService
+from atlas.apps.account.services import UserService
 from atlas.apps.account.models import UserProfile, UserPreference
 from atlas.apps.experience.serializers import PositionSerializer, EducationSerializer
 
@@ -118,7 +118,7 @@ class RegisterUserSerializer(serializers.Serializer):
         """
         create user based on validated data
         """
-        auth_service = AuthService()
+        auth_service = UserService()
         request = self.context.get('request')
         return auth_service.registerPublicUser(
             request, identifier=validated_data[self.username_field], **validated_data)

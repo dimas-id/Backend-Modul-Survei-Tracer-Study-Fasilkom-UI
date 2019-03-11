@@ -98,6 +98,9 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
         """
         return self.ui_sso_username is not None
 
+    def set_as_verified(self):
+        self.is_verified = True
+
     def __str__(self):
         return self.email
 

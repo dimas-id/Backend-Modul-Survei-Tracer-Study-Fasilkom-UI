@@ -123,12 +123,12 @@ DATABASES = {
 
 if PRODUCTION:
     db_env = {
-        'ENGINE': os.environ.get('SQL_ENGINE'),
-        'NAME': os.environ.get('DB_DATABASE'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432')
+        'ENGINE': env('SQL_ENGINE'),
+        'NAME': env('DB_DATABASE'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT')
     }
     DATABASES['default'].update(db_env)
 
@@ -164,10 +164,10 @@ AUTOSLUG_SLUGIFY_FUNCTION = slugify
 # django-rq
 RQ_QUEUES = {
     'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 360,
+        'HOST': env('REDIS_HOST'),
+        'PORT': env('REDIS_PORT'),
+        'DB': env('REDIS_DB'),
+        'DEFAULT_TIMEOUT': env('REDIS_DEFAULT_TIMEOUT'),
     },
 }
 
@@ -215,7 +215,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
+    'SIGNING_KEY': env('JWT_SECRET_KEY'),
     'VERIFYING_KEY': None,
 
     'AUTH_HEADER_TYPES': ('Bearer',),

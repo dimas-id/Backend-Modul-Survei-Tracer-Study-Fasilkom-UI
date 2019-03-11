@@ -30,6 +30,6 @@ include = includer('atlas')
 urlpatterns = [
     path('__admin__/', admin_site.urls),
     path('__docs__/', include_docs_urls(title='Atlas API')),
-    path('django-rq/', __include__('django_rq.urls')),
+    path('__rq__/', __include__('django_rq.urls')),
     path('api/', include('api')),
 ]

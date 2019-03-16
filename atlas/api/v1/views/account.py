@@ -6,12 +6,19 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from rest_framework_simplejwt.views import TokenViewBase
+
 from atlas.common.permissions import IsOwnerOfObject
 from atlas.apps.account.serializers import \
-    UserSerializer, RegisterUserSerializer, UserProfileSerializer, UserPreferenceSerializer
+    UserSerializer, RegisterUserSerializer, UserProfileSerializer, UserPreferenceSerializer,\
+    UserTokenObtainPairSerializer
 from atlas.apps.account.permissions import \
     IsAnonymous, AllowedRegister, HasPriviledgeToAccessUser
 from atlas.apps.account.models import User, UserProfile, UserPreference
+
+
+class UserTokenObtainPairView(TokenViewBase):
+    serializer_class = UserTokenObtainPairSerializer
 
 
 class UserCreateView(APIView):

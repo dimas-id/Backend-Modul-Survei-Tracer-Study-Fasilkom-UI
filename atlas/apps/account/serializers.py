@@ -11,11 +11,21 @@ from django.db import transaction
 
 from rest_framework import serializers
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from atlas.apps.account.services import UserService
 from atlas.apps.account.models import UserProfile, UserPreference
 from atlas.apps.experience.serializers import PositionSerializer, EducationSerializer
 
 User = get_user_model()
+
+
+class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data['user'] = UserSerializer(self.user).data
+        return data
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -38,6 +48,8 @@ class UserSerializer(serializers.ModelSerializer):
     positions = PositionSerializer(many=True)
     educations = EducationSerializer(many=True)
 
+    groups = serializers.SerializerMethodField()
+
     @transaction.atomic
     def update(self, instance, validated_data):
         """
@@ -58,6 +70,11 @@ class UserSerializer(serializers.ModelSerializer):
 
         # updating user data
         return super().update(instance, validated_data)
+
+    def get_groups(self, instance):
+        groups = instance.groups
+        group_names = [g.name for g in groups.all()]
+        return group_names
 
     class Meta:
         model = User
@@ -86,7 +103,6 @@ class UserSerializer(serializers.ModelSerializer):
             'username',
             'positions',
             'educations',
-            'groups',
             'last_login',
             'is_active',
             'is_staff',

@@ -175,10 +175,8 @@ SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 
 # hosts and cors
 
-ALLOWED_HOSTS = ('localhost', '127.0.0.1',
-                 '192.168.99.100', DEPLOYMENT_ROOT_URI)
-CORS_ORIGIN_WHITELIST = ('localhost:3000',
-                         '127.0.0.1:3000',)
+ALLOWED_HOSTS = ('localhost', '127.0.0.1', DEPLOYMENT_ROOT_URI)
+CORS_ORIGIN_WHITELIST = ('127.0.0.1:3000',)
 CORS_ORIGIN_ALLOW_ALL = True
 
 AUTHENTICATION_BACKENDS = (
@@ -266,9 +264,9 @@ else:
 
 AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
-AWS_S3_FILE_OVERWRITE=False
+AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False
-AWS_DEFAULT_ACL='public-read'
+AWS_DEFAULT_ACL = 'public-read'
 
 
 # @todo: raven for debug production

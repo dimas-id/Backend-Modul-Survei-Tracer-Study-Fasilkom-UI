@@ -1,7 +1,6 @@
 from django.urls import path
 
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView, TokenRefreshView)
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from atlas.api.v1.views import general
 from atlas.api.v1.views import account
@@ -12,7 +11,7 @@ general = [
 ]
 
 auth = [
-    path('tokens', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('tokens', account.UserTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('tokens/refresh', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 

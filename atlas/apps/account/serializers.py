@@ -5,8 +5,7 @@ from django.contrib.auth.password_validation import (
     CommonPasswordValidator,
     MinimumLengthValidator,
     NumericPasswordValidator,
-    UserAttributeSimilarityValidator,
-)
+    UserAttributeSimilarityValidator)
 from django.db import transaction
 
 from rest_framework import serializers
@@ -14,8 +13,9 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from atlas.apps.account.services import UserService
-from atlas.apps.account.models import UserProfile, UserPreference
+from atlas.apps.account.models import UserProfile
 from atlas.apps.experience.serializers import PositionSerializer, EducationSerializer
+from atlas.apps.account.constants import C_PREFERENCES
 
 User = get_user_model()
 
@@ -37,9 +37,40 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserPreferenceSerializer(serializers.ModelSerializer):
 
+    preference = serializers.JSONField()
+
+    def validate_preference(self, new_preference: dict):
+        if type(new_preference) is not dict:
+            # JSON object only
+            raise serializers.ValidationError(
+                detail='Invalid object', code='invalid_preference')
+
+        validated_preference = {}
+        # just get the value that in C_PREFERENCES
+        for c in C_PREFERENCES:
+            selected_preference = new_preference.get(c, None)
+            if selected_preference is not None:
+                validated_preference[c] = selected_preference
+
+        return validated_preference
+
+    def update(self, instance, validated_data):
+        PREFERENCE = 'preference'
+
+        # update preference
+        preference = dict(getattr(instance, PREFERENCE))
+        preference.update(validated_data.get(PREFERENCE))
+
+        # immutable
+        new_validated_data = dict(validated_data)
+        new_validated_data[PREFERENCE] = preference
+
+        return super().update(instance, new_validated_data)
+
     class Meta:
-        model = UserPreference
-        exclude = ('user',)
+        model = User
+        read_only_fields = ('id',)
+        fields = ('id', 'preference')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -126,7 +157,7 @@ class RegisterUserSerializer(serializers.Serializer):
 
     # academic data
     ui_sso_npm = serializers.CharField(max_length=16, required=False)
-    latest_csui_class = serializers.IntegerField(
+    latest_csui_class_year = serializers.IntegerField(
         min_value=MIN_GENERATION, max_value=timezone.now().year)
     latest_csui_program = serializers.CharField()
 

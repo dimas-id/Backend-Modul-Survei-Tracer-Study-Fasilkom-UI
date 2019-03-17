@@ -115,22 +115,17 @@ WSGI_APPLICATION = 'atlas.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-    }
-}
-
-if PRODUCTION:
-    db_env = {
+    'default': {
+        # "ENGINE": "django.db.backends.sqlite3",
+        # "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
         'ENGINE': env('SQL_ENGINE'),
-        'NAME': env('DB_DATABASE'),
-        'USER': env('DB_USER'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_POSTGRES_USER'),
         'PASSWORD': env('DB_PASSWORD'),
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT')
     }
-    DATABASES['default'].update(db_env)
+}
 
 # Django Rest Framework
 APPEND_SLASH = False

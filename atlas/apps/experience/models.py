@@ -11,7 +11,7 @@ class Position(AbstractDateCreatedRecordable):
     """
     Represent work experience
     """
-    owner = models.ForeignKey(
+    user = models.ForeignKey(
         to=User, on_delete=models.CASCADE, related_name='positions')
 
     title = models.CharField(_('Title'), max_length=64)
@@ -28,7 +28,7 @@ class Education(AbstractDateCreatedRecordable):
     """
     Represent education experience
     """
-    owner = models.ForeignKey(
+    user = models.ForeignKey(
         to=User, on_delete=models.CASCADE, related_name='educations')
 
     field_of_study = models.CharField(_('Field of Study'), max_length=64)

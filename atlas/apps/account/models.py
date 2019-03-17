@@ -3,6 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext as _
 from django.conf import settings
 
@@ -11,7 +12,10 @@ from autoslug import AutoSlugField
 from atlas.common.db.models import (
     AbstractPrimaryUUIDable, AbstractTimestampable)
 from atlas.apps.account.managers import UserManager
-from atlas.apps.account.utils import slugify_username, user_profile_pic_path
+from atlas.apps.account.utils import (
+    slugify_username,
+    user_profile_pic_path,
+    default_preference)
 from atlas.common.core.validators import PhoneRegex
 
 
@@ -47,6 +51,12 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
     #   linkedin
     #       @todo linkedin_id
 
+    # preference
+    # postgres implementation
+    preference = JSONField(_('User Preference'),
+                           default=default_preference,
+                           help_text=_('Here is the user preference, we can add some later'))
+
     # some metas
     is_superuser = models.BooleanField(
         _('Superuser status'),
@@ -72,6 +82,13 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
         default=False,
         help_text=_(
             'Designates that if this user is not verified,'
+            'then can\'t access other services except Account Service'
+        ))
+    is_email_verified = models.BooleanField(
+        _('Email Verified status'),
+        default=False,
+        help_text=_(
+            'Designates that if this user email is not verified,'
             'then can\'t access other services except Account Service'
         ))
 
@@ -130,7 +147,7 @@ class UserProfile(AbstractTimestampable):
     residence_country = models.CharField(max_length=128, null=True, blank=True)
 
     # academic for validation purpose
-    latest_csui_class = models.SmallIntegerField(
+    latest_csui_class_year = models.SmallIntegerField(
         _('Angkatan'), null=True, blank=True)
     latest_csui_program = models.CharField(
         _('Prodi'), max_length=64, blank=True)
@@ -148,67 +165,11 @@ class UserProfile(AbstractTimestampable):
         return f'{self.user.name} ({self.latest_csui_class})'
 
 
-class UserPreference(AbstractTimestampable):
-    """
-    Represent user preference, add other preference later if we need.
-    """
-    user = models.OneToOneField(
-        related_name='preference', to=User, on_delete=models.CASCADE)
-
-    # preferences
-    should_send_newsletter = models.BooleanField(
-        _('Send Newsletter'),
-        default=True,
-        help_text=_(
-            'Designates that if this is active, '
-            'then user should receive email about Newsletter.'
-        ))
-    should_send_event = models.BooleanField(
-        _('Send Event Update'),
-        default=True,
-        help_text=_(
-            'Designates that if this is active, '
-            'then user should receive email about Event update.'
-        ))
-    should_send_vacancy = models.BooleanField(
-        _('Send Vacancy Update'),
-        default=True,
-        help_text=_(
-            'Designates that if this is active, '
-            'then user should receive email about Vacancy update.'
-        ))
-    should_send_donation_info = models.BooleanField(
-        _('Send Donation Information'),
-        default=True,
-        help_text=_(
-            'Designates that if this is active, '
-            'then user should receive email about Donation information.'
-        ))
-    should_send_update = models.BooleanField(
-        _('Send General Update'),
-        default=True,
-        help_text=_(
-            'Designates that if this is active, '
-            'then user should receive email about General update.'
-        ))
-    could_contact_me = models.BooleanField(
-        _('Contact the person, personally'),
-        default=False,
-        help_text=_(
-            'Designates that if this is active, '
-            'then we could contact user as Fasilkom UI about matter.'
-        ))
-
-    def __str__(self):
-        return self.user.name
-
-
 @receiver(post_save, sender=User, dispatch_uid='user_profile_creation')
 @transaction.atomic
 def create_user_profile_on_new_user(sender, instance: User, created, **kwargs):
     """
-    Create UserProfile and UserPreference for every new User
+    Create UserProfile for every new User
     """
     if created:
         UserProfile.objects.create(user=instance)
-        UserPreference.objects.create(user=instance)

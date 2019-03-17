@@ -1,0 +1,15 @@
+C_PREFERENCE_SEND_NEWSLETTER    = 'should_send_newsletter'
+C_PREFERENCE_SEND_EVENT         = 'should_send_event'
+C_PREFERENCE_SEND_VACANCY       = 'should_send_vacancy'
+C_PREFERENCE_SEND_DONATION_INFO = 'should_send_donation_info'
+C_PREFERENCE_SEND_UPDATE        = 'should_send_update'
+C_PREFERENCE_CONTACT_ME         = 'could_contact_me'
+
+C_PREFERENCES = (
+    C_PREFERENCE_SEND_NEWSLETTER,
+    C_PREFERENCE_SEND_EVENT,
+    C_PREFERENCE_SEND_VACANCY,
+    C_PREFERENCE_SEND_DONATION_INFO,
+    C_PREFERENCE_SEND_UPDATE,
+    C_PREFERENCE_CONTACT_ME
+)

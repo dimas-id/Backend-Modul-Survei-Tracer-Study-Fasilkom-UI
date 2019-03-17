@@ -15,7 +15,7 @@ from atlas.apps.account.serializers import \
     UserTokenObtainPairSerializer
 from atlas.apps.account.permissions import \
     IsAnonymous, AllowedRegister, HasPriviledgeToAccessUser
-from atlas.apps.account.models import User, UserProfile, UserPreference
+from atlas.apps.account.models import User, UserProfile
 
 
 class UserTokenObtainPairView(TokenViewBase):
@@ -104,9 +104,4 @@ class UserPreferenceDetailView(RetrieveUpdateAPIView):
         """
         get user preference instance
         """
-        preference = get_object_or_404(
-            UserPreference, user=self.request.user)
-        # we skip the self.check_object_permissions(preference)
-        # because we get the preference from the user
-        # not from lookup_field
-        return preference
+        return self.request.user

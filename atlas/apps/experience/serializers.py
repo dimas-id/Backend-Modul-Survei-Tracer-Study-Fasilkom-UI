@@ -8,7 +8,7 @@ class PositionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Position
         fields = '__all__'
-        read_only_fields = ('owner',)
+        read_only_fields = ('user',)
 
 
 class EducationSerializer(serializers.ModelSerializer):
@@ -16,4 +16,4 @@ class EducationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Education
         fields = '__all__'
-        read_only_fields = ('owner',)
+        read_only_fields = ('user',)

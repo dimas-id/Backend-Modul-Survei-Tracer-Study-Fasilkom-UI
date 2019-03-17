@@ -6,18 +6,34 @@ class IsOwnerOfObject(BasePermission):
 
     # override this, some model has different user field
     user_field = 'user'
-    username_field = 'username'
+    user_identifier = 'pk'
 
     def get_user_field(self):
         """
-        Return the user_field.
+        Return the string of user_field.
         You can override this or the field.
         This method intended for inherintence.
         """
         return self.user_field
 
-    def is_username_valid(self, request, view):
-        return request.user.username == view.kwargs[self.username_field]
+    def get_user_identifier(self):
+        """
+        Return the string of user_identifier.
+        user_identifier is user identifier in REST URI
+        Example:
+        ```
+        path('/users/<user_id>/balls/<pk>)
+        ```
+        the <user_id> is the variable that we use to identify the ownership.
+        so set 'user_id' as user_identifier
+
+        You can override this or the field.
+        This method intended for inherintence.
+        """
+        return self.user_identifier
+
+    def is_user_identifier_valid(self, request, view):
+        return str(getattr(request.user, 'pk')) == view.kwargs[self.get_user_identifier()]
 
     def has_object_permission(self, request, view, obj):
         """
@@ -36,7 +52,7 @@ class IsOwnerOfObject(BasePermission):
         """
         return super().has_permission(request, view) \
             and IsAuthenticated().has_permission(request, view) \
-            and self.is_username_valid(request, view)
+            and self.is_user_identifier_valid(request, view)
 
 
 class IsOwnerOfObjectOrReadOnly(IsOwnerOfObject):
@@ -48,6 +64,6 @@ class IsOwnerOfObjectOrReadOnly(IsOwnerOfObject):
         has_perm = super().has_object_permission(request, view, obj)
         return request.method in SAFE_METHODS or has_perm
 
-    def is_username_valid(self, request, view):
+    def is_user_identifier_valid(self, request, view):
         return request.method in SAFE_METHODS \
-            or super().is_username_valid(request, view)
+            or super().is_user_identifier_valid(request, view)

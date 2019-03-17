@@ -36,16 +36,16 @@ class AbstractExperienceListCreateView(ListCreateAPIView):
         Return a queryset based on user
         """
         user = get_object_or_404(
-            User, **{self.lookup_field: self.kwargs[self.lookup_field]})
+            User, id=self.kwargs[self.lookup_field])
         Klass = self.get_model_class()
-        return Klass.objects.filter(owner=user)
+        return Klass.objects.filter(user=user)
 
     def perform_create(self, serializer):
         """
         perform save instance, inject owner because in serializer,
         the owner field is read only
         """
-        serializer.save(owner=self.request.user)
+        serializer.save(user=self.request.user)
 
 
 class AbstractExperienceDetailView(RetrieveUpdateDestroyAPIView):
@@ -66,7 +66,7 @@ class AbstractExperienceDetailView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         Klass = self.get_model_class()
-        return Klass.objects.filter(owner=user)
+        return Klass.objects.filter(user=user)
 
 
 class PositionListCreateView(AbstractExperienceListCreateView):

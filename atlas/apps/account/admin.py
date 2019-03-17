@@ -3,12 +3,13 @@ from django.contrib.auth.models import (Group, Permission)
 
 from atlas.common.admin import (admin_site, ModelAdminSuperuser)
 # register model and admin form
-from atlas.apps.account.models import (User, UserProfile, UserPreference)
+from atlas.apps.account.models import (User, UserProfile)
 
 # account
 @register(User, site=admin_site)
 class UserAdmin(ModelAdminSuperuser):
-    list_display = ('id', 'email', 'username', 'first_name', 'last_name', 'profile')
+    list_display = ('id', 'email', 'username',
+                    'first_name', 'last_name', 'profile')
 
     def has_view_or_change_permission(self, request, obj=None):
         return super().has_view_or_change_permission(request, obj=obj) \
@@ -32,7 +33,5 @@ class UserAdmin(ModelAdminSuperuser):
 # profile
 @register(UserProfile, site=admin_site)
 class UserProfileAdmin(ModelAdminSuperuser):
-    list_display = ('user', 'gender', 'birthdate', 'latest_csui_class','residence_city', 'residence_country')
-
-# register default models
-admin_site.register(UserPreference)
+    list_display = ('user', 'gender', 'birthdate',
+                    'latest_csui_class_year', 'residence_city', 'residence_country')

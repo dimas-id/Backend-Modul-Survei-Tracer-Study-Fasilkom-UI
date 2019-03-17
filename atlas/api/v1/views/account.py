@@ -61,15 +61,15 @@ class UserDetailView(RetrieveUpdateAPIView):
     # we dont user IsOwnserOfObject because we need to check if user exists or not
     permission_classes = (IsAuthenticated, HasPriviledgeToAccessUser)
     serializer_class = UserSerializer
-    lookup_field = 'username'
+    lookup_field = 'pk'
 
     def get_object(self):
         """
         get user object.
         throw 404 if not found.
         """
-        username = self.kwargs.get(self.lookup_field)
-        user = get_object_or_404(User, username=username)
+        pk = self.kwargs.get(self.lookup_field)
+        user = get_object_or_404(User, pk=pk)
 
         # check if user has permission to the user data
         self.check_object_permissions(self.request, user)

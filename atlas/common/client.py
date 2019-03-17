@@ -18,8 +18,9 @@ class AbstractClientManager:
 
 
 class AbstractClient:
-    always_use_production = False
-    max_retry_attempt = 2
+    # after first call, we retry call as many as max_retry_attempt
+    max_retry_attempt = 1
+    headers = {}
 
     class Meta:
         always_use_production = False
@@ -62,13 +63,18 @@ class AbstractClient:
     def get_client_name(self):
         return self.client_name
 
+    def set_header(self, key, value):
+        self.headers[key] = value
+
     def post_headers(self):
-        headers = dict()
+        # immutable
+        headers = dict(self.headers)
         headers['content-type'] = 'application/json'
         return headers
 
     def get_headers(self):
-        headers = dict()
+        # immutable
+        headers = dict(self.headers)
         headers['content-type'] = 'application/json'
         headers['accept'] = 'application/json'
         return headers
@@ -93,7 +99,7 @@ class AbstractClient:
         """
         return json.loads(request.content)
 
-    def get(self, uri: str, params: dict = None):
+    def get(self, uri: str, **params):
         """
         Get request.
         Example of uri
@@ -101,7 +107,7 @@ class AbstractClient:
         """
         return self.__request_get__(self.get_full_endpoint(uri), params)
 
-    def post(self, uri: str, data: dict):
+    def post(self, uri: str, **data):
         """
         Post request.
         Example of uri
@@ -125,7 +131,7 @@ class AbstractClient:
                 return (res, True)
             else:
                 # log the message first
-                log_message = f'{self.get_client_name()} failed to GET ({endpoint}): / attempt: {retry_attempt+1} / HTTP code:{req.status_code} \
+                log_message = f'{self.get_client_name()} failed to GET ({endpoint}): / attempt: {retry_attempt} / HTTP code:{req.status_code} \
                     / err msg: {res}'
                 self.logger.error(log_message)
 
@@ -142,7 +148,7 @@ class AbstractClient:
         """
         Helper method to post request.
         If request failed/error, it will retry until
-        max_retry_attempt.
+        max_retry_attempt.self.user_manager.get_user(stateless_user.id)
         Return tuple of result and is_success
         """
         try:
@@ -154,7 +160,7 @@ class AbstractClient:
                 return (res, True)
             else:
                 # log the message first
-                log_message = f'{self.get_client_name()} failed to POST ({endpoint}): / attempt: {retry_attempt+1} / HTTP code:{req.status_code} \
+                log_message = f'{self.get_client_name()} failed to POST ({endpoint}): / retry attempt: {retry_attempt} / HTTP code:{req.status_code} \
                     / err msg: {res}'
                 self.logger.error(log_message)
 

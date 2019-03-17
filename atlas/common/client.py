@@ -3,6 +3,7 @@ import logging
 import requests
 
 from django.conf import settings
+from djangorestframework_camel_case.util import underscoreize, camelize
 
 
 class AbstractClientManager:
@@ -24,6 +25,7 @@ class AbstractClient:
 
     class Meta:
         always_use_production = False
+        is_camelized = True # if the client is using json CAMELCASE instead SNAKECASE
         client_url = {
             'production': '',
             'development': ''
@@ -125,7 +127,11 @@ class AbstractClient:
         try:
             req = requests.get(endpoint, params=params,
                                headers=self.get_headers())
+
             res = self.load_result(req)
+            if self.Meta.is_camelized:
+                # check if using camelcase, then transform data to pythonic
+                res = underscoreize(res)
 
             if self.is_success(req):
                 return (res, True)
@@ -152,6 +158,10 @@ class AbstractClient:
         Return tuple of result and is_success
         """
         try:
+            if self.Meta.is_camelized:
+                # check if using camelcase, then transform data to pythonic
+                data = camelize(data)
+
             req = requests.post(endpoint, json.dumps(data),
                                 headers=self.post_headers())
             res = self.load_result(req)

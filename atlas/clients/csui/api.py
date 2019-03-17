@@ -7,6 +7,7 @@ class CsuiClient(AbstractClient):
 
     class Meta:
         always_use_production = False
+        is_camelized = False
         client_url = {
             'production': '',
             'development': 'https://fc8ae1b3-1a66-4b64-863b-b23f682ecce5.mock.pstmn.io'

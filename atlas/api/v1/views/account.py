@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from atlas.common.permissions import IsOwnerOfObject
 from atlas.apps.account.serializers import \
@@ -43,7 +44,16 @@ class UserCreateView(APIView):
 
         # save data
         user = serializer.save()
-        return Response(data=UserSerializer(user).data, status=status.HTTP_201_CREATED, **options)
+
+        # manually create jwt token
+        refresh_token = RefreshToken.for_user(user)
+
+        return Response(
+            data={
+                'refresh': str(refresh_token),
+                'access': str(refresh_token.access_token),
+                'user': UserSerializer(user).data},
+            status=status.HTTP_201_CREATED, **options)
 
 
 class UserDetailView(RetrieveUpdateAPIView):

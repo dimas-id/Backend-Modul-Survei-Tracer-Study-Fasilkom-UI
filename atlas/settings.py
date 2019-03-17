@@ -136,10 +136,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_camel.render.CamelCaseJSONRenderer',
+        'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
-        'rest_camel.parser.CamelCaseJSONParser',
+        'djangorestframework_camel_case.parser.CamelCaseFormParser',
+        'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
+        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
@@ -150,6 +152,9 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_THROTTLE_RATES': {
         'register': '5/min',
+    },
+    'JSON_UNDERSCOREIZE': {
+        'no_underscore_before_number': True,
     },
 }
 

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "cd2fda65107c5b96c9470cf88d48e8ea32bc611f154052b19eae88448218d0d8"
+            "sha256": "38c0998210bf172d1e65035be9d3ab4c85faae27fcc017556a509db3be73151a"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -16,25 +16,25 @@
     "default": {
         "boto3": {
             "hashes": [
-                "sha256:06414c75d1f62af7d04fd652b38d1e4fd3cfd6b35bad978466af88e2aaecd00d",
-                "sha256:f3b77dff382374773d02411fa47ee408f4f503aeebd837fd9dc9ed8635bc5e8e"
+                "sha256:1b4a86e1167ba7cbb9dbf2a0a0b86447b35a2b901ae5aace75b8196631680957",
+                "sha256:f5b12367c530dac45782251b672f1e911da5c74285f89850b0f4f5694b8c388c"
             ],
             "index": "pypi",
-            "version": "==1.9.111"
+            "version": "==1.9.115"
         },
         "botocore": {
             "hashes": [
-                "sha256:6af473c52d5e3e7ff82de5334e9fee96b2d5ec2df5d78bc00cd9937e2573a7a8",
-                "sha256:9f5123c7be704b17aeacae99b5842ab17bda1f799dd29134de8c70e0a50a45d7"
+                "sha256:7c8ec120bc5bcc4076aebd7dac3a679777ff3a3ce3263c64d7342ea7982b578c",
+                "sha256:f4607f8800f87fd8eacd450699666f92d7fbc48fbb757903ad56825ce08e072a"
             ],
-            "version": "==1.12.111"
+            "version": "==1.12.115"
         },
         "certifi": {
             "hashes": [
-                "sha256:47f9c83ef4c0c621eaef743f133f09fa8a74a9b75f037e8624f83bd1b6626cb7",
-                "sha256:993f830721089fef441cdfeb4b2c8c9df86f0c63239f06bd025a76a7daddb033"
+                "sha256:59b7658e26ca9c7339e00f8f4636cdfe59d34fa37b9b04f6f9e9926b3cece1a5",
+                "sha256:b26104d6835d1f5e49452a26eb2ff87fe7090b89dfcaee5ea2212697e1e1d7ae"
             ],
-            "version": "==2018.11.29"
+            "version": "==2019.3.9"
         },
         "chardet": {
             "hashes": [
@@ -144,14 +144,6 @@
             "index": "pypi",
             "version": "==2.1.3"
         },
-        "django-rest-camel": {
-            "hashes": [
-                "sha256:1129c39828b71cf9595337c169cfa7f14abbe0a75a7b42ce8c99c96c0b6b5ae6",
-                "sha256:9804b74f34bf4b5890d59815074862e59b44f329fd3d34095d215f6dd05e74db"
-            ],
-            "index": "pypi",
-            "version": "==0.3.4"
-        },
         "django-rq": {
             "hashes": [
                 "sha256:3ab01d75694c4124baa497ebd4d6c7ebbf9d93cb4b390bfe253b62220562a299",
@@ -175,6 +167,14 @@
             ],
             "index": "pypi",
             "version": "==3.9.0"
+        },
+        "djangorestframework-camel-case": {
+            "hashes": [
+                "sha256:4bb2e41fb8a5d3745e20c5ee0842ebc6f6bac602b3286c3dd913b01760a2abb0",
+                "sha256:5b957f9cf16730f153a0ab4add9ff17fb41b7fceaa7edad29b0536b515bffd16"
+            ],
+            "index": "pypi",
+            "version": "==1.0.3"
         },
         "djangorestframework-simplejwt": {
             "hashes": [
@@ -389,10 +389,10 @@
         },
         "redis": {
             "hashes": [
-                "sha256:724932360d48e5407e8f82e405ab3650a36ed02c7e460d1e6fddf0f038422b54",
-                "sha256:9b19425a38fd074eb5795ff2b0d9a55b46a44f91f5347995f27e3ad257a7d775"
+                "sha256:6946b5dca72e86103edc8033019cc3814c031232d339d5f4533b02ea85685175",
+                "sha256:8ca418d2ddca1b1a850afa1680a7d2fd1f3322739271de4b704e0d4668449273"
             ],
-            "version": "==3.2.0"
+            "version": "==3.2.1"
         },
         "requests": {
             "hashes": [
@@ -472,10 +472,10 @@
         },
         "isort": {
             "hashes": [
-                "sha256:38a74a5ccf3a15a7a99f975071164f48d4d10eed4154879009c18e6e8933e5aa",
-                "sha256:abbb2684aa234d5eb8a67ef36d4aa62ea080d46c2eba36ad09e2990ae52e4305"
+                "sha256:18c796c2cd35eb1a1d3f012a214a542790a1aed95e29768bdcb9f2197eccbd0b",
+                "sha256:96151fca2c6e736503981896495d344781b60d18bfda78dc11b290c6125ebdb6"
             ],
-            "version": "==4.3.13"
+            "version": "==4.3.15"
         },
         "lazy-object-proxy": {
             "hashes": [

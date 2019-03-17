@@ -4,5 +4,5 @@ from atlas.common.utils.urls import includer
 include = includer('atlas.api')
 
 urlpatterns = [
-    path('v1/', include('v1'))
+    path('/v1', include('v1'))
 ]

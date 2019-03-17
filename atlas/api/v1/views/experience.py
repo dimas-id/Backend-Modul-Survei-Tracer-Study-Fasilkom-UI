@@ -20,7 +20,7 @@ class AbstractExperienceListCreateView(ListCreateAPIView):
     """
     permission_classes = (IsOwnerOfExperience,)
     model_class = None
-    lookup_field = 'username'
+    lookup_field = 'user_id'
 
     def get_model_class(self):
         """
@@ -79,7 +79,7 @@ class PositionListCreateView(AbstractExperienceListCreateView):
     """
     model_class = Position
     serializer_class = PositionSerializer
-    
+
 
 class PositionDetailView(AbstractExperienceDetailView):
     """
@@ -89,7 +89,7 @@ class PositionDetailView(AbstractExperienceDetailView):
     delete:
     """
     model_class = Position
-    serializer_class = PositionSerializer    
+    serializer_class = PositionSerializer
 
 
 class EducationListCreateView(AbstractExperienceListCreateView):

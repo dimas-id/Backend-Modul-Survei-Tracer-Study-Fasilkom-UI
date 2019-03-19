@@ -162,7 +162,7 @@ class UserProfile(AbstractTimestampable):
     website_url = models.URLField(null=True, blank=True)
 
     def __str__(self):
-        return f'{self.user.name} ({self.latest_csui_class})'
+        return f'{self.user.name} ({self.latest_csui_class_year})'
 
 
 @receiver(post_save, sender=User, dispatch_uid='user_profile_creation')

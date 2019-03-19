@@ -212,6 +212,7 @@ class ContactProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         exclude = ('user', 'latest_csui_graduation_status','date_created', 'date_updated', 'birthdate')
 
+
 class ContactSerializer(serializers.ModelSerializer):
     profile = ContactProfileSerializer()
 

@@ -204,3 +204,28 @@ class RegisterUserSerializer(serializers.Serializer):
                 error, code='invalid_registration')
 
         return attrs
+
+
+class ContactProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserProfile
+        exclude = ('user', 'latest_csui_graduation_status','date_created', 'date_updated', 'birthdate')
+
+class ContactSerializer(serializers.ModelSerializer):
+    profile = ContactProfileSerializer()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'name',
+            'email',
+            'profile',
+        )
+        
+        read_only_fields = (
+            'name',
+            'email',
+            'username',
+        )

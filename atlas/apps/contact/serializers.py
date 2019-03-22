@@ -30,6 +30,7 @@ class ContactSerializer(serializers.ModelSerializer):
     def get_profile_picture_url(self, instance):
         """
         Error AWS
+        See: https://gitlab.cs.ui.ac.id/propensi-b3/b3-atlas/issues/17
         """
        # method ini harus ada karena kita define attr profile..url di atas,
        # SerializerMethodField udah jago langsung manggil method ini

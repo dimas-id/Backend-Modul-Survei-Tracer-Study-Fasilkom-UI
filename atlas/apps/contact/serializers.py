@@ -3,6 +3,7 @@ from rest_framework import serializers
 from atlas.apps.contact.models import Contact
 
 class ContactSerializer(serializers.ModelSerializer):
+    # profile_picture_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Contact
@@ -17,7 +18,7 @@ class ContactSerializer(serializers.ModelSerializer):
             'residence_country',
             'latest_csui_class_year',
             'latest_csui_program',
-        #Error AWS    'profile_pic_url',
+            #'profile_picture_url',
             'website_url',
         )
         
@@ -25,3 +26,11 @@ class ContactSerializer(serializers.ModelSerializer):
             'name',
             'email',
         )
+
+    def get_profile_picture_url(self, instance):
+        """
+        Error AWS
+        """
+       # method ini harus ada karena kita define attr profile..url di atas,
+       # SerializerMethodField udah jago langsung manggil method ini
+        return instance.profile_pic_url

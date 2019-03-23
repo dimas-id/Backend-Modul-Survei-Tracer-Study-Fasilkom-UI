@@ -15,7 +15,7 @@ import sys
 import environ
 
 from datetime import timedelta
-from atlas.common.utils.slug import slugify
+from atlas.libs.utils.slug import slugify
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

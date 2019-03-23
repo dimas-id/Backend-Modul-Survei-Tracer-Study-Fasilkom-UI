@@ -1,4 +1,4 @@
-from atlas.common.client import AbstractClient, AbstractClientManager
+from atlas.libs.client import AbstractClient, AbstractClientManager
 
 
 class CsuiClient(AbstractClient):

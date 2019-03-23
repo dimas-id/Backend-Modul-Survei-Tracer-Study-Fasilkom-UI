@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext as _
 
-from atlas.common.db.models import AbstractDateCreatedRecordable
+from atlas.libs.db.models import AbstractDateCreatedRecordable
 
 User = get_user_model()
 

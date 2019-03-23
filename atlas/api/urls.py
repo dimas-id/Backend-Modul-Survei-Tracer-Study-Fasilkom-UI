@@ -1,5 +1,5 @@
 from django.urls import path
-from atlas.common.utils.urls import includer
+from atlas.libs.utils.urls import includer
 
 include = includer('atlas.api')
 

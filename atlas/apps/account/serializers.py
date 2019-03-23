@@ -75,10 +75,6 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer()
-
-    positions = PositionSerializer(many=True)
-    educations = EducationSerializer(many=True)
-
     groups = serializers.SerializerMethodField()
 
     @transaction.atomic
@@ -117,8 +113,6 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'username',
             'profile',
-            'positions',
-            'educations',
             'groups',
             'last_login',
             'is_verified',

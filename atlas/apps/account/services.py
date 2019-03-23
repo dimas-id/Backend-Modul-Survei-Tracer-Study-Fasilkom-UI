@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.authentication import authenticate
 
 from atlas.clients.csui.api import StudentManager
-from atlas.common import redis
+from atlas.libs import redis
 
 User = get_user_model()
 

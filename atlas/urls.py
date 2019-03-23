@@ -22,8 +22,8 @@ from django.urls import include as __include__
 
 from rest_framework.documentation import include_docs_urls
 
-from atlas.common.admin import admin_site
-from atlas.common.utils.urls import includer
+from atlas.libs.admin import admin_site
+from atlas.libs.utils.urls import includer
 
 include = includer('atlas')
 

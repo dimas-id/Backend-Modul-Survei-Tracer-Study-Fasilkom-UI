@@ -1,4 +1,4 @@
-from atlas.common.permissions import IsOwnerOfObject
+from atlas.libs.permissions import IsOwnerOfObject
 
 
 class IsOwnerOfExperience(IsOwnerOfObject):

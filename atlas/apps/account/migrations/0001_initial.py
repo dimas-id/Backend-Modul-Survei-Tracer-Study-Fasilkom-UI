@@ -2,7 +2,7 @@
 
 import atlas.apps.account.managers
 import atlas.apps.account.utils
-import atlas.common.core.validators
+import atlas.libs.core.validators
 import autoslug.fields
 from django.conf import settings
 from django.db import migrations, models
@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('date_updated', models.DateTimeField(auto_now=True, verbose_name='Date Updated')),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='profile', serialize=False, to=settings.AUTH_USER_MODEL)),
                 ('gender', models.CharField(choices=[('M', 'Male'), ('F', 'Female')], max_length=1, null=True)),
-                ('phone_number', models.CharField(blank=True, max_length=15, null=True, validators=[atlas.common.core.validators.PhoneRegex()])),
+                ('phone_number', models.CharField(blank=True, max_length=15, null=True, validators=[atlas.libs.core.validators.PhoneRegex()])),
                 ('birthplace', models.CharField(max_length=128)),
                 ('birthdate', models.DateField(null=True)),
                 ('residence_city', models.CharField(blank=True, max_length=128, null=True)),

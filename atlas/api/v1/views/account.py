@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from atlas.common.permissions import IsOwnerOfObject
+from atlas.libs.permissions import IsOwnerOfObject
 from atlas.apps.account.serializers import \
     UserSerializer, RegisterUserSerializer, UserProfileSerializer, UserPreferenceSerializer,\
     UserTokenObtainPairSerializer

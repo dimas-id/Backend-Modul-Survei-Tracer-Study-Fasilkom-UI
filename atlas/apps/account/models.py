@@ -9,13 +9,13 @@ from django.conf import settings
 
 from autoslug import AutoSlugField
 
-from atlas.common.db.models import (
+from atlas.libs.db.models import (
     AbstractPrimaryUUIDable, AbstractTimestampable)
 from atlas.apps.account.managers import UserManager
 from atlas.apps.account.utils import (
     slugify_username,
     default_preference)
-from atlas.common.core.validators import PhoneRegex
+from atlas.libs.core.validators import PhoneRegex
 
 
 class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, AbstractTimestampable):

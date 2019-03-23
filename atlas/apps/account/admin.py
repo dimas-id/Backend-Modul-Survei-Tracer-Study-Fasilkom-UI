@@ -1,7 +1,7 @@
 from django.contrib.admin import register
 from django.contrib.auth.models import (Group, Permission)
 
-from atlas.common.admin import (admin_site, ModelAdminSuperuser)
+from atlas.libs.admin import (admin_site, ModelAdminSuperuser)
 # register model and admin form
 from atlas.apps.account.models import (User, UserProfile)
 

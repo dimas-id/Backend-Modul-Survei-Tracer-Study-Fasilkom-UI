@@ -251,7 +251,7 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-DEFAULT_PROFILE_PIC = 'img/default-profile-pic.jpeg'
+DEFAULT_PROFILE_PIC = 'https://s3-ap-southeast-1.amazonaws.com/b3-mnemosyne-dev/img/default-profile-pic.jpeg'
 
 # Storage settings
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'

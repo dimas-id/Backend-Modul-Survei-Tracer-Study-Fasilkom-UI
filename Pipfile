@@ -34,5 +34,6 @@ markdown = "==3.0.1"
 pillow = "==5.4.1"
 boto3 = "*"
 djangorestframework-camel-case = "==1.0.3"
+deprecated = "*"
 
 [requires]

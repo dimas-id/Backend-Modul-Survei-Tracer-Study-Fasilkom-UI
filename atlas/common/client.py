@@ -131,6 +131,7 @@ class AbstractClient:
             res = self.load_result(req)
             if self.Meta.is_camelized:
                 # check if using camelcase, then transform data to pythonic
+                print(type(res))
                 res = underscoreize(res)
 
             if self.is_success(req):
@@ -165,6 +166,9 @@ class AbstractClient:
             req = requests.post(endpoint, json.dumps(data),
                                 headers=self.post_headers())
             res = self.load_result(req)
+            if self.Meta.is_camelized:
+                # check if using camelcase, then transform data to pythonic
+                res = underscoreize(res)
 
             if self.is_success(req):
                 return (res, True)

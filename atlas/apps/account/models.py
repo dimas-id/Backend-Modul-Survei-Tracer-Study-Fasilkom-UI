@@ -14,7 +14,6 @@ from atlas.common.db.models import (
 from atlas.apps.account.managers import UserManager
 from atlas.apps.account.utils import (
     slugify_username,
-    user_profile_pic_path,
     default_preference)
 from atlas.common.core.validators import PhoneRegex
 
@@ -154,10 +153,8 @@ class UserProfile(AbstractTimestampable):
     latest_csui_graduation_status = models.CharField(
         _('Kelulusan'), choices=GRADUATION_CHOICES, max_length=2, blank=True)
 
-    # upload profile pic to AWS to MEDIA_ROOT/users/<user_id>/<year>/<filename>
-    # default is upload default profile pic
-    profile_pic_url = models.ImageField(
-        _('Profile Picture'), blank=True, upload_to=user_profile_pic_path, default=settings.DEFAULT_PROFILE_PIC)
+    profile_pic_url = models.URLField(
+        _('Profile Picture'), blank=True, default=settings.DEFAULT_PROFILE_PIC)
 
     website_url = models.URLField(null=True, blank=True)
 

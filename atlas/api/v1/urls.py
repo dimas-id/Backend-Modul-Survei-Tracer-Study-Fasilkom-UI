@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from atlas.api.v1.views import general
 from atlas.api.v1.views import account
 from atlas.api.v1.views import experience
+from atlas.api.v1.views import contact
 
 general = [
     path('/', general.api_v1, name='general-v1'),
@@ -35,4 +36,8 @@ experience = [
          name='experience_education_detail'),
 ]
 
-urlpatterns = [] + general + auth + account + experience
+contact = [
+     path('/contacts', contact.ContactListView.as_view(), name='contacts_list')
+]
+
+urlpatterns = [] + general + auth + account + experience + contact

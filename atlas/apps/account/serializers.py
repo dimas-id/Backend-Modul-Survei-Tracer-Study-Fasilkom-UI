@@ -34,6 +34,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         exclude = ('user', 'latest_csui_graduation_status',)
 
+    def validate_residence_lng(self, value):
+        if value < -180 or value > 180:
+            raise serializers.ValidationError(
+                detail='Invalid Residence Longitude', code='invalid_profile')
+        return value
+
+    def validate_residence_lat(self, value):
+        if value < -90 or value > 90:
+            raise serializers.ValidationError(
+                detail='Invalid Residence Latitude', code='invalid_profile')
+        return value
+
 
 class UserPreferenceSerializer(serializers.ModelSerializer):
 

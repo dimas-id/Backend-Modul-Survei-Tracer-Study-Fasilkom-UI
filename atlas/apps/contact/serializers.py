@@ -11,6 +11,7 @@ class ContactSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'email',
+            'ui_sso_npm',
             'gender',
             'phone_number',
             'birthdate',

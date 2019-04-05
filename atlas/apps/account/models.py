@@ -144,6 +144,10 @@ class UserProfile(AbstractTimestampable):
     # Residence
     residence_city = models.CharField(max_length=128, null=True, blank=True)
     residence_country = models.CharField(max_length=128, null=True, blank=True)
+    residence_lng = models.FloatField(
+        _('Residence Longitude'), null=True, blank=True)
+    residence_lat = models.FloatField(
+        _('Residence Latitude'), null=True, blank=True)
 
     # academic for validation purpose
     latest_csui_class_year = models.SmallIntegerField(

@@ -16,18 +16,18 @@
     "default": {
         "boto3": {
             "hashes": [
-                "sha256:39e9b6516a72864f5a6b69f38edac087cc4ba623095f4528b916620e63de32b3",
-                "sha256:a3eb22bb975a200a69084ec2bb69819e483ad531bf05e7b73861fc1b333aad42"
+                "sha256:576e4568819d3fe9ea89a8acc69aab42d9da4055b9f161f533f35103f589d73a",
+                "sha256:e48b362e3bbffbaec233be0be5141c2b49acb99e1d3dd3eb24a0f7337700146e"
             ],
             "index": "pypi",
-            "version": "==1.9.120"
+            "version": "==1.9.129"
         },
         "botocore": {
             "hashes": [
-                "sha256:2bf8768887bfb008406eec725eecf6f174307dac00f5fad244cdd5d39c6c2147",
-                "sha256:c0f9c57e7a8c65f17a62a0926c3e73686f6ae1c08abf3b5a63cc3a5bcc4c437b"
+                "sha256:1bba80154cd48c3556bd52803eb4904d5d32f20ca5078b5679638d9fcfbcbdc3",
+                "sha256:e96f8f429d51c8a1ef71334284284a91867d61c99943921cd43b87007cbea280"
             ],
-            "version": "==1.12.120"
+            "version": "==1.12.129"
         },
         "certifi": {
             "hashes": [
@@ -480,10 +480,10 @@
         },
         "isort": {
             "hashes": [
-                "sha256:18c796c2cd35eb1a1d3f012a214a542790a1aed95e29768bdcb9f2197eccbd0b",
-                "sha256:96151fca2c6e736503981896495d344781b60d18bfda78dc11b290c6125ebdb6"
+                "sha256:08f8e3f0f0b7249e9fad7e5c41e2113aba44969798a26452ee790c06f155d4ec",
+                "sha256:4e9e9c4bd1acd66cf6c36973f29b031ec752cbfd991c69695e4e259f9a756927"
             ],
-            "version": "==4.3.15"
+            "version": "==4.3.16"
         },
         "lazy-object-proxy": {
             "hashes": [

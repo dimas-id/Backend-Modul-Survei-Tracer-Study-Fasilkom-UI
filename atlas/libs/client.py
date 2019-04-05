@@ -25,7 +25,7 @@ class AbstractClient:
 
     class Meta:
         always_use_production = False
-        is_camelized = True # if the client is using json CAMELCASE instead SNAKECASE
+        is_camelized = True  # if the client is using json CAMELCASE instead SNAKECASE
         client_url = {
             'production': '',
             'development': ''
@@ -67,6 +67,9 @@ class AbstractClient:
 
     def set_header(self, key, value):
         self.headers[key] = value
+
+    def clear_header(self):
+        self.headers = {}
 
     def post_headers(self):
         # immutable
@@ -131,7 +134,6 @@ class AbstractClient:
             res = self.load_result(req)
             if self.Meta.is_camelized:
                 # check if using camelcase, then transform data to pythonic
-                print(type(res))
                 res = underscoreize(res)
 
             if self.is_success(req):
@@ -146,7 +148,7 @@ class AbstractClient:
                     return (res, False)
                 else:
                     return self.__request_get__(endpoint, params, retry_attempt + 1)
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             # something wrong with requests
             self.logger.exception(str(e))
             return (None, False)
@@ -165,6 +167,7 @@ class AbstractClient:
 
             req = requests.post(endpoint, json.dumps(data),
                                 headers=self.post_headers())
+
             res = self.load_result(req)
             if self.Meta.is_camelized:
                 # check if using camelcase, then transform data to pythonic
@@ -183,7 +186,7 @@ class AbstractClient:
                 else:
                     return self.__request_post__(endpoint, data, retry_attempt + 1)
 
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             # something wrong with requests
             self.logger.exception(str(e))
             return (None, False)

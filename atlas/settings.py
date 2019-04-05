@@ -35,14 +35,26 @@ PRODUCTION = os.environ.get('DJANGO_ENV') == 'production'
 TESTING = 'test' in sys.argv
 DEBUG = not PRODUCTION
 
-DEPLOYMENT_ROOT_URI = ''
-DEPLOYMENT_ROOT_URL = 'https://' + DEPLOYMENT_ROOT_URI
+if PRODUCTION:
+    DEPLOYMENT_ROOT_URI = ''
+    DEPLOYMENT_ROOT_URL = 'https://' + DEPLOYMENT_ROOT_URI
+
+    FRONTEND_URI = 'b3-hyperion.netlify.com'
+    FRONTEND_URL = 'https://' + FRONTEND_URI
+else:
+    DEPLOYMENT_ROOT_URI = 'localhost:8000'
+    DEPLOYMENT_ROOT_URL = 'http://' + DEPLOYMENT_ROOT_URI
+
+    FRONTEND_URI = 'localhost:3113'
+    FRONTEND_URL = 'http://' + FRONTEND_URI
+
 
 # Application definition
 APPS = [
     'atlas',
     'atlas.apps.account',
     'atlas.apps.experience',
+    'atlas.apps.external_auth'
 ]
 
 MODULES = [
@@ -176,7 +188,7 @@ SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 # hosts and cors
 
 ALLOWED_HOSTS = ('localhost', '127.0.0.1', DEPLOYMENT_ROOT_URI)
-CORS_ORIGIN_WHITELIST = ('127.0.0.1:3000',)
+CORS_ORIGIN_WHITELIST = (FRONTEND_URI,)
 CORS_ORIGIN_ALLOW_ALL = True
 
 AUTHENTICATION_BACKENDS = (
@@ -184,6 +196,9 @@ AUTHENTICATION_BACKENDS = (
 AUTH_USER_MODEL = 'account.User'
 AUTH_USER_MODEL_LOOKUP_FIELD = 'email'
 ALLOW_NATIVE_REGISTER = True
+
+LINKEDIN_CLIENT_ID = env('LINKEDIN_CLIENT_ID')
+LINKEDIN_CLIENT_SECRET = env('LINKEDIN_CLIENT_SECRET')
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators

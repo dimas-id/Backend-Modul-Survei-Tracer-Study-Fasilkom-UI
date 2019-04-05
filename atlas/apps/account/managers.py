@@ -17,6 +17,18 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def create_user_unusable_password(self, **extra_fields):
+        extra_fields.setdefault("is_superuser", False)
+        if self.model.USERNAME_FIELD == 'email':
+            if not extra_fields['email']:
+                raise ValueError(_("The given email must be set"))
+            extra_fields['email'] = self.normalize_email(extra_fields['email'])
+        user = self.model(**extra_fields)
+        user.set_unusable_password()
+        user.save(using=self._db)
+        return user
+
+
     def create_user(self, password: str = None, **extra_fields):
         extra_fields.setdefault("is_superuser", False)
         return self._create_user(password, **extra_fields)

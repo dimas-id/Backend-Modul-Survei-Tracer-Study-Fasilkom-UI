@@ -6,14 +6,20 @@ from atlas.api.v1.views import general
 from atlas.api.v1.views import account
 from atlas.api.v1.views import experience
 from atlas.api.v1.views import contact
+from atlas.api.v1.views import external_auth
 
 general = [
     path('/', general.api_v1, name='general-v1'),
 ]
 
 auth = [
-    path('/tokens', account.UserTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('/tokens', account.UserTokenObtainPairView.as_view(),
+         name='token_obtain_pair'),
     path('/tokens/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    path('/external-auths/linkedin', external_auth.LinkedinRequestAPIView.as_view(),
+         name='external_auth_linkedin'),
+    path('/external-auths/linkedin/callback', external_auth.LinkedinCallbackAPIView.as_view(),
+         name='external_auth_linkedin_callback')
 ]
 
 account = [
@@ -37,7 +43,7 @@ experience = [
 ]
 
 contact = [
-     path('/contacts', contact.ContactListView.as_view(), name='contacts_list')
+    path('/contacts', contact.ContactListView.as_view(), name='contacts_list')
 ]
 
 urlpatterns = [] + general + auth + account + experience + contact

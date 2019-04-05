@@ -130,6 +130,15 @@ class UserProfile(AbstractTimestampable):
         ('BL', 'Belum Lulus'),
         ('SL', 'Sudah Lulus'),
     )
+    PROGRAM_CHOICES = (
+        ('S1-IK', 'S1 - Ilmu Komputer'),
+        ('S1_KI-IK', 'S1 KI - Ilmu Komputer'),
+        ('S1-SI', 'S1 - Sistem Informasi'),
+        ('S1_EKS-SI', 'S1 Ekstensi - Sistem Informasi'),
+        ('S2-MIK', 'S2 - Magister Ilmu Komputer'),
+        ('S2-MTI', 'S2 - Magister Teknologi Informasi'),
+        ('S3-IK', 'S3 - Doktor Ilmu Komputer'),
+    )
     GENDER_CHOICES = (('M', 'Male'), ('F', 'Female'))
 
     user = models.OneToOneField(
@@ -153,7 +162,7 @@ class UserProfile(AbstractTimestampable):
     latest_csui_class_year = models.SmallIntegerField(
         _('Angkatan'), null=True, blank=True)
     latest_csui_program = models.CharField(
-        _('Prodi'), max_length=64, blank=True)
+        _('Prodi'), choices=PROGRAM_CHOICES, max_length=10, blank=True)
     latest_csui_graduation_status = models.CharField(
         _('Kelulusan'), choices=GRADUATION_CHOICES, max_length=2, blank=True)
 

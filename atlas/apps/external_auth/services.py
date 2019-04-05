@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from atlas.apps.account.services import UserService
+from atlas.apps.experience.services import ExperienceService
 from .models import LinkedinAccount
 
 
@@ -29,5 +30,8 @@ class ExternalAuthService:
             email_address, first_name, last_name, picture_url)
         linkedin_account = self.connect_user_to_linkedin_account(
             user, **linkedin_user_data)
+
+        ExperienceService().extract_and_create_positions_from_linkedin(
+            user, linkedin_user_data.get('positions').get('values'))
 
         return user, linkedin_account

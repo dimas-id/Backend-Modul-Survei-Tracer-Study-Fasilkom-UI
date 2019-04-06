@@ -54,14 +54,16 @@ class UserService:
 
     def get_or_register_external_auth_user(self, email, first_name, last_name, picture_url):
         try:
+            created = False
             user = User.objects.get(email=email)
         except User.DoesNotExist:
+            created = True
             user = User.objects.create_user_unusable_password(
                 email=email, first_name=first_name, last_name=last_name)
 
         user.profile.profile_picture_url = picture_url
         user.profile.save(update_fields=('profile_pic_url',))
-        return user
+        return user, created
 
     def verify_user_registration(self, user: User):
         """

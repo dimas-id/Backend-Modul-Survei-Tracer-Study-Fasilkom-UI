@@ -1,5 +1,6 @@
 import random
 import string
+import json
 
 from django.conf import settings
 from django.http import (
@@ -46,10 +47,11 @@ class LinkedinHelper:
         if user is not None:
             refresh = RefreshToken.for_user(user)
             expire_at = timezone.now() + timezone.timedelta(days=1)
+
+            # @todo secure domain, secure cookies & max age
             response.set_cookie('user_id', user.id)
-            response.set_cookie('should_complete_registration', True)
-            response.set_cookie('token_',
-                                {'access': str(refresh.access_token),
-                                 'refresh': str(refresh)},
+            response.set_cookie('access', str(
+                refresh.access_token),  expires=expire_at)
+            response.set_cookie('refresh', str(refresh),
                                 expires=expire_at)
         return response

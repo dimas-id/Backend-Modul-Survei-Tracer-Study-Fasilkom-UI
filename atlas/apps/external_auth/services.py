@@ -26,12 +26,13 @@ class ExternalAuthService:
         last_name = linkedin_user_data.get("last_name")
         picture_url = linkedin_user_data.get("picture_url")
 
-        user = self.user_service.get_or_register_external_auth_user(
+        user, created = self.user_service.get_or_register_external_auth_user(
             email_address, first_name, last_name, picture_url)
         linkedin_account = self.connect_user_to_linkedin_account(
             user, **linkedin_user_data)
 
-        ExperienceService().extract_and_create_positions_from_linkedin(
-            user, linkedin_user_data.get('positions').get('values'))
+        if linkedin_user_data.get('positions').get('_total') > 0:
+            ExperienceService().extract_and_create_positions_from_linkedin(
+                user, linkedin_user_data.get('positions').get('values'))
 
-        return user, linkedin_account
+        return user, created

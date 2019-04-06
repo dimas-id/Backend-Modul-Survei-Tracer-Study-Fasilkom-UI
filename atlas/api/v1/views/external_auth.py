@@ -1,6 +1,7 @@
 
 import os
 import requests
+import json
 
 from django.conf import settings
 from django.contrib.auth import login as auth_login
@@ -57,8 +58,11 @@ class LinkedinCallbackAPIView(APIView):
 
         user = None
         if auth_success and person_success:
-            user, _ = ExternalAuthService().get_or_register_linkedin_user(**user_data)
+            user, created = ExternalAuthService().get_or_register_linkedin_user(**user_data)
             # make user is authenticated
             auth_login(request, user)
 
-        return helper.redirect_to_frontend(user)
+        response = helper.redirect_to_frontend(user)
+        response.set_cookie('should_complete_registration', json.dumps(created))
+
+        return response

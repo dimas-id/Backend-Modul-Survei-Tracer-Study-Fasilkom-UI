@@ -1,0 +1,25 @@
+sudo dokku plugin:install https://github.com/dokku/dokku-redis.git redis
+
+cat ~/.ssh/id_rsa.pub | ssh root@178.128.214.200 "sudo sshcommand acl-add dokku atlas"
+
+git remote add production dokku@178.128.214.200:atlas
+
+dokku config:set atlas SECRET_KEY='#22h!9f4po0-7hpvgh5@k#$-)74j4jx6x1^o*0%5ddg5qd#o!b' \
+JWT_SECRET_KEY='#22h!9f4po0-7hpvgh5@k#$-)74j4jx6x1^o*0%5ddg5qd#o!b' \
+AWS_ACCESS_KEY_ID='AKIAIRZHFZO44RBT6DCQ' \
+AWS_SECRET_ACCESS_KEY='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' \
+LINKEDIN_CLIENT_ID='81q4oro9pyplgz' \
+LINKEDIN_CLIENT_SECRET='SfaEHvdLXzuXJeGT' \
+SQL_ENGINE='django.db.backends.postgresql' \
+DB_NAME='b3_atlas' \
+DB_POSTGRES_USER='postgres' \
+DB_PASSWORD='underrun21' \
+DB_HOST='159.89.199.117' \
+DB_PORT='5432' \
+DJANGO_ENV='production'
+
+redis:create atlas
+
+http://atlas.178.128.214.200
+
+http://178.128.214.200:56260/

@@ -36,7 +36,7 @@ TESTING = 'test' in sys.argv
 DEBUG = not PRODUCTION
 
 if PRODUCTION:
-    DEPLOYMENT_ROOT_URI = ''
+    DEPLOYMENT_ROOT_URI = 'b3-atlas.herokuapp.com'
     DEPLOYMENT_ROOT_URL = 'https://' + DEPLOYMENT_ROOT_URI
 
     FRONTEND_URI = 'b3-hyperion.netlify.com'
@@ -173,23 +173,14 @@ REST_FRAMEWORK = {
 AUTOSLUG_SLUGIFY_FUNCTION = slugify
 
 # django-rq
-
-if PRODUCTION:
-    RQ_QUEUES = {
-        'default':  {
-            "URL": os.environ.get("REDIS_URL"),
-            "DEFAULT_TIMEOUT": 500
-        }
-    }
-else:
-    RQ_QUEUES = {
-        'default': {
-            'HOST': env('REDIS_HOST'),
-            'PORT': env('REDIS_PORT'),
-            'DB': env('REDIS_DB'),
-            'DEFAULT_TIMEOUT': env('REDIS_DEFAULT_TIMEOUT'),
-        },
-    }
+RQ_QUEUES = {
+    'default': {
+        'HOST': env('REDIS_HOST'),
+        'PORT': env('REDIS_PORT'),
+        'DB': env('REDIS_DB'),
+        'DEFAULT_TIMEOUT': env('REDIS_DEFAULT_TIMEOUT'),
+    },
+}
 
 
 SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']

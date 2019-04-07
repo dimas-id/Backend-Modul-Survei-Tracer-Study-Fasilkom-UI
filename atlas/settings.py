@@ -127,21 +127,16 @@ WSGI_APPLICATION = 'atlas.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-if PRODUCTION and os.environ.get("DATABASE_URL"):
-    DATABASES = {
-        'default': env.db()
+DATABASES = {
+    'default': {
+        'ENGINE': env('SQL_ENGINE'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_POSTGRES_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT')
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': env('SQL_ENGINE'),
-            'NAME': env('DB_NAME'),
-            'USER': env('DB_POSTGRES_USER'),
-            'PASSWORD': env('DB_PASSWORD'),
-            'HOST': env('DB_HOST'),
-            'PORT': env('DB_PORT')
-        }
-    }
+}
 
 # Django Rest Framework
 APPEND_SLASH = False

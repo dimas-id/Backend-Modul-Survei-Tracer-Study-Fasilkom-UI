@@ -105,4 +105,3 @@ class UserService:
 
         # dummy, just set the user as valid
         user.set_as_verified()
-        user.save(update_fields=('is_verified',))

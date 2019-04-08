@@ -97,10 +97,12 @@ class UserSerializer(serializers.ModelSerializer):
         profile_data = validated_data.pop(User.PROFILE_FIELD)
 
         if instance.is_verified:
-            validated_data.pop('ui_sso_npm')
-            validated_data.pop('birthdate')
-            validated_data.pop('latest_csui_class_year')
-            validated_data.pop('latest_csui_program')
+            validated_data.pop('first_name', None)
+            validated_data.pop('last_name', None)
+            validated_data.pop('ui_sso_npm', None)
+            validated_data.pop('birthdate', None)
+            validated_data.pop('latest_csui_class_year', None)
+            validated_data.pop('latest_csui_program', None)
 
         # updating profile data
         if profile_data:

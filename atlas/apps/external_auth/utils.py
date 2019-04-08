@@ -41,7 +41,7 @@ class LinkedinHelper:
     def redirect_to_frontend(self, user=None):
         redirect_url = f'{settings.FRONTEND_URL}/register-external-auths'
         if user is None:
-            redirect_url = f'{settings.FRONTEND_URL}/400'
+            redirect_url = f'{settings.FRONTEND_URL}/error'
 
         response = HttpResponseRedirect(redirect_url)
         if user is not None:

@@ -94,9 +94,15 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Update User data and User Profile data
         """
+        profile_data = validated_data.pop(User.PROFILE_FIELD)
+
+        if instance.is_verified:
+            validated_data.pop('ui_sso_npm')
+            validated_data.pop('birthdate')
+            validated_data.pop('latest_csui_class_year')
+            validated_data.pop('latest_csui_program')
 
         # updating profile data
-        profile_data = validated_data.pop(User.PROFILE_FIELD)
         if profile_data:
             profile = instance.profile
             for profile_attr in profile_data.keys():
@@ -125,6 +131,7 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'username',
             'profile',
+            'ui_sso_npm',
             'groups',
             'last_login',
             'is_verified',

@@ -63,6 +63,6 @@ class LinkedinCallbackAPIView(APIView):
             auth_login(request, user)
 
         response = helper.redirect_to_frontend(user)
-        response.set_cookie('should_complete_registration', json.dumps(True))
+        response.set_cookie('should_complete_registration', json.dumps(created))
 
         return response

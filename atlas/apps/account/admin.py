@@ -10,6 +10,8 @@ from atlas.apps.account.models import (User, UserProfile)
 class UserAdmin(ModelAdminSuperuser):
     list_display = ('id', 'email', 'username',
                     'first_name', 'last_name', 'profile')
+    search_fields = ('first_name', 'last_name', 'email', 'id')
+    list_filter = ('is_staff', 'is_superuser', 'is_verified')
 
     def has_view_or_change_permission(self, request, obj=None):
         return super().has_view_or_change_permission(request, obj=obj) \

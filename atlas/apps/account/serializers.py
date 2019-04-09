@@ -182,7 +182,7 @@ class RegisterUserSerializer(serializers.Serializer):
         """
         auth_service = UserService()
         request = self.context.get('request')
-        return auth_service.registerPublicUser(
+        return auth_service.register_public_user(
             request, identifier=validated_data[self.username_field], **validated_data)
 
     def validate(self, attrs):
@@ -219,3 +219,10 @@ class RegisterUserSerializer(serializers.Serializer):
                 error, code='invalid_registration')
 
         return attrs
+
+    def validate_latest_csui_program(self, value):
+        for pg, _ in UserProfile.PROGRAM_CHOICES:
+            if pg == value:
+                return value
+
+        raise serializers.ValidationError('Unrecognize program')

@@ -1,6 +1,4 @@
 from django.db import models, transaction
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.postgres.fields import JSONField
@@ -16,7 +14,6 @@ from atlas.apps.account.utils import (
     slugify_username,
     default_preference)
 from atlas.libs.core.validators import PhoneRegex
-
 
 class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, AbstractTimestampable):
     """
@@ -136,9 +133,9 @@ class UserProfile(AbstractTimestampable):
         ('S1_KI-IK', 'S1 KI - Ilmu Komputer'),
         ('S1-SI', 'S1 - Sistem Informasi'),
         ('S1_EKS-SI', 'S1 Ekstensi - Sistem Informasi'),
-        ('S2-MIK', 'S2 - Magister Ilmu Komputer'),
-        ('S2-MTI', 'S2 - Magister Teknologi Informasi'),
-        ('S3-IK', 'S3 - Doktor Ilmu Komputer'),
+        ('S2-IK', 'S2 - Ilmu Komputer'),
+        ('S2-TI', 'S2 - Teknologi Informasi'),
+        ('S3-IK', 'S3 - Ilmu Komputer'),
     )
     GENDER_CHOICES = (('M', 'Male'), ('F', 'Female'))
 
@@ -175,12 +172,4 @@ class UserProfile(AbstractTimestampable):
     def __str__(self):
         return f'{self.user.name} ({self.latest_csui_class_year})'
 
-
-@receiver(post_save, sender=User, dispatch_uid='user_profile_creation')
-@transaction.atomic
-def create_user_profile_on_new_user(sender, instance: User, created, **kwargs):
-    """
-    Create UserProfile for every new User
-    """
-    if created:
-        UserProfile.objects.create(user=instance)
+import atlas.apps.account.signals

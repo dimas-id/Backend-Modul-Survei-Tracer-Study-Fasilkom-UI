@@ -38,7 +38,7 @@ class LinkedinHelper:
         )
         return random_state
 
-    def redirect_to_frontend(self, user=None):
+    def redirect_to_frontend(self, user, new_user: bool):
         redirect_url = f'{settings.FRONTEND_URL}/register-external-auths'
         if user is None:
             redirect_url = f'{settings.FRONTEND_URL}/error'
@@ -48,10 +48,14 @@ class LinkedinHelper:
             refresh = RefreshToken.for_user(user)
             expire_at = timezone.now() + timezone.timedelta(days=1)
 
+            domain = settings.FRONTEND_URI
+
             # @todo secure domain, secure cookies & max age
-            response.set_cookie('user_id', user.id)
+            response.set_cookie('user_id', user.id, domain=domain)
             response.set_cookie('access', str(
-                refresh.access_token),  expires=expire_at)
+                refresh.access_token),  expires=expire_at, domain=domain)
             response.set_cookie('refresh', str(refresh),
-                                expires=expire_at)
+                                expires=expire_at, domain=domain)
+            response.set_cookie(
+                'should_complete_registration', json.dumps(new_user), domain=domain)
         return response

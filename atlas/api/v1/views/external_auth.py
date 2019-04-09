@@ -57,6 +57,7 @@ class LinkedinCallbackAPIView(APIView):
             response_data.get('access_token'))
 
         user = None
+        created = False
         if auth_success and person_success:
             user, created = ExternalAuthService().get_or_register_linkedin_user(**user_data)
             # make user is authenticated

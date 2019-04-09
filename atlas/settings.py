@@ -42,11 +42,11 @@ if PRODUCTION:
     FRONTEND_URI = 'b3-hyperion.netlify.com'
     FRONTEND_URL = 'https://' + FRONTEND_URI
 else:
-    DEPLOYMENT_ROOT_URI = 'localhost:8000'
-    DEPLOYMENT_ROOT_URL = 'http://' + DEPLOYMENT_ROOT_URI
+    DEPLOYMENT_ROOT_URI = 'localhost'
+    DEPLOYMENT_ROOT_URL = 'http://' + DEPLOYMENT_ROOT_URI + ':8000'
 
-    FRONTEND_URI = 'localhost:3113'
-    FRONTEND_URL = 'http://' + FRONTEND_URI
+    FRONTEND_URI = 'localhost'
+    FRONTEND_URL = 'http://' + FRONTEND_URI + ':3113'
 
 
 # Application definition

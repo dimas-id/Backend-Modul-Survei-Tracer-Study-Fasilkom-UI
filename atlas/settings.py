@@ -48,6 +48,13 @@ else:
     FRONTEND_URI = 'localhost'
     FRONTEND_URL = 'http://' + FRONTEND_URI + ':3113'
 
+# api key
+LINKEDIN_CLIENT_ID = env('LINKEDIN_CLIENT_ID')
+LINKEDIN_CLIENT_SECRET = env('LINKEDIN_CLIENT_SECRET')
+SENDGRID_API_KEY = env('SENDGRID_API_KEY')
+CSUI_USERNAME = env('CSUI_USERNAME')
+CSUI_PASSWORD = env('CSUI_PASSWORD')
+
 
 # Application definition
 APPS = [
@@ -196,9 +203,6 @@ AUTHENTICATION_BACKENDS = (
 AUTH_USER_MODEL = 'account.User'
 AUTH_USER_MODEL_LOOKUP_FIELD = 'email'
 ALLOW_NATIVE_REGISTER = True
-
-LINKEDIN_CLIENT_ID = env('LINKEDIN_CLIENT_ID')
-LINKEDIN_CLIENT_SECRET = env('LINKEDIN_CLIENT_SECRET')
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators

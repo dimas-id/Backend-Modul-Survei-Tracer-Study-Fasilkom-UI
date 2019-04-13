@@ -13,3 +13,14 @@ class PhoneRegex(RegexValidator):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+
+@deconstructible
+class NumericRegex(RegexValidator):
+    regex = r'^[0-9]$'
+    message = _(
+        'Only numeric are allowed')
+    code = 'invalid'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)

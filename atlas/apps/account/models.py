@@ -13,7 +13,7 @@ from atlas.apps.account.managers import UserManager
 from atlas.apps.account.utils import (
     slugify_username,
     default_preference)
-from atlas.libs.core.validators import PhoneRegex
+from atlas.libs.core.validators import PhoneRegex, NumericRegex
 
 class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, AbstractTimestampable):
     """
@@ -42,7 +42,7 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
     # UI lecturers and staff might not have this field, but it's nice to have
     # this field for later analysis
     ui_sso_npm = models.CharField(
-        _("SSO UI NPM"), max_length=16, null=True, blank=True)
+        _("SSO UI NPM"), max_length=16, null=True, blank=True, validators=[NumericRegex()])
 
     #   linkedin
     #       @todo linkedin_id

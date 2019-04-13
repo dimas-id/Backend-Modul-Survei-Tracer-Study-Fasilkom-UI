@@ -9,7 +9,7 @@ from django.contrib.auth.password_validation import (
 from django.db import transaction
 
 from rest_framework import serializers
-
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from atlas.apps.account.services import UserService
@@ -86,6 +86,9 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    ui_sso_npm = serializers.CharField(max_length=10,
+                                       required=False,
+                                       validators=[UniqueValidator(queryset=User.objects.all())])
     profile = UserProfileSerializer()
     groups = serializers.SerializerMethodField()
 
@@ -132,7 +135,6 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'email',
             'username',
-            'profile',
             'ui_sso_npm',
             'groups',
             'last_login',
@@ -141,6 +143,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_staff',
             'is_superuser',
             'is_verified',
+            'profile',
         )
 
         read_only_fields = (
@@ -171,7 +174,9 @@ class RegisterUserSerializer(serializers.Serializer):
     birthdate = serializers.DateField()
 
     # academic data
-    ui_sso_npm = serializers.CharField(max_length=16, required=False)
+    ui_sso_npm = serializers.CharField(max_length=10,
+                                       required=False,
+                                       validators=[UniqueValidator(queryset=User.objects.all())])
     latest_csui_class_year = serializers.IntegerField(
         min_value=MIN_GENERATION, max_value=timezone.now().year)
     latest_csui_program = serializers.CharField()

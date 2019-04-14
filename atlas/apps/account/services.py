@@ -9,7 +9,10 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.authentication import authenticate
 
 from atlas.clients.csui.api import StudentManager
-# from atlas.apps.account.utils import validate_alumni_data, extract_alumni_data
+from atlas.apps.account.utils import (
+    validate_alumni_data, extract_alumni_data, get_most_matching_mahasiswa)
+from atlas.apps.account.constants import(
+    C_UI_NAME_FIELD, C_UI_STATUS, C_UI_PROGRAMS_FIELD)
 
 User = get_user_model()
 
@@ -20,11 +23,10 @@ class UserService:
 
     class Meta:
         username_field = User.USERNAME_FIELD
-        minimum_score = 65
 
     @transaction.atomic
     def register_public_user(self, request: HttpRequest, identifier: str, password: str,
-                           first_name: str, last_name: str, ui_sso_npm: str = None, **profile):
+                             first_name: str, last_name: str, ui_sso_npm: str = None, **profile):
         """
         Registration procedure for public user (alumnus, student, and
         who want to join as member).
@@ -54,6 +56,7 @@ class UserService:
         user.profile.save(update_fields=('profile_pic_url',))
         return user, created
 
+    @transaction.atomic
     def verify_user_registration(self, user: User):
         """
         Verify user registration data.
@@ -65,24 +68,29 @@ class UserService:
         """
         user_npm = getattr(user, 'ui_sso_npm', None)
         mahasiswa_data = None
-        # if user_npm is not None:
-        #     mahasiswa_data, success = self.student_manager.get_student_by_npm(
-        #         user_npm)
-        #     # check npm
-        #     if success:
-        #         # validate alumni
-        #         data = extract_alumni_data(mahasiswa_data)
-        #         is_valid = validate_alumni_data(user, *data)
-        #         if is_valid:
-        #             user.set_as_verified()
+        if user_npm is not None:
+            mahasiswa_data, success = self.student_manager.get_student_by_npm(
+                user_npm)
+        else:
+            # how if the api is using paginator? LOL
+            user_fullname = getattr(user, 'name')
+            mahasiswa_list, success = self.student_manager.get_students_by_name(
+                user_fullname)
+            # we must find the mhs using name
+            if success:
+                mahasiswa_data, _ = get_most_matching_mahasiswa(
+                    mahasiswa_list, user_fullname, lambda mhs_data: mhs_data.get(C_UI_NAME_FIELD))
 
-        # else:
-        #     # how if the api is using paginator? LOL
-        #     # mahasiswa_list, success = self.student_manager.get_students_by_class(
-        #         # csui_class)
-        #     # we must find the mhs using name
-        #     pass
+        if mahasiswa_data is not None:
+            # not none then we validatez
+            data = extract_alumni_data(mahasiswa_data)
+            is_valid = validate_alumni_data(user, *data)
+            if is_valid:
+                user.set_as_verified()
+                # get latest status, the default i think is Kosong in CSUI API
+                latest_status = mahasiswa_data.get(C_UI_PROGRAMS_FIELD)[0].get(
+                    C_UI_STATUS) if len(mahasiswa_data.get(C_UI_PROGRAMS_FIELD)) > 0 else 'Kosong'
+                setattr(user, 'latest_csui_graduation_status', latest_status)
 
-
-        # just set verifier
-        user.set_as_verified()
+        # todo extract education
+        # checknya double register

@@ -39,10 +39,8 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
     ui_sso_username = models.CharField(
         _("SSO UI username"), max_length=64, null=True, blank=True, unique=True
     )
-    # UI lecturers and staff might not have this field, but it's nice to have
-    # this field for later analysis
     ui_sso_npm = models.CharField(
-        _("SSO UI NPM"), max_length=16, null=True, blank=True)
+        _("SSO UI NPM"), max_length=16, null=True, blank=True, unique=True)
 
     #   linkedin
     #       @todo linkedin_id
@@ -123,11 +121,6 @@ class UserProfile(AbstractTimestampable):
     """
     Represents User Profile, we store all personal related information here.
     """
-    GRADUATION_CHOICES = (
-        ('TL', 'Tidak Lulus'),
-        ('BL', 'Belum Lulus'),
-        ('SL', 'Sudah Lulus'),
-    )
     PROGRAM_CHOICES = (
         ('S1-IK', 'S1 - Ilmu Komputer'),
         ('S1_KI-IK', 'S1 KI - Ilmu Komputer'),
@@ -161,8 +154,12 @@ class UserProfile(AbstractTimestampable):
         _('Angkatan'), null=True, blank=True)
     latest_csui_program = models.CharField(
         _('Prodi'), choices=PROGRAM_CHOICES, max_length=10, blank=True)
+
+    # most longest is Mengundurkan Diri/Keluar
+    # provided by CSUI API
+    # Kosong, Aktif, Cuti, Overseas, Mengundurkan diri/keluar
     latest_csui_graduation_status = models.CharField(
-        _('Kelulusan'), choices=GRADUATION_CHOICES, max_length=2, blank=True)
+        _('Kelulusan'), max_length=32, blank=True, null=True)
 
     profile_pic_url = models.URLField(
         _('Profile Picture'), blank=True, default=settings.DEFAULT_PROFILE_PIC)
@@ -172,4 +169,8 @@ class UserProfile(AbstractTimestampable):
     def __str__(self):
         return f'{self.user.name} ({self.latest_csui_class_year})'
 
-import atlas.apps.account.signals
+
+def run_signal():
+    import atlas.apps.account.signals
+
+run_signal()

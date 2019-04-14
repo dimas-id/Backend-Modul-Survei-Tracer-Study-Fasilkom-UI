@@ -1,7 +1,14 @@
 from django.utils import timezone
 from deprecated import deprecated
 
-from atlas.apps.account.constants import C_PREFERENCES
+from atlas.libs.string import get_most_matching
+from atlas.apps.account.constants import(
+    C_PREFERENCES,
+    C_UI_NPM_FIELD,
+    C_UI_NAME_FIELD,
+    C_UI_BIRTHDATE_FIELD,
+    C_UI_PROGRAMS_FIELD,
+    C_UI_CLASS_YEAR_FIELD,)
 
 
 def slugify_username(value):
@@ -21,18 +28,11 @@ def default_preference():
     return default
 
 
-ui_npm_field = 'npm'
-ui_name_field = 'name'
-ui_birthdate_field = 'tgl_lahir'
-ui_program_field = 'programs'
-ui_class_year = 'angkatan'
-
-
 def extract_alumni_data(mahasiswa_data):
-    ui_name = mahasiswa_data.get(ui_name_field)
-    ui_npm = mahasiswa_data.get(ui_npm_field)
-    ui_birthdate = mahasiswa_data.get(ui_birthdate_field)
-    ui_programs = mahasiswa_data.get(ui_program_field)
+    ui_name = mahasiswa_data.get(C_UI_NAME_FIELD)
+    ui_npm = mahasiswa_data.get(C_UI_NPM_FIELD)
+    ui_birthdate = mahasiswa_data.get(C_UI_BIRTHDATE_FIELD)
+    ui_programs = mahasiswa_data.get(C_UI_PROGRAMS_FIELD)
     ui_angkatan = -1
     ui_program = ''
 
@@ -52,7 +52,7 @@ def extract_alumni_data(mahasiswa_data):
 
         ui_program = f'{degree}-{org}'.upper()
         # get ankgatan
-        ui_angkatan = ui_program.get(ui_class_year)
+        ui_angkatan = ui_program.get(C_UI_CLASS_YEAR_FIELD)
 
     return (ui_name, ui_npm, ui_birthdate, ui_program, ui_angkatan)
 
@@ -90,3 +90,22 @@ def validate_alumni_data(user, ui_name, ui_npm, ui_birthdate, ui_program, ui_ang
         validation_score += 20
 
     return validation_score >= 65
+
+
+def get_most_matching_mahasiswa(mhs_list: list, target: str, extractor):
+    """
+    We matched one by one, and return mahasiswa with biggest ratio.
+    """
+    # create mapping
+    # {'match1': index}
+    mapping = {}
+    # [match1, match2]
+    matchs = []
+
+    for i in len(mhs_list):
+        match = extractor(mhs_list[i])
+        mapping[match] = i
+        matchs.append(match)
+
+    matched_string, ratio = get_most_matching(target, matchs)
+    return mhs_list[mapping[matched_string]], ratio

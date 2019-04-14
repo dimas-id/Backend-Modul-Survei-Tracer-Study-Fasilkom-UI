@@ -13,3 +13,10 @@ C_PREFERENCES = (
     C_PREFERENCE_SEND_UPDATE,
     C_PREFERENCE_CONTACT_ME
 )
+
+C_UI_NPM_FIELD = 'npm'
+C_UI_NAME_FIELD = 'nama'
+C_UI_BIRTHDATE_FIELD = 'tgl_lahir'
+C_UI_PROGRAMS_FIELD = 'programs'
+C_UI_CLASS_YEAR_FIELD = 'angkatan'
+C_UI_STATUS = 'nm_status'

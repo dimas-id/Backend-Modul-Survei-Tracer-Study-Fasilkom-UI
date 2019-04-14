@@ -1,7 +1,7 @@
 import json
 import logging
 import requests
-
+from requests.auth import HTTPBasicAuth, HTTPDigestAuth, AuthBase
 from django.conf import settings
 from djangorestframework_camel_case.util import underscoreize, camelize
 
@@ -22,6 +22,7 @@ class AbstractClient:
     # after first call, we retry call as many as max_retry_attempt
     max_retry_attempt = 1
     headers = {}
+    auth = None
 
     class Meta:
         always_use_production = False
@@ -64,6 +65,12 @@ class AbstractClient:
 
     def get_client_name(self):
         return self.client_name
+
+    def set_auth(self, auth: AuthBase):
+        self.auth = auth
+
+    def get_auth(self):
+        return self.auth
 
     def set_header(self, key, value):
         self.headers[key] = value
@@ -129,7 +136,8 @@ class AbstractClient:
         """
         try:
             req = requests.get(endpoint, params=params,
-                               headers=self.get_headers())
+                               headers=self.get_headers(),
+                               auth=self.get_auth())
 
             res = self.load_result(req)
             if self.Meta.is_camelized:
@@ -166,7 +174,8 @@ class AbstractClient:
                 data = camelize(data)
 
             req = requests.post(endpoint, json.dumps(data),
-                                headers=self.post_headers())
+                                headers=self.post_headers(),
+                                auth=self.get_auth())
 
             res = self.load_result(req)
             if self.Meta.is_camelized:

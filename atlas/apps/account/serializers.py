@@ -88,7 +88,7 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     ui_sso_npm = serializers.CharField(max_length=10,
                                        required=False,
-                                       validators=[UniqueValidator(queryset=User.objects.all())])
+                                       validators=[UniqueValidator(queryset=User.objects.filter(is_verified=True))])
     profile = UserProfileSerializer()
     groups = serializers.SerializerMethodField()
 
@@ -174,9 +174,7 @@ class RegisterUserSerializer(serializers.Serializer):
     birthdate = serializers.DateField()
 
     # academic data
-    ui_sso_npm = serializers.CharField(max_length=10,
-                                       required=False,
-                                       validators=[UniqueValidator(queryset=User.objects.all())])
+    ui_sso_npm = serializers.CharField(max_length=10, required=False,)
     latest_csui_class_year = serializers.IntegerField(
         min_value=MIN_GENERATION, max_value=timezone.now().year)
     latest_csui_program = serializers.CharField()
@@ -233,7 +231,7 @@ class RegisterUserSerializer(serializers.Serializer):
         raise serializers.ValidationError('Unrecognize program')
 
     def validate_ui_sso_npm(self, value):
-        if User.objects.filter(ui_sso_npm=value).exists():
+        if User.objects.filter(ui_sso_npm=value, is_verified=True).exists():
             raise serializers.ValidationError(
                 'ui_sso_npm is already exists')
         return value

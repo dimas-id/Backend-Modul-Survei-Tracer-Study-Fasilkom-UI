@@ -231,3 +231,9 @@ class RegisterUserSerializer(serializers.Serializer):
                 return value
 
         raise serializers.ValidationError('Unrecognize program')
+
+    def validate_ui_sso_npm(self, value):
+        if User.objects.filter(ui_sso_npm=value).exists():
+            raise serializers.ValidationError(
+                'ui_sso_npm is already exists')
+        return value

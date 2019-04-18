@@ -18,9 +18,9 @@ class ContactListView(ListAPIView):
             user_pref = {}
             for category in contact_category:
                 user_pref[category] = True
-            queryset = queryset.filter(preference__contains=user_pref)
+            queryset = queryset.filter(preference__contains=user_pref).order_by('first_name', 'last_name')
 
         if contact_name is not None:
-            queryset = queryset.filter(Q(first_name__icontains=contact_name) | Q(last_name__icontains=contact_name))
+            queryset = queryset.filter(Q(first_name__icontains=contact_name) | Q(last_name__icontains=contact_name)).order_by('first_name', 'last_name')
 
         return queryset

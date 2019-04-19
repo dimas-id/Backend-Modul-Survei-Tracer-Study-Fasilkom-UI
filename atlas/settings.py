@@ -13,9 +13,11 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 import sys
 import environ
+import sentry_sdk
 
 from datetime import timedelta
 from atlas.libs.utils.slug import slugify
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -289,3 +291,8 @@ AWS_DEFAULT_ACL = 'public-read'
 
 
 # @todo: raven for debug production
+if PRODUCTION:
+    sentry_sdk.init(
+        dsn="https://5dfd8af44cfc4a0c9d0906be906a2a4b@sentry.io/1442495",
+        integrations=[DjangoIntegration()]
+    )

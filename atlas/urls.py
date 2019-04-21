@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls.i18n import i18n_patterns
 from django.urls import path, include as __include__
+from django.views.generic import RedirectView
 from rest_framework.documentation import include_docs_urls
 
 from atlas.libs.admin import admin_site
@@ -24,6 +25,7 @@ include = includer('atlas')
 
 urlpatterns = i18n_patterns(path('__admin__/', admin_site.urls)) + \
               [
+                  path('__admin__/', RedirectView.as_view(url='/id/__admin__/', permanent=True), name='redirect_admin'),
                   path('__docs__/', include_docs_urls(title='Atlas API')),
                   path('__rq__/', __include__('django_rq.urls')),
                   path('api', include('api')),

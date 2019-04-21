@@ -1,0 +1,177 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-04-21 21:42+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+#: atlas/apps/account/managers.py:14 atlas/apps/account/managers.py:25
+msgid "The given email must be set"
+msgstr ""
+
+#: atlas/apps/account/models.py:41
+msgid "SSO UI username"
+msgstr ""
+
+#: atlas/apps/account/models.py:44
+msgid "SSO UI NPM"
+msgstr ""
+
+#: atlas/apps/account/models.py:51
+msgid "User Preference"
+msgstr ""
+
+#: atlas/apps/account/models.py:53
+msgid "Here is the user preference, we can add some later"
+msgstr ""
+
+#: atlas/apps/account/models.py:57
+msgid "Superuser status"
+msgstr ""
+
+#: atlas/apps/account/models.py:60
+msgid ""
+"Designates that this user has all permissions without explicitly assigning "
+"them."
+msgstr ""
+
+#: atlas/apps/account/models.py:64
+msgid "Staff status"
+msgstr ""
+
+#: atlas/apps/account/models.py:67
+msgid "Designates that this user can login to administrator site."
+msgstr ""
+
+#: atlas/apps/account/models.py:70
+msgid "Active status"
+msgstr ""
+
+#: atlas/apps/account/models.py:73
+msgid "Designates that if this user is not active, then can't login."
+msgstr ""
+
+#: atlas/apps/account/models.py:76
+msgid "Verified status"
+msgstr ""
+
+#: atlas/apps/account/models.py:79
+msgid ""
+"Designates that if this user is not verified,then can't access other "
+"services except Account Service"
+msgstr ""
+
+#: atlas/apps/account/models.py:83
+msgid "Email Verified status"
+msgstr ""
+
+#: atlas/apps/account/models.py:86
+msgid ""
+"Designates that if this user email is not verified,then can't access other "
+"services except Account Service"
+msgstr ""
+
+#: atlas/apps/account/models.py:149
+msgid "Residence Longitude"
+msgstr ""
+
+#: atlas/apps/account/models.py:151
+msgid "Residence Latitude"
+msgstr ""
+
+#: atlas/apps/account/models.py:155
+msgid "Angkatan"
+msgstr ""
+
+#: atlas/apps/account/models.py:157
+msgid "Prodi"
+msgstr ""
+
+#: atlas/apps/account/models.py:163
+msgid "Kelulusan"
+msgstr ""
+
+#: atlas/apps/account/models.py:166
+msgid "Profile Picture"
+msgstr ""
+
+#: atlas/apps/experience/models.py:19
+msgid "Title"
+msgstr ""
+
+#: atlas/apps/experience/models.py:20
+msgid "Company"
+msgstr ""
+
+#: atlas/apps/experience/models.py:21 atlas/apps/experience/models.py:45
+msgid "Location"
+msgstr ""
+
+#: atlas/apps/experience/models.py:22
+msgid "Industry"
+msgstr ""
+
+#: atlas/apps/experience/models.py:24 atlas/apps/experience/models.py:47
+msgid "Date Started"
+msgstr ""
+
+#: atlas/apps/experience/models.py:25 atlas/apps/experience/models.py:48
+msgid "Date Ended"
+msgstr ""
+
+#: atlas/apps/experience/models.py:28
+msgid "Here is company metadata comes from linkedin"
+msgstr ""
+
+#: atlas/apps/experience/models.py:42
+msgid "Field of Study"
+msgstr ""
+
+#: atlas/apps/experience/models.py:43
+msgid "School"
+msgstr ""
+
+#: atlas/apps/experience/models.py:44
+msgid "Degree"
+msgstr ""
+
+#: atlas/apps/external_auth/models.py:9
+msgid "Linkedin User Email"
+msgstr ""
+
+#: atlas/apps/external_auth/models.py:12
+msgid "Linkedin User Data"
+msgstr ""
+
+#: atlas/apps/external_auth/models.py:13
+msgid "Here is the user linkedin data"
+msgstr ""
+
+#: atlas/libs/core/validators.py:11
+msgid ""
+"Only digits are allowed. Country code are optional. Up to 15 digits allowed."
+msgstr ""
+
+#: atlas/libs/core/validators.py:22
+msgid "Only numeric are allowed"
+msgstr ""
+
+#: atlas/settings.py:259
+msgid "Indonesia"
+msgstr "Indonesia"
+
+#: atlas/settings.py:260
+msgid "English"
+msgstr "English"

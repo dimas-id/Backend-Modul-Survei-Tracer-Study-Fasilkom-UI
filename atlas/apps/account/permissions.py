@@ -1,5 +1,4 @@
 from django.conf import settings
-
 from rest_framework.permissions import (
     IsAdminUser, BasePermission, SAFE_METHODS)
 
@@ -38,12 +37,14 @@ class IsAdminOrStaff(BasePermission):
 
     def has_permission(self, request, view):
         return IsAdminUser().has_permission(request, view) or \
-            request.user.is_staff
+               request.user.is_staff
 
 
 class HasPriviledgeToAccessUser(BasePermission):
 
     def has_object_permission(self, request, view, obj: User):
-        if request.method in SAFE_METHODS:
+        retrieve_self = request.user.id == obj.id
+        if request.method in SAFE_METHODS and \
+                (retrieve_self or request.user.is_verified):
             return True
-        return not request.user.is_anonymous and request.user.id == obj.id
+        return not request.user.is_anonymous and retrieve_self

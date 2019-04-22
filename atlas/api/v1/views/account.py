@@ -1,21 +1,21 @@
+from django.core.exceptions import ValidationError
+from django.http import Http404
 from django.shortcuts import get_object_or_404
-
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateAPIView
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-
-from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenViewBase
 
-from atlas.libs.permissions import IsOwnerOfObject
-from atlas.apps.account.serializers import \
-    UserSerializer, RegisterUserSerializer, UserProfileSerializer, UserPreferenceSerializer,\
-    UserTokenObtainPairSerializer
+from atlas.apps.account.models import User
 from atlas.apps.account.permissions import \
     IsAnonymous, AllowedRegister, HasPriviledgeToAccessUser
-from atlas.apps.account.models import User, UserProfile
+from atlas.apps.account.serializers import \
+    UserSerializer, RegisterUserSerializer, UserPreferenceSerializer, \
+    UserTokenObtainPairSerializer
+from atlas.libs.permissions import IsOwnerOfObject
 
 
 class UserTokenObtainPairView(TokenViewBase):
@@ -79,7 +79,11 @@ class UserDetailView(RetrieveUpdateAPIView):
         throw 404 if not found.
         """
         pk = self.kwargs.get(self.lookup_field)
-        user = get_object_or_404(User, pk=pk)
+        try:
+            user = get_object_or_404(User, pk=pk, is_active=True)
+        except ValidationError:
+            # fix uuid validation error pk='random string'
+            raise Http404
 
         # check if user has permission to the user data
         self.check_object_permissions(self.request, user)

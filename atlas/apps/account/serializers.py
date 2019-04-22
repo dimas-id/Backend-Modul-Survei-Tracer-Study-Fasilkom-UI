@@ -1,21 +1,18 @@
-from django.utils import timezone
 from django.contrib.auth import get_user_model
-from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.password_validation import (
     CommonPasswordValidator,
     MinimumLengthValidator,
     NumericPasswordValidator,
     UserAttributeSimilarityValidator)
 from django.db import transaction
-
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from atlas.apps.account.services import UserService
-from atlas.apps.account.models import UserProfile
-from atlas.apps.experience.serializers import PositionSerializer, EducationSerializer
 from atlas.apps.account.constants import C_PREFERENCES
+from atlas.apps.account.models import UserProfile
+from atlas.apps.account.services import UserService
 
 User = get_user_model()
 
@@ -97,15 +94,15 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Update User data and User Profile data
         """
-        profile_data = validated_data.pop(User.PROFILE_FIELD)
+        profile_data = validated_data.pop(User.PROFILE_FIELD, {})
 
         if instance.is_verified:
             validated_data.pop('first_name', None)
             validated_data.pop('last_name', None)
             validated_data.pop('ui_sso_npm', None)
-            validated_data.pop('birthdate', None)
-            validated_data.pop('latest_csui_class_year', None)
-            validated_data.pop('latest_csui_program', None)
+            profile_data.pop('birthdate', None)
+            profile_data.pop('latest_csui_class_year', None)
+            profile_data.pop('latest_csui_program', None)
 
         # updating profile data
         if profile_data:
@@ -150,8 +147,6 @@ class UserSerializer(serializers.ModelSerializer):
             'name',
             'email',
             'username',
-            'positions',
-            'educations',
             'last_login',
             'is_active',
             'is_staff',

@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
 
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -27,7 +28,6 @@ class UserManager(BaseUserManager):
         user.set_unusable_password()
         user.save(using=self._db)
         return user
-
 
     def create_user(self, password: str = None, **extra_fields):
         extra_fields.setdefault("is_superuser", False)

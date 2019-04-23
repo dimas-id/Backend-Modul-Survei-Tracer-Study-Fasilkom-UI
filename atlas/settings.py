@@ -74,20 +74,19 @@ MODULES = [
     'rest_framework',
     'storages',
     'django_rq',
+    'jet.dashboard',
+    'jet',
 ]
 
-INSTALLED_APPS = (
-        [
-            'django.contrib.admin',
-            'django.contrib.auth',
-            'django.contrib.contenttypes',
-            'django.contrib.sessions',
-            'django.contrib.messages',
-            'django.contrib.staticfiles',
-        ]
-        + MODULES
-        + APPS
-)
+INSTALLED_APPS = MODULES + APPS + \
+                 [
+                     'django.contrib.admin',
+                     'django.contrib.auth',
+                     'django.contrib.contenttypes',
+                     'django.contrib.sessions',
+                     'django.contrib.messages',
+                     'django.contrib.staticfiles',
+                 ]
 
 if PRODUCTION and not TESTING:
     MIDDLEWARE = [
@@ -296,8 +295,15 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False
 AWS_DEFAULT_ACL = 'public-read'
 
+# sentry
 if PRODUCTION:
     sentry_sdk.init(
             dsn="https://5dfd8af44cfc4a0c9d0906be906a2a4b@sentry.io/1442495",
             integrations=[DjangoIntegration()]
     )
+
+# jet
+JET_USER_FIELD = 'django.db.models.TextField'
+JET_DEFAULT_THEME = 'light-blue'
+JET_SIDE_MENU_COMPACT = True
+JET_CHANGE_FORM_SIBLING_LINKS = True

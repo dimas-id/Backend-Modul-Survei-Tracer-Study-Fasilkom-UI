@@ -390,7 +390,6 @@ class TestUserDetailView(RestTestCase):
         user_data = {
             'firstName': 'trapolin',
             'lastName' : 'lapolin',
-            'uiSsoNpm' : '1606918233',
             'profile'  : {
                 'gender'             : 'M',
                 'residence_city'     : 'Surabaya',
@@ -447,7 +446,7 @@ class TestUserDetailView(RestTestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, 'trapolin')
         self.assertEqual(self.user.last_name, 'lapolin')
-        self.assertEqual(self.user.ui_sso_npm, '1606918233')
+        self.assertIsNone(self.user.ui_sso_npm)
         self.assertEqual(self.user.profile.gender, 'M')
         self.assertEqual(self.user.profile.residence_city, 'Surabaya')
         self.assertEqual(str(self.user.profile.birthdate), '1998-01-14')
@@ -455,6 +454,26 @@ class TestUserDetailView(RestTestCase):
         self.assertEqual(self.user.profile.latest_csui_class_year, 2010)
 
         mock_enqueue.assert_called_once()
+
+    @patch('atlas.apps.account.signals.redis.enqueue')
+    def test_user_update_patch_self_npm_null_or_something(self, mock_enqueue):
+        self.authenticate(self.user)
+        self.user.is_verified = False
+        self.user.save()
+
+        # neutralize from .save()
+        mock_enqueue.reset_mock()
+
+        user_data = {
+            'firstName': 'trapolin',
+            'lastName' : 'lapolin',
+            'uiSsoNpm': None,
+        }
+
+        uri = reverse('account_user_detail', kwargs={'pk': self.user.id})
+        response = self.client.patch(uri, data=json.dumps(user_data), content_type='application/json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch('atlas.apps.account.signals.redis.enqueue')
     def test_user_update_put_self(self, mock_enqueue):

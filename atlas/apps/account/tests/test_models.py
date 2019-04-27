@@ -1,8 +1,7 @@
 from django.test import TestCase
 from faker import Faker
 
-from atlas.apps.account.models import User, UserProfile
-from . import factory
+from atlas.apps.account.models import User
 # Create your tests here.
 
 

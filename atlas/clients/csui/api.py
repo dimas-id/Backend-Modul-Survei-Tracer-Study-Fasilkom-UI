@@ -40,5 +40,5 @@ class StudentManager(AbstractClientManager):
         :return: return list of mahasiswa with given name and success status
         :rtype: tuple(list, boolean)
         """
-        uri = f'/siakngcs/mahasiswa/nama/{nama}/'
+        uri = f'/mahasiswa/nama/{nama}/'
         return self.get_client().get(uri=uri)

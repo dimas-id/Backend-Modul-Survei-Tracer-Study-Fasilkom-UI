@@ -1,13 +1,13 @@
 import json
 import logging
+
 import requests
-from requests.auth import HTTPBasicAuth, HTTPDigestAuth, AuthBase
 from django.conf import settings
 from djangorestframework_camel_case.util import underscoreize, camelize
+from requests.auth import *
 
 
 class AbstractClientManager:
-
     client = None
 
     def check_client(self):
@@ -28,7 +28,7 @@ class AbstractClient:
         always_use_production = False
         is_camelized = True  # if the client is using json CAMELCASE instead SNAKECASE
         client_url = {
-            'production': '',
+            'production' : '',
             'development': ''
         }
 
@@ -109,7 +109,10 @@ class AbstractClient:
         Load result from request.
         Deserialize JSON to Dict.
         """
-        return json.loads(request.content)
+        try:
+            return json.loads(request.content)
+        except json.JSONDecodeError:
+            return request.content
 
     def get(self, uri: str, **params):
         """
@@ -158,7 +161,7 @@ class AbstractClient:
                     return self.__request_get__(endpoint, params, retry_attempt + 1)
         except Exception as e:
             # something wrong with requests
-            self.logger.exception(str(e))
+            self.logger.error(str(e))
             return (None, False)
 
     def __request_post__(self, endpoint: str, data: dict, retry_attempt: int = 0):
@@ -197,5 +200,5 @@ class AbstractClient:
 
         except Exception as e:
             # something wrong with requests
-            self.logger.exception(str(e))
+            self.logger.error(str(e))
             return (None, False)

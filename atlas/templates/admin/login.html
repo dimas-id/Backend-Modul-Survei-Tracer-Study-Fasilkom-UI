@@ -1,0 +1,82 @@
+{% load i18n jet_tags static %}
+{% jet_get_current_theme as THEME %}
+{% jet_get_current_version as JET_VERSION %}
+<!DOCTYPE html>
+
+<html lang="en-us">
+
+<head>
+    <title>Log in | Helios site admin</title>
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/base.css" %}" />
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static "jet/css/vendor.css" as url %}{{ url|jet_append_version }}" />
+    <link rel="stylesheet" type="text/css" href="{% static "jet/css/icons/style.css" as url %}{{ url|jet_append_version }}" />
+    <link rel="stylesheet" type="text/css" href="{% static "jet/css/themes/"|add:THEME|add:"/base.css" as url %}{{ url|jet_append_version }}" class="base-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{% static "jet/css/themes/"|add:THEME|add:"/select2.theme.css" as url %}{{ url|jet_append_version }}" class="select2-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{% static "jet/css/themes/"|add:THEME|add:"/jquery-ui.theme.css" as url %}{{ url|jet_append_version }}" class="jquery-ui-stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/login.css" %}" /> {{ form.media }}
+
+    <meta name="robots" content="NONE,NOARCHIVE" />
+</head>
+
+
+<body class=" login" data-admin-utc-offset="25200">
+
+<!-- Container -->
+<div id="container">
+    <div id="header">
+        <div id="branding" style="display: block;">
+            <h1 id="site-name" style="font-size: 24px;">
+                <a href="/id/__admin__/">Atlas</a>
+            </h1>
+        </div>
+    </div>
+    <div id="content" class="colM" style="min-height: 200px;">
+        {% block content %} {% if form.errors and not form.non_field_errors %}
+        <p class="errornote">
+            {% if form.errors.items|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the
+            errors below." %}{% endif %}
+        </p>
+        {% endif %} {% if form.non_field_errors %} {% for error in form.non_field_errors %}
+        <p class="errornote">
+            {{ error }}
+        </p>
+        {% endfor %} {% endif %}
+
+        <div id="content-main">
+
+            {% if user.is_authenticated %}
+            <p class="errornote">
+                {% blocktrans trimmed %} You are authenticated as {{ username }}, but are not authorized to access this page. Would you like
+                to login to a different account? {% endblocktrans %}
+            </p>
+            {% endif %}
+
+            <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+                <div class="form-row">
+                    {{ form.username.errors }} {{ form.username.label_tag }} {{ form.username }}
+                </div>
+                <div class="form-row">
+                    {{ form.password.errors }} {{ form.password.label_tag }} {{ form.password }}
+                    <input type="hidden" name="next" value="{{ next }}" />
+                </div>
+                {% url 'admin_password_reset' as password_reset_url %} {% if password_reset_url %}
+                <div class="password-reset-link">
+                    <a href="{{ password_reset_url }}">{% trans 'Forgotten your password or username?' %}</a>
+                </div>
+                {% endif %}
+                <div class="submit-row">
+                    <label>&nbsp;</label>
+                    <input type="submit" value="{% trans 'Log in' %}" />
+                </div>
+            </form>
+
+        </div>
+        {% endblock %}
+    </div>
+</div>
+<div id="footer "></div>
+</body>
+
+</html>

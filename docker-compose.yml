@@ -40,7 +40,7 @@ services:
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate"
+    command: bash -c "python manage.py compilemessages && python manage.py collectstatic --noinput && python manage.py migrate"
     restart: always
     depends_on:
       - db

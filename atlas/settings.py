@@ -303,7 +303,6 @@ if PRODUCTION:
     )
 
 # jet
-JET_USER_FIELD = 'django.db.models.TextField'
 JET_DEFAULT_THEME = 'light-blue'
 JET_SIDE_MENU_COMPACT = True
 JET_CHANGE_FORM_SIBLING_LINKS = True

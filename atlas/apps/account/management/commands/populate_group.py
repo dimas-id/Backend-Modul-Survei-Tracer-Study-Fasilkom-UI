@@ -12,8 +12,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         total = 0
         groups = [
-            'manajemen',
-            'admin_donasi',
+            'management',
+            'admin_donation',
             'admin_channel',
             'admin_user',
         ]

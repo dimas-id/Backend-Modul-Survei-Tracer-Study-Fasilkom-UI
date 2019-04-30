@@ -1,39 +1,26 @@
 from django.contrib.admin import register
 from django.contrib.auth.models import (Group, Permission)
 
-from atlas.libs.admin import (admin_site, ModelAdminSuperuser)
+from atlas.libs.admin import (admin_site, ModelAdminGroup, ADMIN_USER)
 # register model and admin form
 from atlas.apps.account.models import (User, UserProfile)
 
 # account
 @register(User, site=admin_site)
-class UserAdmin(ModelAdminSuperuser):
+class UserAdmin(ModelAdminGroup):
     list_display = ('id', 'email', 'username',
                     'first_name', 'last_name', 'profile')
     search_fields = ('first_name', 'last_name', 'email', 'id')
     list_filter = ('is_staff', 'is_superuser', 'is_verified')
 
-    def has_view_or_change_permission(self, request, obj=None):
-        return super().has_view_or_change_permission(request, obj=obj) \
-            and request.user.is_superuser
-
-    def has_add_permission(self, request):
-        return super().has_add_permission(request) \
-            and request.user.is_superuser
-
-    def has_module_permission(self, request):
-        return super().has_module_permission(request) \
-            and request.user.is_superuser
-
-    def has_view_permission(self, request, obj=None):
-        return super().has_view_permission(request, obj=obj) \
-            and request.user.is_superuser
-
-    def has_delete_permission(self, request, obj=None):
-        return False
+    # only admin user can access
+    admin_groups = (ADMIN_USER,)
 
 # profile
 @register(UserProfile, site=admin_site)
-class UserProfileAdmin(ModelAdminSuperuser):
+class UserProfileAdmin(ModelAdminGroup):
     list_display = ('user', 'gender', 'birthdate',
                     'latest_csui_class_year', 'residence_city', 'residence_country')
+
+    # only admin user can access
+    admin_groups = (ADMIN_USER,)

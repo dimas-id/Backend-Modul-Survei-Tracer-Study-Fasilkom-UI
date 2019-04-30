@@ -18,7 +18,7 @@ from django.urls import path, include as __include__
 from django.views.generic import RedirectView
 from rest_framework.documentation import include_docs_urls
 
-from atlas.libs.admin import admin_site
+from atlas.admin import admin_site
 from atlas.libs.utils.urls import includer
 
 include = includer('atlas')

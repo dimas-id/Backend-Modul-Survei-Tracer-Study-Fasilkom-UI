@@ -60,7 +60,7 @@ def extract_alumni_data(mahasiswa_data):
 
 def validate_alumni_data(user, ui_name, ui_npm, ui_birthdate, ui_program, ui_angkatan):
     """
-    We are using scoring for validation and the minimum score is 65:
+    We are using scoring for validation and the minimum score is 70:
     npm: 15 points, because it is an optional field
     name: 25 points
         first_name 5 points, last_name: 10 points, full 10
@@ -75,14 +75,14 @@ def validate_alumni_data(user, ui_name, ui_npm, ui_birthdate, ui_program, ui_ang
     program = getattr(user.profile, 'latest_csui_program')
 
     validation_score = 0
-    if ui_npm == npm:
+    if str(ui_npm) == str(npm):
         validation_score += 15
 
-    if ui_birthdate == str(birthdate):
+    if str(ui_birthdate) == str(birthdate):
         validation_score += 20
 
-    if ui_name.lower() == user.name.lower() or \
-            matching_partial(ui_name.lower(), user.name.lower()) >= 85:
+    if str(ui_name).lower() == user.name.lower() or \
+            matching_partial(str(ui_name).lower(), user.name.lower()) >= 85:
         validation_score += 25
 
     if ui_angkatan == csui_class:

@@ -28,9 +28,9 @@ class UserService:
 
         # for now just register the user
         user = User.objects.create_user(
-                password=password, first_name=first_name,
-                last_name=last_name, ui_sso_npm=ui_sso_npm,
-                **{self.Meta.username_field: identifier})
+            password=password, first_name=first_name,
+            last_name=last_name, ui_sso_npm=ui_sso_npm,
+            **{self.Meta.username_field: identifier})
 
         for attr in profile:
             setattr(user.profile, attr, profile[attr])
@@ -44,7 +44,7 @@ class UserService:
         except User.DoesNotExist:
             created = True
             user = User.objects.create_user_unusable_password(
-                    email=email, first_name=first_name, last_name=last_name)
+                email=email, first_name=first_name, last_name=last_name)
 
         user.profile.profile_picture_url = picture_url
         user.profile.save(update_fields=('profile_pic_url',))
@@ -64,16 +64,16 @@ class UserService:
         mahasiswa_data = None
         if user_npm is not None:
             mahasiswa_data, success = self.student_manager.get_student_by_npm(
-                    user_npm)
+                user_npm)
         else:
             # how if the api is using paginator? LOL
             user_fullname = getattr(user, 'name')
             mahasiswa_list, success = self.student_manager.get_students_by_name(
-                    user_fullname)
+                user_fullname)
             # we must find the mhs using name
             if success:
                 mahasiswa_data, _ = get_most_matching_mahasiswa(
-                        mahasiswa_list, user_fullname, lambda mhs_data: mhs_data.get(C_UI_NAME_FIELD))
+                    mahasiswa_list, user_fullname, lambda mhs_data: mhs_data.get(C_UI_NAME_FIELD))
 
         is_valid = False
         if mahasiswa_data is not None and success:
@@ -83,11 +83,20 @@ class UserService:
 
             if is_valid:
                 user.set_as_verified()
+                setattr(user, 'ui_sso_npm', data[1])
+                setattr(user.profile, 'birthdate', data[2])
+                setattr(user.profile, 'latest_csui_program', data[3])
+                setattr(user.profile, 'latest_csui_class_year', data[4])
+
                 # get latest status, the default i think is Kosong in CSUI API
                 latest_status = mahasiswa_data.get(C_UI_PROGRAMS_FIELD)[0].get(
-                        C_UI_STATUS) if len(mahasiswa_data.get(C_UI_PROGRAMS_FIELD)) > 0 else 'Kosong'
-                setattr(user, 'latest_csui_graduation_status', latest_status)
-                user.save(update_fields=('latest_csui_graduation_status'))
+                    C_UI_STATUS) if len(mahasiswa_data.get(C_UI_PROGRAMS_FIELD)) > 0 else 'Kosong'
+                setattr(user.profile, 'latest_csui_graduation_status',
+                        latest_status)
+
+                user.profile.save(update_fields=('birthdate', 'latest_csui_program',
+                                                 'latest_csui_class_year', 'latest_csui_graduation_status',))
+                user.save(update_fields=('ui_sso_npm',))
 
         # todo extract education
         # checknya double register

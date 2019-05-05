@@ -305,6 +305,9 @@ if PRODUCTION:
             integrations=[DjangoIntegration()]
     )
 
+# sendgrid
+SENDGRID_API_KEY = env('SENDGRID_API_KEY')
+
 # jet
 JET_DEFAULT_THEME = 'light-blue'
 JET_SIDE_MENU_COMPACT = True

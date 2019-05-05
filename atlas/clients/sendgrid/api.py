@@ -33,12 +33,12 @@ class MailManager(AbstractClientManager):
         extra = {}
         if from_email is not None:
             extra['from_email'] = from_email
-        mail = mail_factory(
-                subject=subject, html_content=html_content, to_emails=to_emails, **extra)
 
         try:
+            mail = mail_factory(
+                    subject=subject, html_content=html_content, to_emails=to_emails, **extra)
             return self.get_client().send(mail)
         except Exception as e:
-            self.logger.error(e.message)
+            self.logger.error(str(e))
             if not fail_silently:
                 raise e

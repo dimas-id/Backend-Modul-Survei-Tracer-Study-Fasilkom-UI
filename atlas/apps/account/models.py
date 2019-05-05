@@ -112,7 +112,7 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
 
     def set_as_verified(self):
         self.is_verified = True
-        self.save(update_fields=('is_verified',))
+        self.save()
 
     def __str__(self):
         return self.email

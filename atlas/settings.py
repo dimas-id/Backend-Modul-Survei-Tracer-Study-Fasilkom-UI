@@ -34,6 +34,9 @@ env = environ.Env(DEBUG=(bool, False), )  # set default values and casting
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 
+# should be generated per consumer service
+API_KEY = env('API_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 PRODUCTION = os.environ.get('DJANGO_ENV') == 'production'
 TESTING = 'test' in sys.argv

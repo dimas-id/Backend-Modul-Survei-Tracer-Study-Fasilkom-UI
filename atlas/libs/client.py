@@ -7,17 +7,6 @@ from djangorestframework_camel_case.util import underscoreize, camelize
 from requests.auth import *
 
 
-class AbstractClientManager:
-    client = None
-
-    def check_client(self):
-        assert self.client != None, 'Client not implemented'
-
-    def get_client(self):
-        self.check_client()
-        return self.client
-
-
 class AbstractClient:
     # after first call, we retry call as many as max_retry_attempt
     max_retry_attempt = 1
@@ -202,3 +191,67 @@ class AbstractClient:
             # something wrong with requests
             self.logger.error(str(e))
             return (None, False)
+
+    def put(self, uri: str, data):
+        """
+        Post request.
+        Example of uri
+        `/users`
+        """
+        return self.__request_put__(self.get_full_endpoint(uri), data)
+
+    def __request_put__(self, endpoint: str, data: dict, retry_attempt: int = 0):
+        """
+        Helper method to post request.
+        If request failed/error, it will retry until
+        max_retry_attempt.self.user_manager.get_user(stateless_user.id)
+        Return tuple of result and is_success
+        """
+        try:
+            if self.Meta.is_camelized:
+                # check if using camelcase, then transform data to pythonic
+                data = camelize(data)
+
+            req = requests.put(endpoint, json.dumps(data),
+                               headers=self.post_headers(),
+                               auth=self.get_auth())
+
+            res = self.load_result(req)
+            if self.Meta.is_camelized:
+                # check if using camelcase, then transform data to pythonic
+                res = underscoreize(res)
+
+            if self.is_success(req):
+                return (res, True)
+            else:
+                # log the message first
+                log_message = f'{self.get_client_name()} failed to PUT ({endpoint}): / retry attempt: {retry_attempt} / HTTP code:{req.status_code} \
+                    / err msg: {res}'
+                self.logger.error(log_message)
+
+                if self.is_attempt_exceeded(retry_attempt):
+                    return (res, False)
+                else:
+                    return self.__request_post__(endpoint, data, retry_attempt + 1)
+
+        except Exception as e:
+            # something wrong with requests
+            self.logger.error(str(e))
+            return (None, False)
+
+
+class AbstractClientManager:
+    client: AbstractClient = None
+
+    def check_client(self):
+        assert self.client != None, 'Client not implemented'
+
+    def get_client(self):
+        self.check_client()
+        return self.client
+
+
+class UserManagerAdapter(AbstractClientManager):
+
+    def update_or_create_user(self, user_id: str, user):
+        raise NotImplementedError('UserManager is not implemented')

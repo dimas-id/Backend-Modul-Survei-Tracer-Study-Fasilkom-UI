@@ -109,5 +109,9 @@ def get_most_matching_mahasiswa(mhs_list: list, target: str, extractor):
         mapping[match] = i
         matchs.append(match)
 
-    matched_string, ratio = get_most_matching(target, matchs)
-    return mhs_list[mapping[matched_string]], ratio
+    result = get_most_matching(target, matchs)
+
+    if result:
+        matched_string, ratio = result
+        return mhs_list[mapping[matched_string]], ratio
+    return (None, 0)

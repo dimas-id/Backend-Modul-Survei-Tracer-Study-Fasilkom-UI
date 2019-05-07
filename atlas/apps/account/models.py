@@ -21,8 +21,8 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
     Represents User and authentication model.
     """
     # required fields
-    first_name = models.CharField(max_length=128)
-    last_name = models.CharField(max_length=128)
+    first_name = models.CharField(max_length=128, db_index=True)
+    last_name = models.CharField(max_length=128, db_index=True)
     email = models.EmailField(unique=True)
 
     # public ID
@@ -34,17 +34,8 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
                              unique=True,
                              editable=False)
 
-    # external authentications
-
-    # CAS SSO UI
-    ui_sso_username = models.CharField(
-        _("SSO UI username"), max_length=64, null=True, blank=True, unique=True
-    )
     ui_sso_npm = models.CharField(
-        _("SSO UI NPM"), max_length=16, null=True, blank=True, validators=[NumericRegex()])
-
-    #   linkedin
-    #       @todo linkedin_id
+        _("SSO UI NPM"), max_length=16, null=True, blank=True, validators=[NumericRegex()], db_index=True)
 
     # preference
     # postgres implementation

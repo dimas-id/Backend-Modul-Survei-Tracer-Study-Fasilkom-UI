@@ -26,7 +26,7 @@ class HeliosClient(AbstractClient):
         always_use_production = False
         is_camelized = True
         client_url = {
-            'production' : '',
+            'production' : f'https://{settings.HELIOS_URI}/api/v1',
             'development': 'http://localhost:8004/api/v1'
         }
 

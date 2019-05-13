@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install git because we need this to clone custom lib
 RUN apt-get update && \
-    apt-get install -y git
+    apt-get install -y git gettext
 
 # Set the working directory to /app
 RUN mkdir /app

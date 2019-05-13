@@ -42,18 +42,20 @@ PRODUCTION = os.environ.get('DJANGO_ENV') == 'production'
 TESTING = 'test' in sys.argv
 DEBUG = not PRODUCTION
 
+ROOT_URI = env('ROOT_URI')
+HELIOS_URI = env('HELIOS_URI')
+HYPERION_URI = env('HYPERION_URI')
+
 if PRODUCTION:
-    DEPLOYMENT_ROOT_URI = 'b3-atlas.herokuapp.com'
-    DEPLOYMENT_ROOT_URL = 'https://' + DEPLOYMENT_ROOT_URI
-
-    FRONTEND_URI = 'b3-hyperion.netlify.com'
-    FRONTEND_URL = 'https://' + FRONTEND_URI
+    HTTP = 'https://'
 else:
-    DEPLOYMENT_ROOT_URI = 'localhost'
-    DEPLOYMENT_ROOT_URL = 'http://' + DEPLOYMENT_ROOT_URI + ':8000'
+    HTTP = 'http://'
 
-    FRONTEND_URI = 'localhost'
-    FRONTEND_URL = 'http://' + FRONTEND_URI + ':3113'
+DEPLOYMENT_ROOT_URL = HTTP + ROOT_URI
+
+# backward
+FRONTEND_URI = HYPERION_URI
+FRONTEND_URL = HTTP + FRONTEND_URI
 
 # api key
 LINKEDIN_CLIENT_ID = env('LINKEDIN_CLIENT_ID')
@@ -82,14 +84,14 @@ MODULES = [
 ]
 
 INSTALLED_APPS = MODULES + APPS + \
-                 [
-                     'django.contrib.admin',
-                     'django.contrib.auth',
-                     'django.contrib.contenttypes',
-                     'django.contrib.sessions',
-                     'django.contrib.messages',
-                     'django.contrib.staticfiles',
-                 ]
+    [
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+    ]
 
 if PRODUCTION and not TESTING:
     MIDDLEWARE = [
@@ -121,10 +123,10 @@ ROOT_URLCONF = 'atlas.urls'
 
 TEMPLATES = [
     {
-        'BACKEND' : 'django.template.backends.django.DjangoTemplates',
-        'DIRS'    : ['atlas/templates/'],
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ['atlas/templates/'],
         'APP_DIRS': True,
-        'OPTIONS' : {
+        'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
@@ -141,27 +143,27 @@ WSGI_APPLICATION = 'atlas.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE'  : env('SQL_ENGINE'),
-        'NAME'    : env('DB_NAME'),
-        'USER'    : env('DB_POSTGRES_USER'),
+        'ENGINE': env('SQL_ENGINE'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_POSTGRES_USER'),
         'PASSWORD': env('DB_PASSWORD'),
-        'HOST'    : env('DB_HOST'),
-        'PORT'    : env('DB_PORT')
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT')
     }
 }
 
 # Django Rest Framework
 APPEND_SLASH = False
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS'      : 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE'                     : 20,
-    'DEFAULT_PERMISSION_CLASSES'    : (
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
     ),
-    'DEFAULT_RENDERER_CLASSES'      : (
+    'DEFAULT_RENDERER_CLASSES': (
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
     ),
-    'DEFAULT_PARSER_CLASSES'        : (
+    'DEFAULT_PARSER_CLASSES': (
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
@@ -170,13 +172,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_THROTTLE_CLASSES'      : (
+    'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.ScopedRateThrottle',
     ),
-    'DEFAULT_THROTTLE_RATES'        : {
+    'DEFAULT_THROTTLE_RATES': {
         'register': '5/min',
     },
-    'JSON_UNDERSCOREIZE'            : {
+    'JSON_UNDERSCOREIZE': {
         'no_underscore_before_number': True,
     },
 }
@@ -187,9 +189,9 @@ AUTOSLUG_SLUGIFY_FUNCTION = slugify
 # django-rq
 RQ_QUEUES = {
     'default': {
-        'HOST'           : env('REDIS_HOST'),
-        'PORT'           : env('REDIS_PORT'),
-        'DB'             : env('REDIS_DB'),
+        'HOST': env('REDIS_HOST'),
+        'PORT': env('REDIS_PORT'),
+        'DB': env('REDIS_DB'),
         'DEFAULT_TIMEOUT': env('REDIS_DEFAULT_TIMEOUT'),
     },
 }
@@ -198,7 +200,7 @@ SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 
 # hosts and cors
 
-ALLOWED_HOSTS = ('localhost', '127.0.0.1', DEPLOYMENT_ROOT_URI)
+ALLOWED_HOSTS = ('localhost', '127.0.0.1', ROOT_URI, HELIOS_URI)
 CORS_ORIGIN_WHITELIST = (FRONTEND_URI,)
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -216,7 +218,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME'   : 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
         'OPTIONS': {
             'min_length': 8,
         }
@@ -230,24 +232,24 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME'          : timedelta(days=7),
-    'REFRESH_TOKEN_LIFETIME'         : timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS'          : False,
-    'BLACKLIST_AFTER_ROTATION'       : True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
 
-    'ALGORITHM'                      : 'HS256',
-    'SIGNING_KEY'                    : env('JWT_SECRET_KEY'),
-    'VERIFYING_KEY'                  : None,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': env('JWT_SECRET_KEY'),
+    'VERIFYING_KEY': None,
 
-    'AUTH_HEADER_TYPES'              : ('Bearer',),
-    'USER_ID_FIELD'                  : 'id',
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
 
-    'AUTH_TOKEN_CLASSES'             : ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM'               : 'token_type',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
 
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME'         : timedelta(minutes=5),
-    'SLIDING_TOKEN_REFRESH_LIFETIME' : timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
 # Internationalization
@@ -301,8 +303,8 @@ AWS_DEFAULT_ACL = 'public-read'
 # sentry
 if PRODUCTION:
     sentry_sdk.init(
-            dsn="https://5dfd8af44cfc4a0c9d0906be906a2a4b@sentry.io/1442495",
-            integrations=[DjangoIntegration()]
+        dsn="https://5dfd8af44cfc4a0c9d0906be906a2a4b@sentry.io/1442495",
+        integrations=[DjangoIntegration()]
     )
 
 # sendgrid

@@ -5,22 +5,31 @@ services:
     image: postgres:10.7-alpine
     container_name: b3_atlas_db
     volumes:
-      - /var/lib/postgresql/data/
+      - b3-atlas-postgres_data:/var/lib/postgresql/data/
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_POSTGRES_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      private:
     restart: always
   redis:
     image: redis:5.0.4
     container_name: b3_atlas_redis
     command: redis-server --appendonly yes
+    volumes:
+      - b3-atlas-redis_data:/data
+    networks:
+      private:
     restart: always
   migration:
     build: .
     image: b3_atlas/web
     container_name: b3_atlas_migration
     environment:
+      ROOT_URI: ${ROOT_URI}
+      HELIOS_URI: ${HELIOS_URI}
+      HYPERION_URI: ${HYPERION_URI}
       DJANGO_ENV: ${DJANGO_ENV}
       SECRET_KEY: ${SECRET_KEY}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
@@ -40,25 +49,44 @@ services:
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    command: bash -c "python manage.py compilemessages && python manage.py collectstatic --noinput && python manage.py migrate"
-    restart: always
-    depends_on:
-      - db
-      - redis
-  web:
-    image: b3_atlas/web
-    container_name: b3_atlas_web
-    ports:
-      - 8000:8000
-    command: bash -c "cd /app && gunicorn atlas.wsgi:application --bind 0.0.0.0:8000 --error-logfile error.log --workers 3"
-    restart: always
+    command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py compilemessages"
+    networks:
+      private:
+    restart: on-failure
     depends_on:
       - db
       - redis
   rqworker:
     image: b3_atlas/web
-    container_name: b3_rqworker
+    container_name: b3_atlas_rqworker
     command: python /app/manage.py rqworker
+    networks:
+      private:
     restart: always
     depends_on:
-      - web
+      - migration
+  web:
+    image: b3_atlas/web
+    container_name: b3_atlas_web
+    ports:
+      - 8000:8000
+    command: bash -c "cd /app && gunicorn atlas.wsgi:application --bind 0.0.0.0:8000 --error-logfile error.log"
+    networks:
+      private:
+      public:
+    restart: always
+    depends_on:
+      - rqworker
+
+
+volumes:
+  b3-atlas-postgres_data:
+  b3-atlas-redis_data:
+
+networks:
+  private:
+    external:
+      name: b3-${DJANGO_ENV}-private
+  public:
+    external:
+      name: b3-${DJANGO_ENV}-public

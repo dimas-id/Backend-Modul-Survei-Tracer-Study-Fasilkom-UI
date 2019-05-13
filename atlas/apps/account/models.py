@@ -94,13 +94,6 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
         """
         return f'{self.first_name} {self.last_name}'
 
-    @property
-    def is_paired_sso(self):
-        """
-        returns true if user has paired this account with SSO UI
-        """
-        return self.ui_sso_username is not None
-
     def set_as_verified(self):
         self.is_verified = True
         self.save()

@@ -22,7 +22,6 @@ class UserTest(TestCase):
         self.assertTrue(user.is_active)
         self.assertFalse(user.is_verified)
         self.assertFalse(user.is_email_verified)
-        self.assertFalse(user.is_paired_sso)
 
         self.assertEqual(
             user.name, f'{self.user_data["first_name"]} {self.user_data["last_name"]}')

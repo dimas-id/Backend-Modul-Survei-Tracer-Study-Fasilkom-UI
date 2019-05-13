@@ -98,7 +98,7 @@ class TestUserCreateView(RestTestCase):
         self.assertEqual(resp_data.get('user').get('profile').get('profilePicUrl'),
                          'https://s3-ap-southeast-1.amazonaws.com/b3-mnemosyne-dev/img/default-profile-pic.jpeg')
 
-        mock_enqueue.assert_called_once()
+        mock_enqueue.assert_called()
 
     @patch('atlas.apps.account.signals.redis.enqueue')
     def test_register_user_without_npm(self, mock_enqueue):
@@ -119,7 +119,7 @@ class TestUserCreateView(RestTestCase):
         for k in ('refresh', 'access', 'user'):
             self.assertIsNotNone(response.data.get(k))
 
-        mock_enqueue.assert_called_once()
+        mock_enqueue.assert_called()
 
     # @patch('atlas.apps.account.signals.redis.enqueue')
     # def test_register_user_npm_numeric(self, mock_enqueue):
@@ -453,7 +453,7 @@ class TestUserDetailView(RestTestCase):
         self.assertEqual(self.user.profile.latest_csui_program, 'S1-SI')
         self.assertEqual(self.user.profile.latest_csui_class_year, 2010)
 
-        mock_enqueue.assert_called_once()
+        mock_enqueue.assert_called()
 
     @patch('atlas.apps.account.signals.redis.enqueue')
     def test_user_update_patch_self_npm_null_or_something(self, mock_enqueue):
@@ -551,13 +551,15 @@ class TestUserDetailView(RestTestCase):
         self.assertEqual(self.user.profile.latest_csui_program, 'S1-SI')
         self.assertEqual(self.user.profile.latest_csui_class_year, 2010)
 
-        mock_enqueue.assert_called_once()
+        mock_enqueue.assert_called()
 
     @patch('atlas.apps.account.signals.redis.enqueue')
     def test_user_verified_update_self(self, mock_enqueue):
         self.authenticate(self.user)
         self.user.is_verified = True
         self.user.save()
+
+        mock_enqueue.reset_mock()
 
         user_data = {
             'firstName': 'trapolin',
@@ -586,7 +588,7 @@ class TestUserDetailView(RestTestCase):
         self.assertEqual(self.user.profile.gender, 'M')
         self.assertEqual(self.user.profile.residence_city, 'Surabaya')
 
-        mock_enqueue.assert_not_called()
+        mock_enqueue.assert_called_once()
 
     @patch('atlas.apps.account.signals.redis.enqueue')
     def test_user_update_other_user(self, mock_enqueue):

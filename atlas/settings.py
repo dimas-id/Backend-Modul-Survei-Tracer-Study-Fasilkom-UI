@@ -32,19 +32,19 @@ env = environ.Env(DEBUG=(bool, False), )  # set default values and casting
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env('ATLAS_SECRET_KEY')
 
 # should be generated per consumer service
-API_KEY = env('API_KEY')
+API_KEY = env('ATLAS_API_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-PRODUCTION = os.environ.get('DJANGO_ENV') == 'production'
+PRODUCTION = os.environ.get('ATLAS_DJANGO_ENV') == 'production'
 TESTING = 'test' in sys.argv
 DEBUG = not PRODUCTION
 
-ROOT_URI = env('ROOT_URI')
-HELIOS_URI = env('HELIOS_URI')
-HYPERION_URI = env('HYPERION_URI')
+ROOT_URI = env('ATLAS_ROOT_URI')
+HELIOS_URI = env('ATLAS_HELIOS_URI')
+HYPERION_URI = env('ATLAS_HYPERION_URI')
 
 if PRODUCTION:
     HTTP = 'https://'
@@ -58,11 +58,11 @@ FRONTEND_URI = HYPERION_URI
 FRONTEND_URL = HTTP + FRONTEND_URI
 
 # api key
-LINKEDIN_CLIENT_ID = env('LINKEDIN_CLIENT_ID')
-LINKEDIN_CLIENT_SECRET = env('LINKEDIN_CLIENT_SECRET')
-SENDGRID_API_KEY = env('SENDGRID_API_KEY')
-CSUI_USERNAME = env('CSUI_USERNAME')
-CSUI_PASSWORD = env('CSUI_PASSWORD')
+LINKEDIN_CLIENT_ID = env('ATLAS_LINKEDIN_CLIENT_ID')
+LINKEDIN_CLIENT_SECRET = env('ATLAS_LINKEDIN_CLIENT_SECRET')
+SENDGRID_API_KEY = env('ATLAS_SENDGRID_API_KEY')
+CSUI_USERNAME = env('ATLAS_CSUI_USERNAME')
+CSUI_PASSWORD = env('ATLAS_CSUI_PASSWORD')
 
 # Application definition
 APPS = [
@@ -143,12 +143,12 @@ WSGI_APPLICATION = 'atlas.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': env('SQL_ENGINE'),
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_POSTGRES_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT')
+        'ENGINE': env('ATLAS_SQL_ENGINE'),
+        'NAME': env('ATLAS_DB_NAME'),
+        'USER': env('ATLAS_DB_POSTGRES_USER'),
+        'PASSWORD': env('ATLAS_DB_PASSWORD'),
+        'HOST': env('ATLAS_DB_HOST'),
+        'PORT': env('ATLAS_DB_PORT')
     }
 }
 
@@ -189,17 +189,17 @@ AUTOSLUG_SLUGIFY_FUNCTION = slugify
 # django-rq
 RQ_QUEUES = {
     'default': {
-        'HOST': env('REDIS_HOST'),
-        'PORT': env('REDIS_PORT'),
-        'DB': env('REDIS_DB'),
-        'DEFAULT_TIMEOUT': env('REDIS_DEFAULT_TIMEOUT'),
+        'HOST': env('ATLAS_REDIS_HOST'),
+        'PORT': env('ATLAS_REDIS_PORT'),
+        'DB': env('ATLAS_REDIS_DB'),
+        'DEFAULT_TIMEOUT': env('ATLAS_REDIS_DEFAULT_TIMEOUT'),
     },
 }
 
 SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 
 # hosts and cors
-SUBDIRECTORY = env('SUBDIRECTORY')
+SUBDIRECTORY = env('ATLAS_SUBDIRECTORY')
 FORCE_SCRIPT_NAME= SUBDIRECTORY
 ALLOWED_HOSTS = ('localhost', '127.0.0.1', ROOT_URI,)
 CORS_ORIGIN_WHITELIST = (FRONTEND_URI,)
@@ -239,7 +239,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': env('JWT_SECRET_KEY'),
+    'SIGNING_KEY': env('ATLAS_JWT_SECRET_KEY'),
     'VERIFYING_KEY': None,
 
     'AUTH_HEADER_TYPES': ('Bearer',),
@@ -295,15 +295,15 @@ else:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     AWS_STORAGE_BUCKET_NAME = 'b3-mnemosyne-dev'
 
-AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_ACCESS_KEY_ID = env('ATLAS_AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('ATLAS_AWS_SECRET_ACCESS_KEY')
 AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False
 AWS_DEFAULT_ACL = 'public-read'
 
 if PRODUCTION:
     AWS_S3_PROXIES = {
-        'http': env('HTTP_PROXY'),
+        'http': env('ATLAS_HTTP_PROXY'),
     }
 
 # sentry
@@ -314,7 +314,7 @@ if PRODUCTION:
     )
 
 # sendgrid
-SENDGRID_API_KEY = env('SENDGRID_API_KEY')
+SENDGRID_API_KEY = env('ATLAS_SENDGRID_API_KEY')
 
 # jet
 JET_DEFAULT_THEME = 'light-blue'

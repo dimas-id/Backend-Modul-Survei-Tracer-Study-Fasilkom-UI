@@ -12,8 +12,8 @@ import sys
 
 from django.core.wsgi import get_wsgi_application
 
-if os.environ.get('PRODUCTION') == 'production':
-  WSGIAPP=os.environ.get('HOST_PATH')
+if os.environ.get('ATLAS_PRODUCTION') == 'production':
+  WSGIAPP=os.environ.get('ATLAS_HOST_PATH')
   sys.path.append(WSGIAPP)
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'atlas.settings'

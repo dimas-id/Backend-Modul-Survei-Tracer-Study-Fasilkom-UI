@@ -24,9 +24,9 @@ auth = [
 
 account = [
     path('/register', account.UserCreateView.as_view(), name='account_register'),
-    path('/users/<pk>', account.UserDetailView.as_view(),
+    path('/users/<uuid:pk>', account.UserDetailView.as_view(),
          name='account_user_detail'),
-    path('/users/<pk>/preference', account.UserPreferenceDetailView.as_view(),
+    path('/users/<uuid:pk>/preference', account.UserPreferenceDetailView.as_view(),
          name='account_preference_detail'),
 ]
 

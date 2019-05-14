@@ -199,7 +199,8 @@ RQ_QUEUES = {
 SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 
 # hosts and cors
-
+SUBDIRECTORY = env('SUBDIRECTORY')
+FORCE_SCRIPT_NAME= SUBDIRECTORY
 ALLOWED_HOSTS = ('localhost', '127.0.0.1', ROOT_URI, HELIOS_URI)
 CORS_ORIGIN_WHITELIST = (FRONTEND_URI,)
 CORS_ORIGIN_ALLOW_ALL = True
@@ -278,10 +279,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'
+STATIC_URL = f'{SUBDIRECTORY}/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_URL = f'{SUBDIRECTORY}/media/'
 
 DEFAULT_PROFILE_PIC = 'https://s3-ap-southeast-1.amazonaws.com/b3-mnemosyne-dev/img/default-profile-pic.jpeg'
 
@@ -302,7 +303,7 @@ AWS_DEFAULT_ACL = 'public-read'
 
 if PRODUCTION:
     AWS_S3_PROXIES = {
-        'http': env('http_proxy'),
+        'http': env('HTTP_PROXY'),
     }
 
 # sentry

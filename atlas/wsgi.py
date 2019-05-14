@@ -16,6 +16,6 @@ if os.environ.get('PRODUCTION') == 'production':
   WSGIAPP=os.environ.get('HOST_PATH')
   sys.path.append(WSGIAPP)
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'atlas.settings')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'atlas.settings'
 
 application = get_wsgi_application()

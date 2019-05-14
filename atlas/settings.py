@@ -301,9 +301,10 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False
 AWS_DEFAULT_ACL = 'public-read'
 
-if PRODUCTION:
+PROXY = env('ATLAS_HTTP_PROXY')
+if PRODUCTION and PROXY:
     AWS_S3_PROXIES = {
-        'http': env('ATLAS_HTTP_PROXY'),
+        'http': PROXY,
     }
 
 # sentry

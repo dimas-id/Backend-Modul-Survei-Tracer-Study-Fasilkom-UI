@@ -7,14 +7,14 @@ services:
     volumes:
       - b3-atlas-postgres_data:/var/lib/postgresql/data/
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${ATLAS_DB_NAME}
+      POSTGRES_USER: ${ATLAS_DB_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${ATLAS_DB_PASSWORD}
     networks:
       private:
     restart: always
   redis:
-    image: redis:5.0.4
+    image: redis:5.0.4-alpine
     container_name: b3_atlas_redis
     command: redis-server --appendonly yes
     volumes:
@@ -27,28 +27,28 @@ services:
     image: b3_atlas/web
     container_name: b3_atlas_migration
     environment:
-      ROOT_URI: ${ROOT_URI}
-      HELIOS_URI: ${HELIOS_URI}
-      HYPERION_URI: ${HYPERION_URI}
-      DJANGO_ENV: ${DJANGO_ENV}
-      SECRET_KEY: ${SECRET_KEY}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      DB_NAME: ${DB_NAME}
-      DB_POSTGRES_USER: ${DB_POSTGRES_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
-      REDIS_DB: ${REDIS_DB}
-      REDIS_DEFAULT_TIMEOUT: ${REDIS_DEFAULT_TIMEOUT}
-      CSUI_USERNAME: ${CSUI_USERNAME}
-      CSUI_PASSWORD: ${CSUI_PASSWORD}
-      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID}
-      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET}
-      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      ROOT_URI: ${ATLAS_ROOT_URI}
+      HELIOS_URI: ${ATLAS_HELIOS_URI}
+      HYPERION_URI: ${ATLAS_HYPERION_URI}
+      DJANGO_ENV: ${ATLAS_DJANGO_ENV}
+      SECRET_KEY: ${ATLAS_SECRET_KEY}
+      JWT_SECRET_KEY: ${ATLAS_JWT_SECRET_KEY}
+      DB_NAME: ${ATLAS_DB_NAME}
+      DB_POSTGRES_USER: ${ATLAS_DB_POSTGRES_USER}
+      DB_PASSWORD: ${ATLAS_DB_PASSWORD}
+      DB_HOST: ${ATLAS_DB_HOST}
+      DB_PORT: ${ATLAS_DB_PORT}
+      REDIS_HOST: ${ATLAS_REDIS_HOST}
+      REDIS_PORT: ${ATLAS_REDIS_PORT}
+      REDIS_DB: ${ATLAS_REDIS_DB}
+      REDIS_DEFAULT_TIMEOUT: ${ATLAS_REDIS_DEFAULT_TIMEOUT}
+      CSUI_USERNAME: ${ATLAS_CSUI_USERNAME}
+      CSUI_PASSWORD: ${ATLAS_CSUI_PASSWORD}
+      LINKEDIN_CLIENT_ID: ${ATLAS_LINKEDIN_CLIENT_ID}
+      LINKEDIN_CLIENT_SECRET: ${ATLAS_LINKEDIN_CLIENT_SECRET}
+      SENDGRID_API_KEY: ${ATLAS_SENDGRID_API_KEY}
+      AWS_ACCESS_KEY_ID: ${ATLAS_AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${ATLAS_AWS_SECRET_ACCESS_KEY}
     command: bash -c "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py compilemessages"
     networks:
       private:
@@ -73,6 +73,7 @@ services:
     command: bash -c "cd /app && gunicorn atlas.wsgi:application --bind 0.0.0.0:8000 --error-logfile error.log"
     networks:
       private:
+        ipv4_address: ${ATLAS_IPV4}
       public:
     restart: always
     depends_on:
@@ -86,7 +87,7 @@ volumes:
 networks:
   private:
     external:
-      name: b3-${DJANGO_ENV}-private
+      name: b3-${ATLAS_DJANGO_ENV}-private
   public:
     external:
-      name: b3-${DJANGO_ENV}-public
+      name: b3-${ATLAS_DJANGO_ENV}-public

@@ -11,11 +11,15 @@ echo 'RUN MIGRATION'
 pipenv run python manage.py migrate
 pipenv run python manage.py compilemessages
 
-echo 'SIGHUP Atlas process'
-kill -HUP $(<"/home/wisnuprama/iluni12/b3-atlas/atlas.pid")
-
-echo 'SIGHUP Atlas RQWorker process'
-kill -HUP $(<"/home/wisnuprama/iluni12/b3-atlas/atlas_rq.pid")
+echo 'Kill Atlas process'
+Port=5000
+pid=`ps ax | grep gunicorn | grep $Port | awk '{split($0,a," "); print a[1]}' | head -n 1`
+if [ -z "$pid" ]; then
+  echo "no gunicorn deamon on port $Port"
+else
+  kill $pid
+  echo "killed gunicorn deamon on port $Port"
+fi
 
 echo 'RUN GUNICORN BIND ON 8000'
 nohup pipenv run gunicorn atlas.wsgi:application \

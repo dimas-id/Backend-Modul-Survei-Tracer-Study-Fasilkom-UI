@@ -1,6 +1,7 @@
 .vscode/
 .idea/
 dump.rdb
+*.pid
 
 # sqlite
 *.sqlite

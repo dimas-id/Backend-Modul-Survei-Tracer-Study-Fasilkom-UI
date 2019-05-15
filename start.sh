@@ -1,13 +1,7 @@
 #!/bin/sh
 
-UPSTREAM=${1:-'@{u}'}
-LOCAL=$(git rev-parse @)
-REMOTE=$(git rev-parse "$UPSTREAM")
-BASE=$(git merge-base @ "$UPSTREAM")
-
-if [ $LOCAL = $REMOTE ]; then
-    echo "Up-to-date"
-elif [ $LOCAL = $BASE ]; then
+if [[ `git status --porcelain --untracked-files=no` ]]; then
+  	git pull origin master
     echo 'LOAD ENV VARIABLES'
 		source ./.env
 
@@ -36,4 +30,6 @@ elif [ $LOCAL = $BASE ]; then
 		nohup pipenv run python manage.py rqworker > /dev/null & echo $(($!+1)) > atlas_rq.pid
 
 		echo 'ATLAS DEPLOYMENT SUCCESS'
+else
+  echo "Up-to-date"
 fi

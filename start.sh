@@ -20,6 +20,8 @@ else
   echo "killed gunicorn deamon on port $ATLAS_PORT"
 fi
 
+sleep 2
+
 echo 'RUN GUNICORN BIND ON 8000'
 nohup pipenv run gunicorn atlas.wsgi:application \
 	--bind 0.0.0.0:8000 \

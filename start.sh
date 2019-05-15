@@ -11,7 +11,6 @@ elif [ $LOCAL = $BASE ]; then
     echo 'LOAD ENV VARIABLES'
 		source ./.env
 
-    echo 'INSTALL DEPENDENCIES'
 		pipenv install --deploy
 
 		echo 'RUN MIGRATION'

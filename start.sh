@@ -30,7 +30,4 @@ nohup pipenv run gunicorn atlas.wsgi:application \
 	--workers=3 \
 	> /dev/null & echo $(($!+1)) > atlas.pid
 
-echo 'RUN RQWORKER'
-nohup pipenv run python manage.py rqworker > /dev/null & echo $(($!+1)) > atlas_rq.pid
-
 echo 'ATLAS DEPLOYMENT SUCCESS'

@@ -42,6 +42,7 @@ PRODUCTION = os.environ.get('ATLAS_DJANGO_ENV') == 'production'
 TESTING = 'test' in sys.argv
 DEBUG = not PRODUCTION
 
+PORT = os.environ.get('ATLAS_PORT')
 ROOT_URI = env('ATLAS_ROOT_URI')
 HELIOS_URI = env('ATLAS_HELIOS_URI')
 HYPERION_URI = env('ATLAS_HYPERION_URI')
@@ -52,6 +53,9 @@ else:
     HTTP = 'http://'
 
 DEPLOYMENT_ROOT_URL = HTTP + ROOT_URI
+
+if PORT:
+    DEPLOYMENT_ROOT_URL = DEPLOYMENT_ROOT_URL + f':{PORT}'
 
 # backward
 FRONTEND_URI = HYPERION_URI

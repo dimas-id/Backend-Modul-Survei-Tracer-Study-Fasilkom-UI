@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-21 21:42+0700\n"
+"POT-Creation-Date: 2019-05-16 20:17+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,95 +17,140 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
 #: atlas/apps/account/managers.py:14 atlas/apps/account/managers.py:25
 msgid "The given email must be set"
 msgstr "Email yang diberikan harus disetel"
 
-#: atlas/apps/account/models.py:41
-msgid "SSO UI username"
-msgstr "Username SSO UI"
+#: atlas/apps/account/models.py:24
+msgid "First Name"
+msgstr ""
 
-#: atlas/apps/account/models.py:44
+#: atlas/apps/account/models.py:25
+msgid "Last Name"
+msgstr ""
+
+#: atlas/apps/account/models.py:38
 msgid "SSO UI NPM"
 msgstr "NPM SSO UI"
 
-#: atlas/apps/account/models.py:51
+#: atlas/apps/account/models.py:42
 msgid "User Preference"
 msgstr "Preferensi Pengguna"
 
-#: atlas/apps/account/models.py:53
+#: atlas/apps/account/models.py:44
 msgid "Here is the user preference, we can add some later"
-msgstr "Di sini adalah preferensi pengguna, kita dapat menambahkan beberapa nanti"
+msgstr ""
+"Di sini adalah preferensi pengguna, kita dapat menambahkan beberapa nanti"
 
-#: atlas/apps/account/models.py:57
+#: atlas/apps/account/models.py:48
 msgid "Superuser status"
 msgstr "Status superuser"
 
-#: atlas/apps/account/models.py:60
+#: atlas/apps/account/models.py:51
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
-msgstr "Menunjukkan bahwa pengguna ini memiliki semua izin tanpa menetapkan secara eksplisit."
+msgstr ""
+"Menunjukkan bahwa pengguna ini memiliki semua izin tanpa menetapkan secara "
+"eksplisit."
 
-#: atlas/apps/account/models.py:64
+#: atlas/apps/account/models.py:55
 msgid "Staff status"
 msgstr "Status staf"
 
-#: atlas/apps/account/models.py:67
+#: atlas/apps/account/models.py:58
 msgid "Designates that this user can login to administrator site."
 msgstr "Menunjukkan bahwa pengguna ini dapat masuk ke situs administrator."
 
-#: atlas/apps/account/models.py:70
+#: atlas/apps/account/models.py:61
 msgid "Active status"
 msgstr "Status aktif"
 
-#: atlas/apps/account/models.py:73
+#: atlas/apps/account/models.py:64
 msgid "Designates that if this user is not active, then can't login."
-msgstr "Menentukan bahwa jika pengguna ini tidak aktif, maka tidak dapat masuk."
+msgstr ""
+"Menentukan bahwa jika pengguna ini tidak aktif, maka tidak dapat masuk."
 
-#: atlas/apps/account/models.py:76
+#: atlas/apps/account/models.py:67
 msgid "Verified status"
 msgstr "Status verifikasi"
 
-#: atlas/apps/account/models.py:79
+#: atlas/apps/account/models.py:70
 msgid ""
 "Designates that if this user is not verified,then can't access other "
 "services except Account Service"
-msgstr "Menunjukkan bahwa jika pengguna ini tidak diverifikasi, maka tidak dapat mengakses layanan lain kecuali Layanan Akun"
+msgstr ""
+"Menunjukkan bahwa jika pengguna ini tidak diverifikasi, maka tidak dapat "
+"mengakses layanan lain kecuali Layanan Akun"
 
-#: atlas/apps/account/models.py:83
+#: atlas/apps/account/models.py:74
 msgid "Email Verified status"
 msgstr "Status verifikasi email"
 
-#: atlas/apps/account/models.py:86
+#: atlas/apps/account/models.py:77
 msgid ""
 "Designates that if this user email is not verified,then can't access other "
 "services except Account Service"
-msgstr "Menunjukkan bahwa jika email pengguna ini tidak diverifikasi, maka tidak dapat mengakses layanan lain kecuali Layanan Akun"
+msgstr ""
+"Menunjukkan bahwa jika email pengguna ini tidak diverifikasi, maka tidak "
+"dapat mengakses layanan lain kecuali Layanan Akun"
 
-#: atlas/apps/account/models.py:149
+#: atlas/apps/account/models.py:120
+msgid "User"
+msgstr ""
+
+#: atlas/apps/account/models.py:124
+msgid "Gender"
+msgstr ""
+
+#: atlas/apps/account/models.py:125
+msgid "Phone Number"
+msgstr ""
+
+#: atlas/apps/account/models.py:127
+msgid "Birthdate"
+msgstr ""
+
+#: atlas/apps/account/models.py:130
+#, fuzzy
+#| msgid "Residence Latitude"
+msgid "Residence City"
+msgstr "Lintang Tempat Tinggal"
+
+#: atlas/apps/account/models.py:131
+#, fuzzy
+#| msgid "Residence Longitude"
+msgid "Residence Country"
+msgstr "Bujur Tempat Tinggal"
+
+#: atlas/apps/account/models.py:133
 msgid "Residence Longitude"
 msgstr "Bujur Tempat Tinggal"
 
-#: atlas/apps/account/models.py:151
+#: atlas/apps/account/models.py:135
 msgid "Residence Latitude"
 msgstr "Lintang Tempat Tinggal"
 
-#: atlas/apps/account/models.py:155
+#: atlas/apps/account/models.py:139
 msgid "Angkatan"
 msgstr "Angkatan"
 
-#: atlas/apps/account/models.py:157
+#: atlas/apps/account/models.py:141
 msgid "Prodi"
 msgstr "Prodi"
 
-#: atlas/apps/account/models.py:163
+#: atlas/apps/account/models.py:147
 msgid "Kelulusan"
 msgstr "Kelulusan"
 
-#: atlas/apps/account/models.py:166
+#: atlas/apps/account/models.py:150
 msgid "Profile Picture"
 msgstr "Foto Profil"
+
+#: atlas/apps/account/models.py:152
+msgid "Website URL"
+msgstr ""
 
 #: atlas/apps/experience/models.py:19
 msgid "Title"
@@ -162,16 +207,52 @@ msgstr "Berikut adalah data Linkedin pengguna"
 #: atlas/libs/core/validators.py:11
 msgid ""
 "Only digits are allowed. Country code are optional. Up to 15 digits allowed."
-msgstr "Hanya digit yang diizinkan. Kode negara adalah opsional. Hingga 15 digit diizinkan."
+msgstr ""
+"Hanya digit yang diizinkan. Kode negara adalah opsional. Hingga 15 digit "
+"diizinkan."
 
 #: atlas/libs/core/validators.py:22
 msgid "Only numeric are allowed"
 msgstr "Hanya numerik yang diizinkan."
 
-#: atlas/settings.py:259
+#: atlas/settings.py:266
 msgid "Indonesia"
 msgstr "Indonesia"
 
-#: atlas/settings.py:260
+#: atlas/settings.py:267
 msgid "English"
 msgstr "English"
+
+#: atlas/templates/admin/login.html:38
+msgid "Please correct the error below."
+msgstr ""
+
+#: atlas/templates/admin/login.html:51
+#, python-format
+msgid ""
+"You are authenticated as %(username)s, but are not authorized to access this "
+"page. Would you like to login to a different account?"
+msgstr ""
+
+#: atlas/templates/admin/login.html:66
+msgid "Forgotten your password or username?"
+msgstr ""
+
+#: atlas/templates/admin/login.html:71
+msgid "Log in"
+msgstr ""
+
+#: atlas/templates/admin/submit_line.html:4
+msgid "Save"
+msgstr ""
+
+#: atlas/templates/admin/submit_line.html:7
+msgid "Delete"
+msgstr ""
+
+#: atlas/templates/admin/submit_line.html:9
+msgid "Cancel"
+msgstr ""
+
+#~ msgid "SSO UI username"
+#~ msgstr "Username SSO UI"

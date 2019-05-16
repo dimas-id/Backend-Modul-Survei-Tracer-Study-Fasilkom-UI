@@ -24,11 +24,11 @@ msgstr "Email yang diberikan harus disetel"
 
 #: atlas/apps/account/models.py:24
 msgid "First Name"
-msgstr ""
+msgstr "Nama Depan"
 
 #: atlas/apps/account/models.py:25
 msgid "Last Name"
-msgstr ""
+msgstr "Nama Belakang"
 
 #: atlas/apps/account/models.py:38
 msgid "SSO UI NPM"
@@ -98,31 +98,31 @@ msgstr ""
 
 #: atlas/apps/account/models.py:120
 msgid "User"
-msgstr ""
+msgstr "Pengguna"
 
 #: atlas/apps/account/models.py:124
 msgid "Gender"
-msgstr ""
+msgstr "Jenis Kelamin"
 
 #: atlas/apps/account/models.py:125
 msgid "Phone Number"
-msgstr ""
+msgstr "Nomor Telepon"
 
 #: atlas/apps/account/models.py:127
 msgid "Birthdate"
-msgstr ""
+msgstr "Tanggal Lahir"
 
 #: atlas/apps/account/models.py:130
 #, fuzzy
 #| msgid "Residence Latitude"
 msgid "Residence City"
-msgstr "Lintang Tempat Tinggal"
+msgstr "Kota Tempat Tinggal"
 
 #: atlas/apps/account/models.py:131
 #, fuzzy
 #| msgid "Residence Longitude"
 msgid "Residence Country"
-msgstr "Bujur Tempat Tinggal"
+msgstr "Negara Tempat Tinggal"
 
 #: atlas/apps/account/models.py:133
 msgid "Residence Longitude"
@@ -150,7 +150,7 @@ msgstr "Foto Profil"
 
 #: atlas/apps/account/models.py:152
 msgid "Website URL"
-msgstr ""
+msgstr "URL Website"
 
 #: atlas/apps/experience/models.py:19
 msgid "Title"
@@ -225,34 +225,34 @@ msgstr "English"
 
 #: atlas/templates/admin/login.html:38
 msgid "Please correct the error below."
-msgstr ""
+msgstr "Tolong perbaiki kesalahan berikut"
 
 #: atlas/templates/admin/login.html:51
 #, python-format
 msgid ""
 "You are authenticated as %(username)s, but are not authorized to access this "
 "page. Would you like to login to a different account?"
-msgstr ""
+msgstr "Anda terautentikasi sebagai %(username)s, tetapi tidak memiliki autorisasi untuk mengakses halaman ini. Apakah Anda ingin login dengan akun yang berbeda?"
 
 #: atlas/templates/admin/login.html:66
 msgid "Forgotten your password or username?"
-msgstr ""
+msgstr "Lupa kata sandi atau username?"
 
 #: atlas/templates/admin/login.html:71
 msgid "Log in"
-msgstr ""
+msgstr "Log in"
 
 #: atlas/templates/admin/submit_line.html:4
 msgid "Save"
-msgstr ""
+msgstr "Simpan"
 
 #: atlas/templates/admin/submit_line.html:7
 msgid "Delete"
-msgstr ""
+msgstr "Hapus"
 
 #: atlas/templates/admin/submit_line.html:9
 msgid "Cancel"
-msgstr ""
+msgstr "Batal"
 
 #~ msgid "SSO UI username"
 #~ msgstr "Username SSO UI"

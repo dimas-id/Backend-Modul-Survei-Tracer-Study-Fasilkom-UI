@@ -12,12 +12,12 @@ pipenv run python manage.py migrate
 pipenv run python manage.py compilemessages
 
 echo 'Kill Atlas process'
-pid=`ps ax | grep gunicorn | grep $ATLAS_PORT | awk '{split($0,a," "); print a[1]}' | head -n 1`
+pid=`ps ax | grep gunicorn | grep 8000 | awk '{split($0,a," "); print a[1]}' | head -n 1`
 if [ -z "$pid" ]; then
-  echo "no gunicorn deamon on port $ATLAS_PORT"
+  echo "no gunicorn deamon on port 8000"
 else
   kill $pid
-  echo "killed gunicorn deamon on port $ATLAS_PORT"
+  echo "killed gunicorn deamon on port 8000"
 fi
 
 sleep 2

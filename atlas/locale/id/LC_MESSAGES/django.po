@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-16 20:17+0700\n"
+"POT-Creation-Date: 2019-05-16 22:05+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -212,8 +212,14 @@ msgstr ""
 "diizinkan."
 
 #: atlas/libs/core/validators.py:22
-msgid "Only numeric are allowed"
-msgstr "Hanya numerik yang diizinkan."
+#, fuzzy
+#| msgid ""
+#| "Only digits are allowed. Country code are optional. Up to 15 digits "
+#| "allowed."
+msgid "Only numeric are allowed. Up to 9-11 digits allowed."
+msgstr "Hanya angka yang diperbolehkan. Hingga 9-11 digit yang diperbolehkan."
+"Hanya digit yang diizinkan. Kode negara adalah opsional. Hingga 15 digit "
+"diizinkan."
 
 #: atlas/settings.py:266
 msgid "Indonesia"
@@ -232,7 +238,10 @@ msgstr "Tolong perbaiki kesalahan berikut"
 msgid ""
 "You are authenticated as %(username)s, but are not authorized to access this "
 "page. Would you like to login to a different account?"
-msgstr "Anda terautentikasi sebagai %(username)s, tetapi tidak memiliki autorisasi untuk mengakses halaman ini. Apakah Anda ingin login dengan akun yang berbeda?"
+msgstr ""
+"Anda terautentikasi sebagai %(username)s, tetapi tidak memiliki autorisasi "
+"untuk mengakses halaman ini. Apakah Anda ingin login dengan akun yang "
+"berbeda?"
 
 #: atlas/templates/admin/login.html:66
 msgid "Forgotten your password or username?"
@@ -253,6 +262,9 @@ msgstr "Hapus"
 #: atlas/templates/admin/submit_line.html:9
 msgid "Cancel"
 msgstr "Batal"
+
+#~ msgid "Only numeric are allowed"
+#~ msgstr "Hanya numerik yang diizinkan."
 
 #~ msgid "SSO UI username"
 #~ msgstr "Username SSO UI"

@@ -17,9 +17,9 @@ class PhoneRegex(RegexValidator):
 
 @deconstructible
 class NumericRegex(RegexValidator):
-    regex = r'^[0-9]$'
+    regex = r'^\d{9,11}$'
     message = _(
-        'Only numeric are allowed')
+        'Only numeric are allowed. Up to 9-11 digits allowed.')
     code = 'invalid'
 
     def __init__(self, **kwargs):

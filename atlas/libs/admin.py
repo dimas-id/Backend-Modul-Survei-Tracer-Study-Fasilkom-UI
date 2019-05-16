@@ -136,8 +136,8 @@ class ModelAdminSuperuser(ModelAdmin):
 
 
 class MyAdminSite(AdminSite):
-    site_header = "Altas Administration"
-    site_title = "Altas site admin"
+    site_header = "Atlas Administration"
+    site_title = "Atlas site admin"
 
 
 admin_site = MyAdminSite(name="admin")

@@ -48,7 +48,7 @@ HELIOS_URI = env('ATLAS_HELIOS_URI')
 HYPERION_URI = env('ATLAS_HYPERION_URI')
 
 if PRODUCTION:
-    HTTP = 'http://'
+    HTTP = 'https://'
 else:
     HTTP = 'http://'
 

@@ -19,154 +19,154 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 #: atlas/apps/account/managers.py:14 atlas/apps/account/managers.py:25
 msgid "The given email must be set"
-msgstr ""
+msgstr "Email yang diberikan harus disetel"
 
 #: atlas/apps/account/models.py:41
 msgid "SSO UI username"
-msgstr ""
+msgstr "Username SSO UI"
 
 #: atlas/apps/account/models.py:44
 msgid "SSO UI NPM"
-msgstr ""
+msgstr "NPM SSO UI"
 
 #: atlas/apps/account/models.py:51
 msgid "User Preference"
-msgstr ""
+msgstr "Preferensi Pengguna"
 
 #: atlas/apps/account/models.py:53
 msgid "Here is the user preference, we can add some later"
-msgstr ""
+msgstr "Di sini adalah preferensi pengguna, kita dapat menambahkan beberapa nanti"
 
 #: atlas/apps/account/models.py:57
 msgid "Superuser status"
-msgstr ""
+msgstr "Status superuser"
 
 #: atlas/apps/account/models.py:60
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
-msgstr ""
+msgstr "Menunjukkan bahwa pengguna ini memiliki semua izin tanpa menetapkan secara eksplisit."
 
 #: atlas/apps/account/models.py:64
 msgid "Staff status"
-msgstr ""
+msgstr "Status staf"
 
 #: atlas/apps/account/models.py:67
 msgid "Designates that this user can login to administrator site."
-msgstr ""
+msgstr "Menunjukkan bahwa pengguna ini dapat masuk ke situs administrator."
 
 #: atlas/apps/account/models.py:70
 msgid "Active status"
-msgstr ""
+msgstr "Status aktif"
 
 #: atlas/apps/account/models.py:73
 msgid "Designates that if this user is not active, then can't login."
-msgstr ""
+msgstr "Menentukan bahwa jika pengguna ini tidak aktif, maka tidak dapat masuk."
 
 #: atlas/apps/account/models.py:76
 msgid "Verified status"
-msgstr ""
+msgstr "Status verifikasi"
 
 #: atlas/apps/account/models.py:79
 msgid ""
 "Designates that if this user is not verified,then can't access other "
 "services except Account Service"
-msgstr ""
+msgstr "Menunjukkan bahwa jika pengguna ini tidak diverifikasi, maka tidak dapat mengakses layanan lain kecuali Layanan Akun"
 
 #: atlas/apps/account/models.py:83
 msgid "Email Verified status"
-msgstr ""
+msgstr "Status verifikasi email"
 
 #: atlas/apps/account/models.py:86
 msgid ""
 "Designates that if this user email is not verified,then can't access other "
 "services except Account Service"
-msgstr ""
+msgstr "Menunjukkan bahwa jika email pengguna ini tidak diverifikasi, maka tidak dapat mengakses layanan lain kecuali Layanan Akun"
 
 #: atlas/apps/account/models.py:149
 msgid "Residence Longitude"
-msgstr ""
+msgstr "Bujur Tempat Tinggal"
 
 #: atlas/apps/account/models.py:151
 msgid "Residence Latitude"
-msgstr ""
+msgstr "Lintang Tempat Tinggal"
 
 #: atlas/apps/account/models.py:155
 msgid "Angkatan"
-msgstr ""
+msgstr "Angkatan"
 
 #: atlas/apps/account/models.py:157
 msgid "Prodi"
-msgstr ""
+msgstr "Prodi"
 
 #: atlas/apps/account/models.py:163
 msgid "Kelulusan"
-msgstr ""
+msgstr "Kelulusan"
 
 #: atlas/apps/account/models.py:166
 msgid "Profile Picture"
-msgstr ""
+msgstr "Foto Profil"
 
 #: atlas/apps/experience/models.py:19
 msgid "Title"
-msgstr ""
+msgstr "Judul"
 
 #: atlas/apps/experience/models.py:20
 msgid "Company"
-msgstr ""
+msgstr "Perusahaan"
 
 #: atlas/apps/experience/models.py:21 atlas/apps/experience/models.py:45
 msgid "Location"
-msgstr ""
+msgstr "Lokasi"
 
 #: atlas/apps/experience/models.py:22
 msgid "Industry"
-msgstr ""
+msgstr "Industri"
 
 #: atlas/apps/experience/models.py:24 atlas/apps/experience/models.py:47
 msgid "Date Started"
-msgstr ""
+msgstr "Tanggal Mulai"
 
 #: atlas/apps/experience/models.py:25 atlas/apps/experience/models.py:48
 msgid "Date Ended"
-msgstr ""
+msgstr "Tanggal Selesai"
 
 #: atlas/apps/experience/models.py:28
 msgid "Here is company metadata comes from linkedin"
-msgstr ""
+msgstr "Berikut metadata perusahaan dari Linkedin"
 
 #: atlas/apps/experience/models.py:42
 msgid "Field of Study"
-msgstr ""
+msgstr "Bidang Studi"
 
 #: atlas/apps/experience/models.py:43
 msgid "School"
-msgstr ""
+msgstr "Sekolah"
 
 #: atlas/apps/experience/models.py:44
 msgid "Degree"
-msgstr ""
+msgstr "Gelar"
 
 #: atlas/apps/external_auth/models.py:9
 msgid "Linkedin User Email"
-msgstr ""
+msgstr "Linkedin Email Pengguna"
 
 #: atlas/apps/external_auth/models.py:12
 msgid "Linkedin User Data"
-msgstr ""
+msgstr "Linkedin Data Pengguna"
 
 #: atlas/apps/external_auth/models.py:13
 msgid "Here is the user linkedin data"
-msgstr ""
+msgstr "Berikut adalah data Linkedin pengguna"
 
 #: atlas/libs/core/validators.py:11
 msgid ""
 "Only digits are allowed. Country code are optional. Up to 15 digits allowed."
-msgstr ""
+msgstr "Hanya digit yang diizinkan. Kode negara adalah opsional. Hingga 15 digit diizinkan."
 
 #: atlas/libs/core/validators.py:22
 msgid "Only numeric are allowed"
-msgstr ""
+msgstr "Hanya numerik yang diizinkan."
 
 #: atlas/settings.py:259
 msgid "Indonesia"

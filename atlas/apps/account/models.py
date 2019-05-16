@@ -21,8 +21,8 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
     Represents User and authentication model.
     """
     # required fields
-    first_name = models.CharField(max_length=128, db_index=True)
-    last_name = models.CharField(max_length=128, db_index=True)
+    first_name = models.CharField(verbose_name=_("First Name"), max_length=128, db_index=True)
+    last_name = models.CharField(verbose_name=_("Last Name"), max_length=128, db_index=True)
     email = models.EmailField(unique=True)
 
     # public ID
@@ -117,18 +117,18 @@ class UserProfile(AbstractTimestampable):
     )
     GENDER_CHOICES = (('M', 'Male'), ('F', 'Female'))
 
-    user = models.OneToOneField(
+    user = models.OneToOneField(verbose_name=_("User"),
         primary_key=True, related_name='profile', to=User, on_delete=models.CASCADE)
 
     # personal info
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
-    phone_number = models.CharField(
+    gender = models.CharField(verbose_name=_("Gender"), max_length=1, choices=GENDER_CHOICES, null=True)
+    phone_number = models.CharField(verbose_name=_("Phone Number"), 
         max_length=15, validators=[PhoneRegex()], null=True, blank=True)
-    birthdate = models.DateField(null=True)
+    birthdate = models.DateField(verbose_name=_("Birthdate"), null=True)
 
     # Residence
-    residence_city = models.CharField(max_length=128, null=True, blank=True)
-    residence_country = models.CharField(max_length=128, null=True, blank=True)
+    residence_city = models.CharField(verbose_name=_("Residence City"), max_length=128, null=True, blank=True)
+    residence_country = models.CharField(verbose_name=_("Residence Country"), max_length=128, null=True, blank=True)
     residence_lng = models.FloatField(
         _('Residence Longitude'), null=True, blank=True)
     residence_lat = models.FloatField(
@@ -149,7 +149,7 @@ class UserProfile(AbstractTimestampable):
     profile_pic_url = models.URLField(
         _('Profile Picture'), blank=True, default=settings.DEFAULT_PROFILE_PIC)
 
-    website_url = models.URLField(null=True, blank=True)
+    website_url = models.URLField(verbose_name=_("Website URL"), null=True, blank=True)
 
     def __str__(self):
         return f'{self.user.name} ({self.latest_csui_class_year})'

@@ -27,8 +27,11 @@ class ContactListView(ListAPIView):
             queries = contact_query.split()
             search_args = []
             for q in queries:
-                for f in ('first_name__icontains', 'last_name__icontains', 'email__icontains'):
-                    search_args.append(Q(**{f: q}))
+                if q.isnumeric():
+                    search_args.append(Q(**{'profile__latest_csui_class_year': int(q)}))
+                else:
+                    for f in ('first_name__icontains', 'last_name__icontains', 'email__icontains',):
+                        search_args.append(Q(**{f: q}))
             queryset = queryset.filter(functools.reduce(operator.or_, search_args))
 
         return queryset.order_by('first_name', 'last_name')

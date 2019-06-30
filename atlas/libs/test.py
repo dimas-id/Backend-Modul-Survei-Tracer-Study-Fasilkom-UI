@@ -21,9 +21,13 @@ class RestTestCase(APITestCase):
     @staticmethod
     def create_user(**extra) -> User:
         u = UserFactory(**extra)
-        u.set_password('hellthisispassword12333311')
+        u.set_password(RestTestCase.get_password())
         u.save()
         return u
+
+    @staticmethod
+    def get_password():
+        return 'hellthisispassword12333311'
 
     @staticmethod
     def create_admin() -> User:

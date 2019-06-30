@@ -27,7 +27,7 @@ class StudentManager(AbstractClientManager):
         :param nama: mahasiswa npm
         :type arg1: str
         :return: return mahasiswa with given name and success status
-        :rtype: tuple(list, boolean)
+        :rtype: tuple(dict, boolean)
         """
         uri = f'/mahasiswa/{npm}/'
         return self.get_client().get(uri=uri)

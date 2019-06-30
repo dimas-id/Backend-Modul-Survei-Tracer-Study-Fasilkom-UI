@@ -137,7 +137,7 @@ class AbstractClient:
                 res = underscoreize(res)
 
             if self.is_success(req):
-                return (res, True)
+                return (res, True, req)
             else:
                 # log the message first
                 log_message = f'{self.get_client_name()} failed to GET ({endpoint}): / attempt: {retry_attempt} / HTTP code:{req.status_code} \
@@ -145,13 +145,13 @@ class AbstractClient:
                 self.logger.error(log_message)
 
                 if self.is_attempt_exceeded(retry_attempt):
-                    return (res, False)
+                    return (res, False, req)
                 else:
                     return self.__request_get__(endpoint, params, retry_attempt + 1)
         except Exception as e:
             # something wrong with requests
             self.logger.error(str(e))
-            return (None, False)
+            return (None, False, None)
 
     def __request_post__(self, endpoint: str, data: dict, retry_attempt: int = 0):
         """
@@ -175,7 +175,7 @@ class AbstractClient:
                 res = underscoreize(res)
 
             if self.is_success(req):
-                return (res, True)
+                return (res, True, req)
             else:
                 # log the message first
                 log_message = f'{self.get_client_name()} failed to POST ({endpoint}): / retry attempt: {retry_attempt} / HTTP code:{req.status_code} \
@@ -183,14 +183,14 @@ class AbstractClient:
                 self.logger.error(log_message)
 
                 if self.is_attempt_exceeded(retry_attempt):
-                    return (res, False)
+                    return (res, False, req)
                 else:
                     return self.__request_post__(endpoint, data, retry_attempt + 1)
 
         except Exception as e:
             # something wrong with requests
             self.logger.error(str(e))
-            return (None, False)
+            return (None, False, None)
 
     def put(self, uri: str, data):
         """
@@ -222,7 +222,7 @@ class AbstractClient:
                 res = underscoreize(res)
 
             if self.is_success(req):
-                return (res, True)
+                return (res, True, req)
             else:
                 # log the message first
                 log_message = f'{self.get_client_name()} failed to PUT ({endpoint}): / retry attempt: {retry_attempt} / HTTP code:{req.status_code} \
@@ -230,14 +230,14 @@ class AbstractClient:
                 self.logger.error(log_message)
 
                 if self.is_attempt_exceeded(retry_attempt):
-                    return (res, False)
+                    return (res, False, req)
                 else:
                     return self.__request_post__(endpoint, data, retry_attempt + 1)
 
         except Exception as e:
             # something wrong with requests
             self.logger.error(str(e))
-            return (None, False)
+            return (None, False, None)
 
 
 class AbstractClientManager:

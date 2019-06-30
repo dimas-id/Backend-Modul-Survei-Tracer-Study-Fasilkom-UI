@@ -7,6 +7,7 @@ from atlas.api.v1.views import account
 from atlas.api.v1.views import experience
 from atlas.api.v1.views import contact
 from atlas.api.v1.views import external_auth
+from atlas.api.v1.views import validator
 
 general = [
     path('/', general.api_v1, name='general-v1'),
@@ -46,4 +47,9 @@ contact = [
     path('/contacts', contact.ContactListView.as_view(), name='contacts_list')
 ]
 
-urlpatterns = [] + general + auth + account + experience + contact
+validator = [
+    path('/alumni/validate', validator.AlumniValidationView.as_view(),
+         name='alumni_validation')
+]
+
+urlpatterns = [] + general + auth + account + experience + contact + validator

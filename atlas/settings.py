@@ -74,7 +74,8 @@ APPS = [
     'atlas.apps.account',
     'atlas.apps.experience',
     'atlas.apps.external_auth',
-    'atlas.apps.contact'
+    'atlas.apps.contact',
+    'atlas.apps.validator'
 ]
 
 MODULES = [

@@ -289,16 +289,16 @@ STATIC_URL = f'{SUBDIRECTORY}/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = f'{SUBDIRECTORY}/media/'
 
-DEFAULT_PROFILE_PIC = 'https://s3-ap-southeast-1.amazonaws.com/b3-mnemosyne-dev/img/default-profile-pic.jpeg'
+DEFAULT_PROFILE_PIC = 'https://alumni-prod.s3-ap-southeast-1.amazonaws.com/img/default-profile-pic.jpeg'
 
 # Storage settings
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 if PRODUCTION and not TESTING:
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    AWS_STORAGE_BUCKET_NAME = 'b3-mnemosyne'
+    AWS_STORAGE_BUCKET_NAME = 'alumni-prod'
 else:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    AWS_STORAGE_BUCKET_NAME = 'b3-mnemosyne-dev'
+    AWS_STORAGE_BUCKET_NAME = 'alumni-dev'
 
 AWS_ACCESS_KEY_ID = env('ATLAS_AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env('ATLAS_AWS_SECRET_ACCESS_KEY')

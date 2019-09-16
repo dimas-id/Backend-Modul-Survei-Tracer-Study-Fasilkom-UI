@@ -65,6 +65,6 @@ class LinkedinPersonManager(AbstractClientManager):
         return self.get_client().get(uri, format='json')
 
     def get_person_lite_profile(self, access_token):
-        uri = "v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))"
+        uri = "/v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))"
         self.get_client().set_header('Authorization', f'Bearer {access_token}')
         return self.client.get(uri, format='json')

@@ -7,6 +7,8 @@ LINKEDIN_CLIENT_SECRET = settings.LINKEDIN_CLIENT_SECRET
 
 
 class OAuth2LinkedinClient(AbstractClient):
+    max_retry_attempt = 0
+
     class Meta:
         always_use_production = True
         is_camelized = False
@@ -38,6 +40,13 @@ class LinkedinOAuth2Manager(AbstractClientManager):
 
 
 class LinkedinClient(AbstractClient):
+    max_retry_attempt = 0
+
+    def get_headers(self):
+        headers = super().get_headers()
+        headers['X-RestLi-Protocol-Version'] = '2.0.0'
+        return headers
+
     class Meta:
         always_use_production = True
         is_camelized = True
@@ -50,12 +59,12 @@ class LinkedinClient(AbstractClient):
 class LinkedinPersonManager(AbstractClientManager):
     client = LinkedinClient()
 
-    def get_person_basic_profile(self, access_token):
-        scope = (
-            "id,first-name,last-name,headline,location,industry,"
-            "current-share,num-connections,summary,specialties,"
-            "positions,picture-url,public-profile-url,email-address,"
-            "api-standard-profile-request"
-        )
-        uri = "/v1/people/~:({})?".format(scope)
-        return self.client.get(uri, oauth2_access_token=access_token, client_id=LINKEDIN_CLIENT_ID, format='json')
+    def get_email_address(self, access_token):
+        uri = '/v2/emailAddress?q=members&projection=(elements*(handle~))'
+        self.get_client().set_header('Authorization', f'Bearer {access_token}')
+        return self.get_client().get(uri, format='json')
+
+    def get_person_lite_profile(self, access_token):
+        uri = "v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))"
+        self.get_client().set_header('Authorization', f'Bearer {access_token}')
+        return self.client.get(uri, format='json')

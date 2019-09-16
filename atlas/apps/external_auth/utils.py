@@ -27,7 +27,7 @@ class LinkedinHelper:
             "client_id=" + CLIENT_ID_LINKEDIN + "&" +
             "redirect_uri=" + REDIRECT_URI + "&" +
             "state=" + state + "&" +
-            "scope=r_basicprofile r_emailaddress rw_company_admin w_share"
+            "scope=r_emailaddress r_liteprofile"
         )
 
     def get_random_state(self):
@@ -59,3 +59,21 @@ class LinkedinHelper:
             response.set_cookie(
                 'should_complete_registration', json.dumps(new_user), domain=domain)
         return response
+
+
+def extract_email_and_profile_from_linkedin_response(email_data:dict, profile_data:dict):
+    user = {}
+    user['email_address'] = email_data['elements'][0]['handle~']
+    user['id'] = profile_data['id']
+    user['first_name'] = profile_data['firstName']['localized']['en_US']
+    user['first_name'] = profile_data['lastName']['localized']['en_US']
+
+    try:
+        # less priority
+        dp = profile_data['profilePicture']['displayImage~']
+        last_dp = dp['paging']['count'] - 1
+        user['picture_url'] = dp['elements'][last_dp]['identifiers']['identifier']
+    except:
+        pass
+
+    return user

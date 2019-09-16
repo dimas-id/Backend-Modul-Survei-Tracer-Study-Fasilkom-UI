@@ -16,14 +16,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from atlas.apps.external_auth.utils import (
-    LinkedinHelper,
-)
+from atlas.apps.external_auth.utils import LinkedinHelper
+from atlas.apps.external_auth.utils import extract_email_and_profile_from_linkedin_response
 from atlas.apps.external_auth.services import ExternalAuthService
-from atlas.clients.linkedin.api import (
-    LinkedinOAuth2Manager,
-    LinkedinPersonManager
-)
+from atlas.clients.linkedin.api import LinkedinPersonManager
+from atlas.clients.linkedin.api import LinkedinOAuth2Manager
 
 
 class LinkedinRequestAPIView(APIView):
@@ -51,15 +48,21 @@ class LinkedinCallbackAPIView(APIView):
             return HttpResponse(status=status.HTTP_403_FORBIDDEN)
 
         code = request.GET.get('code', '')
-        response_data, auth_success, _ = LinkedinOAuth2Manager().request_token(code,
-                                                                            REDIRECT_URL)
-        user_data, person_success, _ = LinkedinPersonManager().get_person_basic_profile(
-            response_data.get('access_token'))
+        response_data, auth_success, _ = LinkedinOAuth2Manager()\
+            .request_token(code, REDIRECT_URL)
+
+        linkedin_person_mgr = LinkedinPersonManager()
+        profile_data, person_success, _ = linkedin_person_mgr\
+            .get_person_lite_profile(response_data.get('access_token'))
+        user_email_data, email_success, _ = linkedin_person_mgr\
+            .get_email_address(response_data.get('access_token'))
 
         user = None
         created = False
-        if auth_success and person_success:
-            user, created = ExternalAuthService().get_or_register_linkedin_user(**user_data)
+        if auth_success and email_success and person_success:
+            user_data = extract_email_and_profile_from_linkedin_response(
+                user_email_data, profile_data)
+            user, created = ExternalAuthService().get_or_register_linkedin_user()
             # make user is authenticated
             auth_login(request, user)
 

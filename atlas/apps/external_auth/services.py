@@ -31,11 +31,11 @@ class ExternalAuthService:
         _, created_linkedin  = self.connect_user_to_linkedin_account(
             user, **linkedin_user_data)
 
-        '''
-        @todo: temporary fix, find elegant solution
-        '''
-        if created_linkedin and linkedin_user_data.get('positions').get('_total') > 0:
-            ExperienceService().extract_and_create_positions_from_linkedin(
-                user, linkedin_user_data.get('positions').get('values'))
+        # '''
+        # @todo: temporary fix, find elegant solution
+        # '''
+        # if created_linkedin and linkedin_user_data.get('positions').get('_total') > 0:
+        #     ExperienceService().extract_and_create_positions_from_linkedin(
+        #         user, linkedin_user_data.get('positions').get('values'))
 
         return user, created

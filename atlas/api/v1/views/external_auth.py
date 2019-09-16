@@ -51,9 +51,9 @@ class LinkedinCallbackAPIView(APIView):
             return HttpResponse(status=status.HTTP_403_FORBIDDEN)
 
         code = request.GET.get('code', '')
-        response_data, auth_success = LinkedinOAuth2Manager().request_token(code,
+        response_data, auth_success, _ = LinkedinOAuth2Manager().request_token(code,
                                                                             REDIRECT_URL)
-        user_data, person_success = LinkedinPersonManager().get_person_basic_profile(
+        user_data, person_success, _ = LinkedinPersonManager().get_person_basic_profile(
             response_data.get('access_token'))
 
         user = None

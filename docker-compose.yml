@@ -1,5 +1,4 @@
-version: "3.6"
-
+version: "3"
 services:
   db:
     image: postgres:10.7-alpine
@@ -73,7 +72,7 @@ services:
     command: bash -c "cd /app && gunicorn atlas.wsgi:application --bind 0.0.0.0:8000 --error-logfile error.log"
     networks:
       private:
-        ipv4_address: ${ATLAS_IPV4}
+        ipv4_address: ${ATLAS_ROOT_URI}
       public:
     restart: always
     depends_on:

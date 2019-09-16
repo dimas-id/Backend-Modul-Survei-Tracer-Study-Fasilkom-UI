@@ -96,7 +96,7 @@ class TestUserCreateView(RestTestCase):
 
         resp_data = json.loads(response.content)
         self.assertEqual(resp_data.get('user').get('profile').get('profilePicUrl'),
-                         'https://s3-ap-southeast-1.amazonaws.com/b3-mnemosyne-dev/img/default-profile-pic.jpeg')
+                         'https://alumni-prod.s3-ap-southeast-1.amazonaws.com/img/default-profile-pic.jpeg')
 
         mock_enqueue.assert_called()
 

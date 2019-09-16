@@ -63,12 +63,12 @@ class UserService:
         user_npm = getattr(user, 'ui_sso_npm', None)
         mahasiswa_data = None
         if user_npm is not None:
-            mahasiswa_data, success = self.student_manager.get_student_by_npm(
+            mahasiswa_data, success, _ = self.student_manager.get_student_by_npm(
                     user_npm)
         else:
             # how if the api is using paginator? LOL
             user_fullname = getattr(user, 'name')
-            mahasiswa_list, success = self.student_manager.get_students_by_name(
+            mahasiswa_list, success, _ = self.student_manager.get_students_by_name(
                     user_fullname)
             # we must find the mhs using name
             if success:

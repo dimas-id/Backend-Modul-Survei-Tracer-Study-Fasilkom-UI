@@ -3,9 +3,7 @@ import string
 import json
 
 from django.conf import settings
-from django.http import (
-    HttpResponseRedirect,
-)
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.urls import reverse
 
@@ -43,37 +41,34 @@ class LinkedinHelper:
         if user is None:
             redirect_url = f'{settings.FRONTEND_URL}/err'
 
-        response = HttpResponseRedirect(redirect_url)
-        if user is not None:
-            refresh = RefreshToken.for_user(user)
-            expire_at = timezone.now() + timezone.timedelta(days=1)
+        response = HttpResponseRedirect(redirect_to=redirect_url)
+        refresh = RefreshToken.for_user(user)
+        expire_at = timezone.now() + timezone.timedelta(days=1)
 
-            domain = settings.FRONTEND_URI
+        domain = settings.DOMAIN
 
-            # @todo secure domain, secure cookies & max age
-            response.set_cookie('user_id', user.id, domain=domain)
-            response.set_cookie('access', str(
-                refresh.access_token),  expires=expire_at, domain=domain)
-            response.set_cookie('refresh', str(refresh),
-                                expires=expire_at, domain=domain)
-            response.set_cookie(
-                'should_complete_registration', json.dumps(new_user), domain=domain)
+        # @todo secure domain, secure cookies & max age
+        response.set_cookie('user_id', user.id, domain=domain)
+        response.set_cookie('access', str(
+            refresh.access_token),  expires=expire_at, domain=domain)
+        response.set_cookie('refresh', str(refresh),
+                            expires=expire_at, domain=domain)
+        response.set_cookie(
+            'should_complete_registration', json.dumps(new_user), domain=domain)
         return response
 
 
 def extract_email_and_profile_from_linkedin_response(email_data:dict, profile_data:dict):
     user = {}
-    user['email_address'] = email_data['elements'][0]['handle~']
+    user['email_address'] = email_data['elements'][0]['handle~']['email_address']
     user['id'] = profile_data['id']
-    user['first_name'] = profile_data['firstName']['localized']['en_US']
-    user['first_name'] = profile_data['lastName']['localized']['en_US']
+    # user['public_url'] = f'https://www.linkedin.com/in/{profile_data["vanity_name"]}'
+    user['first_name'] = profile_data['localized_first_name']
+    user['last_name'] = profile_data['localized_last_name']
 
-    try:
-        # less priority
-        dp = profile_data['profilePicture']['displayImage~']
-        last_dp = dp['paging']['count'] - 1
-        user['picture_url'] = dp['elements'][last_dp]['identifiers']['identifier']
-    except:
-        pass
+    dp = profile_data['profile_picture']['display_image~']
+    last_dp = len(dp['elements']) - 1 # take latest 800x800
+    list_identifiers = dp['elements'][last_dp]['identifiers']
+    user['picture_url'] = list_identifiers[len(list_identifiers) - 1]['identifier']
 
     return user

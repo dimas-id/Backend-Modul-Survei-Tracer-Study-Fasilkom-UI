@@ -46,8 +46,9 @@ class UserService:
             user = User.objects.create_user_unusable_password(
                     email=email, first_name=first_name, last_name=last_name)
 
-        user.profile.profile_picture_url = picture_url
-        user.profile.save(update_fields=('profile_pic_url',))
+        profile = user.profile
+        profile.profile_pic_url = picture_url
+        profile.save(update_fields=('profile_pic_url',))
         return user, created
 
     @transaction.atomic

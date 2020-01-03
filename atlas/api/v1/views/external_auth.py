@@ -51,18 +51,19 @@ class LinkedinCallbackAPIView(APIView):
         response_data, auth_success, _ = LinkedinOAuth2Manager()\
             .request_token(code, REDIRECT_URL)
 
-        linkedin_person_mgr = LinkedinPersonManager()
+        linkedin_person_mgr = LinkedinPersonManager(
+            response_data.get('access_token'))
         profile_data, person_success, _ = linkedin_person_mgr\
-            .get_person_lite_profile(response_data.get('access_token'))
+            .get_person_lite_profile()
         user_email_data, email_success, _ = linkedin_person_mgr\
-            .get_email_address(response_data.get('access_token'))
+            .get_email_address()
 
         user = None
         created = False
         if auth_success and email_success and person_success:
             user_data = extract_email_and_profile_from_linkedin_response(
                 user_email_data, profile_data)
-            user, created = ExternalAuthService().get_or_register_linkedin_user()
+            user, created = ExternalAuthService().get_or_register_linkedin_user(**user_data)
             # make user is authenticated
             auth_login(request, user)
 

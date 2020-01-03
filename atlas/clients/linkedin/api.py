@@ -57,14 +57,21 @@ class LinkedinClient(AbstractClient):
 
 
 class LinkedinPersonManager(AbstractClientManager):
+
     client = LinkedinClient()
 
-    def get_email_address(self, access_token):
-        uri = '/v2/emailAddress?q=members&projection=(elements*(handle~))'
-        self.get_client().set_header('Authorization', f'Bearer {access_token}')
-        return self.get_client().get(uri, format='json')
+    def __init__(self, access_token: str):
+        self.access_token = access_token
+        self.get_client()\
+            .set_header('Authorization', f'Bearer {self.get_access_token()}')
 
-    def get_person_lite_profile(self, access_token):
-        uri = "/v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))"
-        self.get_client().set_header('Authorization', f'Bearer {access_token}')
-        return self.client.get(uri, format='json')
+    def get_access_token(self):
+        return self.access_token
+
+    def get_email_address(self):
+        uri = '/v2/emailAddress?q=members&projection=(elements*(handle~))'
+        return self.get_client().get(uri)
+
+    def get_person_lite_profile(self):
+        uri = "/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage~:playableStreams))"
+        return self.client.get(uri)

@@ -122,7 +122,7 @@ class UserProfile(AbstractTimestampable):
 
     # personal info
     gender = models.CharField(verbose_name=_("Gender"), max_length=1, choices=GENDER_CHOICES, null=True)
-    phone_number = models.CharField(verbose_name=_("Phone Number"), 
+    phone_number = models.CharField(verbose_name=_("Phone Number"),
         max_length=15, validators=[PhoneRegex()], null=True, blank=True)
     birthdate = models.DateField(verbose_name=_("Birthdate"), null=True)
 

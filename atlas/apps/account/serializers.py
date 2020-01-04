@@ -1,3 +1,6 @@
+import re
+
+from deprecated import deprecated
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import (
     CommonPasswordValidator,
@@ -8,6 +11,7 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from atlas.apps.account.constants import C_PREFERENCES
@@ -155,6 +159,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
+@deprecated(reason='Register should use v2')
 class RegisterUserSerializer(serializers.Serializer):
     username_field = User.USERNAME_FIELD
     MIN_GENERATION = 1986
@@ -230,3 +235,65 @@ class RegisterUserSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'ui_sso_npm is already exists')
         return value
+
+
+class RegisterUserSerializerV2(serializers.Serializer):
+    """
+    2020-01-04
+    We move registration to v2 because we want user to fill their background so we
+    can validate them and crawl all their education on cs ui service.
+
+    So, for registration we just need some fields below.
+    """
+    username_field = User.USERNAME_FIELD
+
+    # auth
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    # profile
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    birthdate = serializers.DateField()
+
+    linkedin_url = serializers.URLField(required=False)
+
+    def create(self, validated_data: dict):
+        """
+        create user based on validated data
+        """
+        auth_service = UserService()
+        request = self.context.get('request')
+        return auth_service.register_public_user(
+            request, identifier=validated_data[self.username_field], **validated_data)
+
+    def validate_email(self, email: str):
+        # normalize email
+        validated_email = email
+        if self.username_field == 'email':
+            validated_email = validated_email.lower()
+            if validated_email.endswith('@ui.ac.id'):
+                raise ValidationError('Can\'t register using UI email.')
+
+        # validate identifier (email/username) is unique
+        if User.objects.filter(**{self.username_field: validated_email}).exists():
+            raise ValidationError(f'{self.username_field} is already exists')
+
+        return validated_email
+
+    def validate_password(self, password: str):
+        request = self.context.get('request')
+        # validate password to minimum
+        MinimumLengthValidator(min_length=8).validate(password)
+        CommonPasswordValidator().validate(password)
+        UserAttributeSimilarityValidator(password, request.user)
+        NumericPasswordValidator().validate(password)
+
+        return password
+
+    def validate_linkedin_url(self, linkedin_url: str):
+        LINKEDIN_BASIC_URL = 'linkedin.com/in/'
+        reg_linkedin = re.compile(r'https?:\/\/(www\.)?linkedin\.com\/in\/(\w+)')
+        if not reg_linkedin.match(linkedin_url):
+            raise ValidationError(detail=f'Invalid linkedin URL (example: {LINKEDIN_BASIC_URL}) & should use https')
+        return linkedin_url

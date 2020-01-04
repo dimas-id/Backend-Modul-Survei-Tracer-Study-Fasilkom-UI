@@ -121,26 +121,6 @@ class TestUserCreateView(RestTestCase):
 
         mock_enqueue.assert_called()
 
-    # @patch('atlas.apps.account.signals.redis.enqueue')
-    # def test_register_user_npm_numeric(self, mock_enqueue):
-    #     data = {
-    #         'email'              : 'wisnu1c@csui.com',
-    #         'password'           : 'password123ccc',
-    #         'firstName'          : 'wisnu',
-    #         'lastName'           : 'pramadhitya',
-    #         'birthdate'          : '1998-01-14',
-    #         'latestCsuiProgram'  : 'S1-IK',
-    #         'latestCsuiClassYear': 2016,
-    #         'uiSsoNpm'           : '16069xx05x'
-    #     }
-    #
-    #     uri = reverse('account_register')
-    #     response = self.client.post(path=uri, data=data)
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #
-    #     # response data is in pythonic
-    #     self.assertTrue('uiSsoNpm' in json.loads(response.content))
-
     @patch('atlas.apps.account.signals.redis.enqueue')
     def test_register_user_npm_unique_if_is_verified(self, mock_enqueue):
         TestUserCreateView.create_user(ui_sso_npm='1606918055', is_verified=True)
@@ -437,7 +417,7 @@ class TestUserDetailView(RestTestCase):
             'latestCsuiClassYear',
             'latestCsuiProgram',
             'profilePicUrl',
-            'websiteUrl',
+            'linkedinUrl',
         )
 
         for f in profile_fields:
@@ -535,7 +515,7 @@ class TestUserDetailView(RestTestCase):
             'latestCsuiClassYear',
             'latestCsuiProgram',
             'profilePicUrl',
-            'websiteUrl',
+            'linkedinUrl',
         )
 
         for f in profile_fields:

@@ -16,6 +16,7 @@ class PositionSerializer(serializers.ModelSerializer):
 
 # Create bulk create for education endpoint
 class EducationListSerializer(serializers.ListSerializer):
+
     def create(self, validated_data):
         educations = [Education(**item) for item in validated_data]
         return Education.objects.bulk_create(educations)

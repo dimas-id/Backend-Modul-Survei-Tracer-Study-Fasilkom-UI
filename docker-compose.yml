@@ -12,6 +12,7 @@ services:
     networks:
       private:
     restart: always
+
   redis:
     image: redis:5.0.4-alpine
     container_name: b3_atlas_redis
@@ -72,13 +73,14 @@ services:
     command: bash -c "cd /app && gunicorn atlas.wsgi:application --bind 0.0.0.0:8000 --error-logfile error.log"
     networks:
       private:
-        ipv4_address: ${ATLAS_ROOT_URI}
+#        ipv4_address: ${ATLAS_ROOT_URI}
       public:
     restart: always
     depends_on:
       - rqworker
-
-
+      - db
+    links:
+      - db:db
 volumes:
   b3-atlas-postgres_data:
   b3-atlas-redis_data:

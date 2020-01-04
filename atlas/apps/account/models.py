@@ -23,6 +23,8 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
     # required fields
     first_name = models.CharField(verbose_name=_("First Name"), max_length=128, db_index=True)
     last_name = models.CharField(verbose_name=_("Last Name"), max_length=128, db_index=True)
+
+    # TODO db index email
     email = models.EmailField(unique=True)
 
     # public ID
@@ -134,11 +136,12 @@ class UserProfile(AbstractTimestampable):
     residence_lat = models.FloatField(
         _('Residence Latitude'), null=True, blank=True)
 
+    # TODO Favian should remove this later the latest_* fields
     # academic for validation purpose
     latest_csui_class_year = models.SmallIntegerField(
         _('Angkatan'), null=True, blank=True)
     latest_csui_program = models.CharField(
-        _('Prodi'), choices=PROGRAM_CHOICES, max_length=10, blank=True)
+        _('Prodi'), choices=PROGRAM_CHOICES, max_length=10, blank=True, null=True)
 
     # most longest is Mengundurkan Diri/Keluar
     # provided by CSUI API
@@ -149,7 +152,7 @@ class UserProfile(AbstractTimestampable):
     profile_pic_url = models.URLField(
         _('Profile Picture'), blank=True, default=settings.DEFAULT_PROFILE_PIC)
 
-    website_url = models.URLField(verbose_name=_("Website URL"), null=True, blank=True)
+    linkedin_url = models.URLField(verbose_name=_("Linkedin URL"), null=True, blank=True)
 
     def __str__(self):
         return f'{self.user.name} ({self.latest_csui_class_year})'

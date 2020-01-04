@@ -56,7 +56,7 @@ class Education(AbstractDateCreatedRecordable):
 
     # academic for validation purpose
     csui_class_year = models.SmallIntegerField(
-        _('Angkatan'), null=True, blank=True)
+        _('Angkatan'))
     csui_program = models.CharField(
         _('Prodi'), choices=PROGRAM_CHOICES, max_length=10, blank=True)
 

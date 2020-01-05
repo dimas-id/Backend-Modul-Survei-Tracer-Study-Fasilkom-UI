@@ -103,6 +103,15 @@ class EducationListCreateView(AbstractExperienceListCreateView):
     model_class = Education
     serializer_class = EducationSerializer
 
+    """
+    Override serializer to force many=True on create
+    """
+    def get_serializer(self, data=None, instance=None, many=False, partial=False):
+        serializer = super(EducationListCreateView, self)\
+            .get_serializer(instance=instance,data=data, many=True, partial=partial)
+        serializer.is_valid()
+        return serializer
+
 
 class EducationDetailView(AbstractExperienceDetailView):
     """
@@ -113,3 +122,5 @@ class EducationDetailView(AbstractExperienceDetailView):
     """
     model_class = Education
     serializer_class = EducationSerializer
+
+

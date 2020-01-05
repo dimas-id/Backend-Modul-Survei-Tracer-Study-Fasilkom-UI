@@ -16,19 +16,15 @@ RUN mkdir /app
 WORKDIR /app
 
 # Install dependencies
-RUN pip install --upgrade pip
-RUN pip install pipenv
+RUN pip3 install pipenv
 # -- Adding Pipfiles
 COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock
 
 # -- Install dependencies:
-RUN pipenv lock --requirements > requirements.txt
-RUN pip install -r requirements.txt
-RUN pip install whitenoise
-#RUN pipenv install --deploy
+RUN pipenv install --deploy --system
 
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-CMD ["./start.sh"]
+#CMD ["./start.sh"]

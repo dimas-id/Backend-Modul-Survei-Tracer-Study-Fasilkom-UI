@@ -1,14 +1,13 @@
 #!/bin/sh
 
-#git pull origin master
+git pull origin master
 echo 'LOAD ENV VARIABLES'
 source ./.env
 
-# pipenv install --deploy
+pipenv install --deploy
 
 echo 'RUN MIGRATION'
 # python manage.py collectstatic --no-input
-pipenv run python manage.py makemigrations
 pipenv run python manage.py migrate
 pipenv run python manage.py compilemessages
 
@@ -29,7 +28,6 @@ nohup pipenv run gunicorn atlas.wsgi:application \
 	--access-logfile - \
 	--error-logfile error.log \
 	--workers=3 \
-	--reload \
 	> /dev/null & echo $(($!+1)) > atlas.pid
 
 echo 'ATLAS DEPLOYMENT SUCCESS'

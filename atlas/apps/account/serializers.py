@@ -290,3 +290,10 @@ class RegisterUserSerializerV2(serializers.Serializer):
         NumericPasswordValidator().validate(password)
 
         return password
+
+    def validate_linkedin_url(self, linkedin_url: str):
+        LINKEDIN_BASIC_URL = 'https://linkedin.com/in/'
+        reg_linkedin = re.compile(r'https?:\/\/(www\.)?linkedin\.com\/in\/(\w+)')
+        if not reg_linkedin.match(linkedin_url):
+            raise ValidationError(detail=f'Invalid linkedin URL (example: {LINKEDIN_BASIC_URL})')
+        return linkedin_url

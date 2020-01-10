@@ -1,14 +1,7 @@
 from deprecated import deprecated
 from django.utils import timezone
 
-from atlas.apps.account.constants import (
-    C_PREFERENCES,
-    C_UI_NPM_FIELD,
-    C_UI_NAME_FIELD,
-    C_UI_BIRTHDATE_FIELD,
-    C_UI_PROGRAMS_FIELD,
-    C_UI_CLASS_YEAR_FIELD, )
-from atlas.libs.string import get_most_matching, matching_partial
+from atlas.apps.account.constants import C_PREFERENCES
 
 
 def slugify_username(value):

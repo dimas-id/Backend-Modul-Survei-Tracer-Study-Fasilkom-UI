@@ -108,7 +108,6 @@ class EducationListCreateView(AbstractExperienceListCreateView):
         the owner field is read only
         """
         obj = serializer.save(user=self.request.user)
-        print(obj)
         for education in obj:
             redis.enqueue(experience_service.verify_user_registration, education=education)
 

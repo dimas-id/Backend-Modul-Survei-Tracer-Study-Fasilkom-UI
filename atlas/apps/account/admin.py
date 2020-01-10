@@ -19,8 +19,7 @@ class UserAdmin(ModelAdminGroup):
 # profile
 @register(UserProfile, site=admin_site)
 class UserProfileAdmin(ModelAdminGroup):
-    list_display = ('user', 'gender', 'birthdate',
-                    'latest_csui_class_year', 'residence_city', 'residence_country')
+    list_display = ('user', 'gender', 'birthdate', 'residence_city', 'residence_country')
 
     # only admin user can access
     admin_groups = (ADMIN_USER,)

@@ -35,7 +35,7 @@ env = environ.Env(DEBUG=(bool, False), )  # set default values and casting
 SECRET_KEY = env('ATLAS_SECRET_KEY')
 
 # should be generated per consumer service
-API_KEY = env('ATLAS_API_KEY')
+API_KEY = env('ATLAS_API_KEY').strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 PRODUCTION = os.environ.get('ATLAS_DJANGO_ENV') == 'production'

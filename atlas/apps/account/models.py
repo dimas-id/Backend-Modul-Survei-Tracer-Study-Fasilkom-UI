@@ -158,8 +158,4 @@ class UserProfile(AbstractTimestampable):
         return f'{self.user.name} ({self.latest_csui_class_year})'
 
 
-def run_signal():
-    import atlas.apps.account.signals
-
-
-run_signal()
+#

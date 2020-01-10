@@ -9,8 +9,11 @@ from rest_framework.permissions import IsAuthenticated
 from atlas.apps.experience.permissions import IsOwnerOfExperience
 from atlas.apps.experience.serializers import EducationSerializer, PositionSerializer
 from atlas.apps.experience.models import Position, Education
+from atlas.apps.experience.services import ExperienceService
+from atlas.libs import redis
 
 User = get_user_model()
+experience_service = ExperienceService()
 
 
 class AbstractExperienceListCreateView(ListCreateAPIView):
@@ -96,6 +99,21 @@ class EducationListCreateView(AbstractExperienceListCreateView):
     """
     post:
     Create education
+    overriding post method to verify user
+    """
+
+    def perform_create(self, serializer):
+        """
+        perform save instance, inject owner because in serializer,
+        the owner field is read only
+        """
+        obj = serializer.save(user=self.request.user)
+        print(obj)
+        for education in obj:
+            redis.enqueue(experience_service.verify_user_registration, education=education)
+
+
+    """
 
     get:
     Return list of education owned by user

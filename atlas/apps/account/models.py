@@ -96,9 +96,28 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
         """
         return f'{self.first_name} {self.last_name}'
 
+    @property
+    def is_completed(self):
+        """
+        returns completeness status:
+        gender
+        phone_number
+        birthdate
+        residence_city
+        residence_country
+        linkedin_url
+        """
+        profile = self.profile
+        fields = ['gender','phone_number','birthdate','residence_city','residence_country','linkedin_url']
+        for i in fields:
+            if not getattr(profile, i, None):
+                return False
+        return True
+
     def set_as_verified(self):
         self.is_verified = True
         self.save()
+
 
     def __str__(self):
         return self.email

@@ -106,11 +106,13 @@ class EducationListCreateView(AbstractExperienceListCreateView):
         """
         perform save instance, inject owner because in serializer,
         the owner field is read only
+
+        Overwrite education every time it is created
         """
+        Education.objects.filter(user=self.request.user).delete()
         obj = serializer.save(user=self.request.user)
         for education in obj:
             redis.enqueue(experience_service.verify_user_registration, education=education)
-
 
     """
 

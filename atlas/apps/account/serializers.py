@@ -33,7 +33,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        exclude = ('user', 'latest_csui_graduation_status',)
+        exclude = ('user',)
 
     def validate_residence_lng(self, value):
         if value < -180 or value > 180:
@@ -92,6 +92,7 @@ class UserSerializer(serializers.ModelSerializer):
                                        validators=[UniqueValidator(queryset=User.objects.filter(is_verified=True))])
     profile = UserProfileSerializer()
     groups = serializers.SerializerMethodField()
+    is_completed = serializers.ReadOnlyField()
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -105,8 +106,6 @@ class UserSerializer(serializers.ModelSerializer):
             validated_data.pop('last_name', None)
             validated_data.pop('ui_sso_npm', None)
             profile_data.pop('birthdate', None)
-            profile_data.pop('latest_csui_class_year', None)
-            profile_data.pop('latest_csui_program', None)
 
         # updating profile data
         if profile_data:
@@ -144,6 +143,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_staff',
             'is_superuser',
             'is_verified',
+            'is_completed',
             'profile',
         )
 
@@ -156,6 +156,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_staff',
             'is_superuser',
             'is_verified',
+            'is_completed',
         )
 
 

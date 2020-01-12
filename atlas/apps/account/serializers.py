@@ -87,9 +87,7 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    ui_sso_npm = serializers.CharField(max_length=10,
-                                       required=False,
-                                       validators=[UniqueValidator(queryset=User.objects.filter(is_verified=True))])
+
     profile = UserProfileSerializer()
     groups = serializers.SerializerMethodField()
     is_completed = serializers.ReadOnlyField()
@@ -104,7 +102,6 @@ class UserSerializer(serializers.ModelSerializer):
         if instance.is_verified:
             validated_data.pop('first_name', None)
             validated_data.pop('last_name', None)
-            validated_data.pop('ui_sso_npm', None)
             profile_data.pop('birthdate', None)
 
         # updating profile data
@@ -135,7 +132,6 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'email',
             'username',
-            'ui_sso_npm',
             'groups',
             'last_login',
             'is_verified',

@@ -79,3 +79,4 @@ class Education(AbstractDateCreatedRecordable):
         self.is_verified = True
         self.save()
 
+

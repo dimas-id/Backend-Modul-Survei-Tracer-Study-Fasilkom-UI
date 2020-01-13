@@ -4,6 +4,7 @@ from django.utils.translation import ugettext as _
 from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext as _
 
+from atlas.libs import redis
 from atlas.libs.core.validators import NumericRegex
 from atlas.libs.db.models import AbstractDateCreatedRecordable
 
@@ -32,7 +33,6 @@ class Position(AbstractDateCreatedRecordable):
     def is_current(self):
         return self.date_ended is None
 
-
 class Education(AbstractDateCreatedRecordable):
     """
     Represent education experience
@@ -51,6 +51,14 @@ class Education(AbstractDateCreatedRecordable):
     user = models.ForeignKey(
         to=User, on_delete=models.CASCADE, related_name='educations')
 
+    is_verified = models.BooleanField(
+        _('Verified status'),
+        default=False,
+        help_text=_(
+            'Designates that if this education is not verified,'
+            'then can\'t access other services except Account Service'
+        ))
+
     ui_sso_npm = models.CharField(
         _("SSO UI NPM"), max_length=16, null=True, blank=True, validators=[NumericRegex()], db_index=True)
 
@@ -65,3 +73,10 @@ class Education(AbstractDateCreatedRecordable):
     # Kosong, Aktif, Cuti, Overseas, Mengundurkan diri/keluar
     csui_graduation_status = models.CharField(
         _('Kelulusan'), max_length=32, blank=True, null=True)
+
+    @property
+    def set_as_verified(self):
+        self.is_verified = True
+        self.save()
+
+

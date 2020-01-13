@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from atlas.apps.experience.models import Education, Position
 
@@ -16,6 +17,10 @@ class PositionSerializer(serializers.ModelSerializer):
 
 # Create bulk create for education endpoint
 class EducationListSerializer(serializers.ListSerializer):
+
+    ui_sso_npm = serializers.CharField(max_length=10,
+                                       required=False,
+                                       validators=[UniqueValidator(queryset=Education.objects.filter(is_verified=True))])
 
     def create(self, validated_data):
         educations = [Education(**item) for item in validated_data]

@@ -9,12 +9,15 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenViewBase
 
+from atlas.api.v1.views.experience import experience_service
 from atlas.apps.account.models import User
 from atlas.apps.account.permissions import \
     IsAnonymous, AllowedRegister, HasPriviledgeToAccessUser
 from atlas.apps.account.serializers import \
     UserSerializer, RegisterUserSerializer, UserPreferenceSerializer, \
     UserTokenObtainPairSerializer
+from atlas.apps.experience.models import Education
+from atlas.libs import redis
 from atlas.libs.permissions import IsOwnerOfObject
 
 
@@ -88,6 +91,13 @@ class UserDetailView(RetrieveUpdateAPIView):
         # check if user has permission to the user data
         self.check_object_permissions(self.request, user)
         return user
+
+    def patch(self, request, *args, **kwargs):
+        patch = self.partial_update(request, *args, **kwargs)
+        educations = Education.objects.filter(user=request.user)
+        for education in educations:
+            redis.enqueue(experience_service.verify_user_registration, education=education)
+        return patch
 
 
 class UserPreferenceDetailView(RetrieveUpdateAPIView):

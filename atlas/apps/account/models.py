@@ -96,9 +96,28 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
         """
         return f'{self.first_name} {self.last_name}'
 
+    @property
+    def is_completed(self):
+        """
+        returns completeness status:
+        gender
+        phone_number
+        birthdate
+        residence_city
+        residence_country
+        linkedin_url
+        """
+        profile = self.profile
+        fields = ['gender','phone_number','birthdate','residence_city','residence_country','linkedin_url']
+        for i in fields:
+            if not getattr(profile, i, None):
+                return False
+        return True
+
     def set_as_verified(self):
         self.is_verified = True
         self.save()
+
 
     def __str__(self):
         return self.email
@@ -140,20 +159,6 @@ class UserProfile(AbstractTimestampable):
         _('Residence Longitude'), null=True, blank=True)
     residence_lat = models.FloatField(
         _('Residence Latitude'), null=True, blank=True)
-
-    # TODO Favian should remove this later the latest_* fields
-    # academic for validation purpose
-    latest_csui_class_year = models.SmallIntegerField(
-        _('Angkatan'), null=True, blank=True)
-    latest_csui_program = models.CharField(
-        _('Prodi'), choices=PROGRAM_CHOICES, max_length=10, blank=True, null=True)
-
-    # most longest is Mengundurkan Diri/Keluar
-    # provided by CSUI API
-    # Kosong, Aktif, Cuti, Overseas, Mengundurkan diri/keluar
-    latest_csui_graduation_status = models.CharField(
-        _('Kelulusan'), max_length=32, blank=True, null=True)
-
     profile_pic_url = models.URLField(
         _('Profile Picture'), blank=True, default=settings.DEFAULT_PROFILE_PIC)
 
@@ -161,7 +166,7 @@ class UserProfile(AbstractTimestampable):
         verbose_name=_("Linkedin URL"), null=True, blank=True, validators=[URL_VALIDATOR_LINKEDIN])
 
     def __str__(self):
-        return f'{self.user.name} ({self.latest_csui_class_year})'
+        return f'{self.user.name}'
 
 
 def run_signal():

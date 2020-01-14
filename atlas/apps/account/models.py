@@ -114,8 +114,8 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
                 return False
         return True
 
-    def set_as_verified(self):
-        self.is_verified = True
+    def set_as_verified(self,status):
+        self.is_verified = status
         self.save()
 
 

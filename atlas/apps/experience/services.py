@@ -2,6 +2,7 @@ from datetime import date
 
 from django.db import transaction
 
+from atlas.apps.account.constants import C_UI_PROGRAMS_FIELD, C_UI_STATUS, C_UI_NAME_FIELD
 from atlas.apps.experience.utils import check_verified_status
 from atlas.clients.csui import StudentManager
 from .models import Position, Education
@@ -58,14 +59,18 @@ class ExperienceService:
                 user_npm)
         else:
             # how if the api is using paginator? LOL
-            user_fullname = getattr(education.user, 'name')
-            mahasiswa_list, success, _ = self.student_manager.get_students_by_name(
-                user_fullname)
+            user_fullname = [getattr(education.user, 'first_name'),getattr(education.user, 'last_name', None)]
+            user_fullname_concat = getattr(education.user, 'name')
+            mahasiswa_list = []
+            for name in user_fullname:
+                if name:
+                    mahasiswa_list_temp, success, _ = self.student_manager.get_students_by_name(
+                        name)
+                    mahasiswa_list.extend(mahasiswa_list_temp)
             # we must find the mhs using name
             if success:
                 mahasiswa_data, _ = get_most_matching_mahasiswa(
-                    mahasiswa_list, user_fullname, lambda mhs_data: mhs_data.get(C_UI_NAME_FIELD))
-
+                    mahasiswa_list, user_fullname_concat, lambda mhs_data: mhs_data.get(C_UI_NAME_FIELD))
         is_valid = False
         if mahasiswa_data is not None and success:
             # not none then we validatez
@@ -76,7 +81,7 @@ class ExperienceService:
                 is_valid = False
 
             if is_valid:
-                education.set_as_verified()
+                education.set_as_verified
                 setattr(education, 'ui_sso_npm', data[1])
                 setattr(education.user.profile, 'birthdate', data[2])
                 setattr(education, 'csui_program', data[3])

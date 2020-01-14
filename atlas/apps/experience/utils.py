@@ -67,7 +67,7 @@ def validate_alumni_data(education, ui_name, ui_npm, ui_birthdate, ui_program, u
         validation_score += 20
 
     if str(ui_name).lower() == education.user.name.lower() or \
-            matching_partial(str(ui_name).lower(), education.user.name.lower()) >= 85:
+            matching_partial(str(ui_name).lower(), education.user.name.lower()) >= 75:
         validation_score += 25
 
     if ui_angkatan == csui_class:
@@ -108,10 +108,9 @@ def check_verified_status(user):
     Rule: All education must be verified in order to verify the account
     """
     education_list = Education.objects.filter(user=user)
-    verified = True
+    is_verified = True
     for education in education_list:
         if not education.is_verified:
-            verified = False
+            is_verified = False
             break
-    if verified:
-        user.set_as_verified()
+    user.set_as_verified(is_verified)

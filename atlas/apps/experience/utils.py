@@ -79,7 +79,7 @@ def validate_alumni_data(education, ui_name, ui_npm, ui_birthdate, ui_program, u
     return validation_score >= 70
 
 
-def get_most_matching_mahasiswa(mhs_list: list, target: str, extractor):
+def get_most_matching_mahasiswa(mhs_list: list, target: str, extractor, program_name):
     """
     We matched one by one, and return mahasiswa with biggest ratio.
     """
@@ -90,9 +90,10 @@ def get_most_matching_mahasiswa(mhs_list: list, target: str, extractor):
     matchs = []
 
     for i in range(len(mhs_list)):
-        match = extractor(mhs_list[i])
-        mapping[match] = i
-        matchs.append(match)
+        if mhs_list[i]['program'][0]['nm_prg'][:2] == program_name:
+            match = extractor(mhs_list[i])
+            mapping[match] = i
+            matchs.append(match)
 
     result = get_most_matching(target, matchs)
 

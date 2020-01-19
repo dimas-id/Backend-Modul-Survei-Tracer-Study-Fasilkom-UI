@@ -70,7 +70,7 @@ class ExperienceService:
             # we must find the mhs using name
             if success:
                 mahasiswa_data, _ = get_most_matching_mahasiswa(
-                    mahasiswa_list, user_fullname_concat, lambda mhs_data: mhs_data.get(C_UI_NAME_FIELD))
+                    mahasiswa_list, user_fullname_concat, lambda mhs_data: mhs_data.get(C_UI_NAME_FIELD), education.csui_program[:2])
         is_valid = False
         if mahasiswa_data is not None and success:
             # not none then we validatez

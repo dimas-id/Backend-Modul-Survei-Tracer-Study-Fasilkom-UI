@@ -40,9 +40,3 @@ def message_about_user_changes(sender, instance: User, created, **kwargs):
     for cls in managers:
         if issubclass(cls, client.UserManagerAdapter):
             redis.enqueue(cls().update_or_create_user, user_id=instance.id, user=instance)
-
-# Move outside signals (trigger by education)
-# @receiver(post_save, sender=UserProfile, dispatch_uid='verify_user_profile')
-# def verify_user_profile(sender, instance: UserProfile, created, **kwargs):
-#     if not created and not instance.user.is_verified:
-#         redis.enqueue(user_service.verify_user_registration, user=instance.user)

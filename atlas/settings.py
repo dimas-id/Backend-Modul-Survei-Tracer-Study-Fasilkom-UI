@@ -203,9 +203,7 @@ RQ_QUEUES = {
 SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 
 # hosts and cors
-SUBDIRECTORY = env('ATLAS_SUBDIRECTORY')
-FORCE_SCRIPT_NAME= SUBDIRECTORY
-ALLOWED_HOSTS = ('localhost', '127.0.0.1', ROOT_URI,)
+ALLOWED_HOSTS = ('localhost', '127.0.0.1', ROOT_URI, '10.119.105.37')
 CORS_ORIGIN_WHITELIST = (DOMAIN,)
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -283,27 +281,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = f'{SUBDIRECTORY}/static/'
+STATIC_URL = '/static/'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = f'{SUBDIRECTORY}/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
+MEDIA_URL = '/media/'
 
 DEFAULT_PROFILE_PIC = 'https://alumni-prod.s3-ap-southeast-1.amazonaws.com/img/default-profile-pic.jpeg'
 
 # Storage settings
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-if PRODUCTION and not TESTING:
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    AWS_STORAGE_BUCKET_NAME = 'alumni-prod'
-else:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    AWS_STORAGE_BUCKET_NAME = 'alumni-dev'
-
-AWS_ACCESS_KEY_ID = env('ATLAS_AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = env('ATLAS_AWS_SECRET_ACCESS_KEY')
-AWS_S3_FILE_OVERWRITE = False
-AWS_QUERYSTRING_AUTH = False
-AWS_DEFAULT_ACL = 'public-read'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # sentry
 if PRODUCTION:

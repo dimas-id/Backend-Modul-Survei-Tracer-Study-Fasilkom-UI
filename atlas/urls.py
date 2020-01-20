@@ -28,7 +28,7 @@ urlpatterns = i18n_patterns(path('__admin__/', admin_site.urls)) + \
               [
                   path('jet/', __include__('jet.urls', 'jet')),  # Django JET URLS
                   path('jet/dashboard/', __include__('jet.dashboard.urls', 'jet-dashboard')),  # Django JET dashboard URLS
-                  path('__admin__/', RedirectView.as_view(url=f'{settings.SUBDIRECTORY}/id/__admin__/', permanent=True), name='redirect_admin'),
+                  path('__admin__/', RedirectView.as_view(url='/id/__admin__/', permanent=True), name='redirect_admin'),
                   path('__docs__/', include_docs_urls(title='Atlas API')),
                   path('__rq__/', __include__('django_rq.urls')),
                   path('api', include('api')),

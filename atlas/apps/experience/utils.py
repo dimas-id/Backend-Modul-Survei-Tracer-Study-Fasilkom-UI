@@ -90,10 +90,11 @@ def get_most_matching_mahasiswa(mhs_list: list, target: str, extractor, program_
     matchs = []
 
     for i in range(len(mhs_list)):
-        if mhs_list[i]['program'][0]['nm_prg'][:2] == program_name:
-            match = extractor(mhs_list[i])
-            mapping[match] = i
-            matchs.append(match)
+        if len(mhs_list[i]['program']) > 0:
+            if mhs_list[i]['program'][0]['nm_prg'][:2] == program_name:
+                match = extractor(mhs_list[i])
+                mapping[match] = i
+                matchs.append(match)
 
     result = get_most_matching(target, matchs)
 

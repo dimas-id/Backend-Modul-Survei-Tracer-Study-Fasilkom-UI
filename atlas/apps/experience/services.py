@@ -54,7 +54,7 @@ class ExperienceService:
         """
         user_npm = getattr(education, 'ui_sso_npm', None)
         mahasiswa_data = None
-        if user_npm is not None:
+        if user_npm is not None and user_npm.strip() != '':
             mahasiswa_data, success, _ = self.student_manager.get_student_by_npm(
                 user_npm)
         else:
@@ -63,7 +63,7 @@ class ExperienceService:
             user_fullname_concat = getattr(education.user, 'name')
             mahasiswa_list = []
             for name in user_fullname:
-                if name:
+                if name and name.strip():
                     mahasiswa_list_temp, success, _ = self.student_manager.get_students_by_name(
                         name)
                     mahasiswa_list.extend(mahasiswa_list_temp)

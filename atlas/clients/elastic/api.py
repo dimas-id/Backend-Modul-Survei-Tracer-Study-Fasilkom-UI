@@ -30,7 +30,7 @@ class ElasticManager(AbstractClientManager):
     def get_student_by_npm(self, npm, fail_silently=False):
         try:
             res = self.get_client().search(index=settings.ELASTICSEARCH_INDEX, body={"query": {"match": {"NPM": npm}}})
-            return elastic_to_csui_format(res)[0], True
+            return elastic_to_csui_format(res)[0], True, None
         except Exception as e:
             self.logger.error(str(e))
             if not fail_silently:

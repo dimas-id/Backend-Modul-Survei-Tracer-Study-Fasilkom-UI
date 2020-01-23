@@ -24,3 +24,13 @@ class NumericRegex(RegexValidator):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+@deconstructible
+class NpmRegex(RegexValidator):
+    regex = r'^\w{9,11}$'
+    message = _(
+        'Up to 9-11 digits allowed.')
+    code = 'invalid'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)

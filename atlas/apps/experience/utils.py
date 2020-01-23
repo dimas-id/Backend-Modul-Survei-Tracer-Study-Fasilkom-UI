@@ -34,7 +34,7 @@ def extract_alumni_data(mahasiswa_data, input_program):
 
         # get org
         # Ilmu Komputer -> [Ilmu, Komputer] -> [I, K] -> IK
-        org = ''.join([s[:1] for s in program.get('nm_org').split()])
+        org = ''.join([s[:1] for s in program.get('nm_org').split()])[:2]
 
         ui_program = f'{degree}-{org}'.upper()
         # get ankgatan

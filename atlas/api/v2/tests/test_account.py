@@ -16,7 +16,7 @@ class TestUserCreateView(RestTestCase):
     def setUp(self) -> None:
         super().setUp()
         # turn off throttle scope so we dont get code 429 after certain tests
-        from atlas.api.v1.views.account import UserCreateView
+        from atlas.api.v2.views.account import UserCreateView
         UserCreateView.throttle_scope = None
 
     @patch('atlas.apps.account.signals.redis.enqueue')
@@ -57,6 +57,20 @@ class TestUserCreateView(RestTestCase):
         user = users.first()
         self.assertEqual(user.profile.linkedin_url,
                          'https://linkedin.com/in/wisnuprama')
+
+    @patch('atlas.apps.account.signals.redis.enqueue')
+    def test_register_user_without_linkedin(self, mock_enqueue):
+        data = {
+            'email': 'wisnu1c@csui.com',
+            'password': 'wwjdjdjawkdjawl123123',
+            'firstName': 'wisnu',
+            'lastName': 'pramadhitya',
+            'birthdate': '1998-01-14',
+        }
+
+        uri = reverse('account_register_v2')
+        response = self.client.post(path=uri, data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     @patch('atlas.apps.account.signals.redis.enqueue')
     def test_register_user_low_quality_password(self, mock_enqueue):

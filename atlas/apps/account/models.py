@@ -7,14 +7,14 @@ from django.conf import settings
 
 from autoslug import AutoSlugField
 
-from atlas.libs.db.models import (
-    AbstractPrimaryUUIDable, AbstractTimestampable)
+from atlas.libs.db.models import AbstractPrimaryUUIDable
+from atlas.libs.db.models import AbstractTimestampable
 from atlas.apps.account.managers import UserManager
-from atlas.apps.account.utils import (
-    slugify_username,
-    default_preference)
-from atlas.libs.core.validators import PhoneRegex, NumericRegex
-
+from atlas.apps.account.utils import default_preference
+from atlas.apps.account.utils import slugify_username
+from django.core.validators import RegexValidator
+from atlas.libs.core.validators import NumericRegex
+from atlas.libs.core.validators import PhoneRegex
 
 class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, AbstractTimestampable):
     """
@@ -123,6 +123,11 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
         return self.email
 
 
+URL_VALIDATOR_LINKEDIN_MSG = f'Invalid linkedin URL (example: https://linkedin.com/in/<username>'
+URL_VALIDATOR_LINKEDIN =  RegexValidator(
+    regex=r'https?:\/\/(www\.)?linkedin\.com\/in\/(\w+)', message=URL_VALIDATOR_LINKEDIN_MSG)
+
+
 class UserProfile(AbstractTimestampable):
     """
     Represents User Profile, we store all personal related information here.
@@ -157,7 +162,8 @@ class UserProfile(AbstractTimestampable):
     profile_pic_url = models.URLField(
         _('Profile Picture'), blank=True, default=settings.DEFAULT_PROFILE_PIC)
 
-    linkedin_url = models.URLField(verbose_name=_("Linkedin URL"), null=True, blank=True)
+    linkedin_url = models.URLField(
+        verbose_name=_("Linkedin URL"), null=True, blank=True, validators=[URL_VALIDATOR_LINKEDIN])
 
     def __str__(self):
         return f'{self.user.name}'

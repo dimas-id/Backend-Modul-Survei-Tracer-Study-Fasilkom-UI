@@ -1,0 +1,84 @@
+version: '3'
+
+services:
+  webservice:
+    image: b3_atlas/webservice
+    build:
+      context: ./
+      dockerfile: Dockerfile.prod
+      args: 
+        - http_proxy=http://proxy.cs.ui.ac.id:8080
+        - https_proxy=http://proxy.cs.ui.ac.id:8080
+    command: gunicorn atlas.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    expose:
+      - 8000
+    env_file: .env
+    environment: 
+      - ATLAS_DJANGO_ENV=production
+    depends_on:
+      - db
+      - redis
+      - elastic
+    restart: always
+  rqworker:
+    image: b3_atlas/webservice
+    command: python manage.py rqworker
+    depends_on:
+      - redis
+      - webservice
+    restart: always
+  redis:
+    image: redis:5.0.7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: always
+  db:
+    image: postgres:11.6-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks: 
+      - default
+      - b3phoebe_metabase-net
+    env_file: .env.db
+    restart: always
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    ports:
+      - 8000:80
+    depends_on:
+      - webservice
+    restart: always
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      private:
+    ports:
+      - 9200:9200
+    restart: always
+volumes:
+  redis_data:
+  postgres_data:
+  static_volume:
+  media_volume:
+  esdata:
+networks:
+  b3phoebe_metabase-net:
+    external: true

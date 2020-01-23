@@ -21,6 +21,7 @@ services:
     depends_on:
       - db
       - redis
+      - elastic
     restart: always
   rqworker:
     image: b3_atlas/webservice
@@ -57,13 +58,30 @@ services:
     depends_on:
       - webservice
     restart: always
-
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      private:
+    ports:
+      - 9200:9200
+    restart: always
 volumes:
   redis_data:
   postgres_data:
   static_volume:
   media_volume:
-
+  esdata:
 networks:
   b3phoebe_metabase-net:
     external: true

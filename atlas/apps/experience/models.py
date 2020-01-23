@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext as _
 
 from atlas.libs import redis
-from atlas.libs.core.validators import NumericRegex
+from atlas.libs.core.validators import NumericRegex, NpmRegex
 from atlas.libs.db.models import AbstractDateCreatedRecordable
 
 User = get_user_model()
@@ -60,7 +60,7 @@ class Education(AbstractDateCreatedRecordable):
         ))
 
     ui_sso_npm = models.CharField(
-        _("SSO UI NPM"), max_length=16, null=True, blank=True, validators=[NumericRegex()], db_index=True)
+        _("SSO UI NPM"), max_length=16, null=True, blank=True, validators=[NpmRegex()], db_index=True)
 
     # academic for validation purpose
     csui_class_year = models.SmallIntegerField(

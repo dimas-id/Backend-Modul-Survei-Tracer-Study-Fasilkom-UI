@@ -21,6 +21,7 @@ services:
     depends_on:
       - db
       - redis
+      - elastic
     restart: always
   rqworker:
     image: b3_atlas/webservice
@@ -71,6 +72,7 @@ services:
       private:
     ports:
       - 9200:9200
+    restart: always
 volumes:
   redis_data:
   postgres_data:

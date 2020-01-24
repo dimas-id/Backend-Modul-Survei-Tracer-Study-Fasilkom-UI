@@ -45,7 +45,7 @@ class LinkedinHelper:
         refresh = RefreshToken.for_user(user)
         expire_at = timezone.now() + timezone.timedelta(days=1)
 
-        domain = settings.DOMAIN
+        domain = '.cs.ui.ac.id'
 
         # @todo secure domain, secure cookies & max age
         response.set_cookie('user_id', user.id, domain=domain)

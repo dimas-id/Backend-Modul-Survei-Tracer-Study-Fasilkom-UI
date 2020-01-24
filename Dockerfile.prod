@@ -8,6 +8,9 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+RUN export http_proxy=http://proxy.cs.ui.ac.id:8080
+RUN export https_proxy=http://proxy.cs.ui.ac.id:8080
+
 # install psycopg2
 RUN apk update \
     && apk add gettext \

@@ -1,3 +1,3 @@
 #!/bin/sh
 pip install elasticsearch-loader
-elasticsearch_loader --index mahasiswa --type _doc json data_mhs.json
+/usr/local/bin/elasticsearch_loader --index mahasiswa --type _doc json data_mhs.json

@@ -71,8 +71,6 @@ services:
       memlock:
         soft: -1
         hard: -1
-    networks:
-      private:
     ports:
       - 9200:9200
     restart: always

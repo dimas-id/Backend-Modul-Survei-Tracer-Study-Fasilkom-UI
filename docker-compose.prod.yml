@@ -9,7 +9,7 @@ services:
       args: 
         - http_proxy=http://proxy.cs.ui.ac.id:8080
         - https_proxy=http://proxy.cs.ui.ac.id:8080
-    command: gunicorn atlas.wsgi:application --bind 0.0.0.0:8000 --timeout 120 --worker 2
+    command: gunicorn atlas.wsgi:application --bind 0.0.0.0:8000 --timeout=120 --workers=2
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/mediafiles

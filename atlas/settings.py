@@ -310,3 +310,7 @@ JET_DEFAULT_THEME = 'light-blue'
 JET_SIDE_MENU_COMPACT = True
 JET_CHANGE_FORM_SIBLING_LINKS = True
 
+PROXIES = {
+  'http': 'http://proxy.cs.ui.ac.id:8080',
+  'https': 'http://proxy.cs.ui.ac.id:8080',
+}

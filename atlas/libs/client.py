@@ -6,7 +6,6 @@ from django.conf import settings
 from djangorestframework_camel_case.util import underscoreize, camelize
 from requests.auth import *
 
-
 class AbstractClient:
     # after first call, we retry call as many as max_retry_attempt
     max_retry_attempt = 1
@@ -128,6 +127,7 @@ class AbstractClient:
         """
         try:
             req = requests.get(endpoint, params=params,
+                               proxies=settings.PROXIES,
                                headers=self.get_headers(),
                                auth=self.get_auth())
 
@@ -166,6 +166,7 @@ class AbstractClient:
                 data = camelize(data)
 
             req = requests.post(endpoint, json.dumps(data),
+                               proxies=settings.PROXIES,
                                 headers=self.post_headers(),
                                 auth=self.get_auth())
 
@@ -213,6 +214,7 @@ class AbstractClient:
                 data = camelize(data)
 
             req = requests.put(endpoint, json.dumps(data),
+                               proxies=settings.PROXIES,
                                headers=self.post_headers(),
                                auth=self.get_auth())
 

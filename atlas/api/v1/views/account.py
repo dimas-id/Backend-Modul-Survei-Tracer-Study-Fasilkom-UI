@@ -94,7 +94,7 @@ class UserDetailView(RetrieveUpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         patch = self.partial_update(request, *args, **kwargs)
-        educations = Education.objects.filter(user=request.user)
+        educations = Education.objects.filter(user=pk if IsAdminUser else request.user)
         for education in educations:
             redis.enqueue(experience_service.verify_user_registration, education=education)
         return patch

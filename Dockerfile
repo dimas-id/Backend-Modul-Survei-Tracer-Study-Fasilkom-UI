@@ -1,24 +1,23 @@
-FROM python:3.6.7-slim
+# pull official base image
+FROM python:3.6.8-alpine
 
-# Set environment varibles
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
+# set work directory
+WORKDIR /app
+
+# set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Install git because we need this to clone custom lib
+# install psycopg2
 RUN apk update \
-    && apk install -y git gettext \
+    && apk add gettext \
     && apk add --virtual build-deps gcc python3-dev musl-dev \
     && apk add postgresql-dev \
-    && pip install psycopg2 \
-    && apk del build-deps
+    && pip install psycopg2-binary==2.8.6 \
+    && apk del build-deps \
+    && apk add --no-cache git
 
-# Set the working directory to /app
-RUN mkdir /app
-WORKDIR /app
-
-# Install dependencies
+# install dependencies
 RUN pip install --upgrade pip
 RUN pip3 install pipenv
 
@@ -27,9 +26,4 @@ COPY Pipfile /app/Pipfile
 COPY Pipfile.lock /app/Pipfile.lock
 
 # -- Install dependencies:
-RUN pipenv install --dev --system
-
-# Copy the current directory contents into the container at /app
-COPY . /app
-
-ENTRYPOINT ["/app/entrypoint.sh"]
+RUN pipenv install --system --skip-lock

@@ -1,62 +1,78 @@
-wversion: "3"
+version: '3'
 
 services:
-  db:
-    image: postgres:11.5-alpine
+  webservice:
+    image: b3_atlas/webservice
+    command: ./entrypoint.sh
+    build:
+      context: ./
+      dockerfile: Dockerfile
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data/
-    environment:
-      POSTGRES_DB: ${ATLAS_DB_NAME}
-      POSTGRES_USER: ${ATLAS_DB_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${ATLAS_DB_PASSWORD}
-    networks:
-      private:
-    restart: always
-  redis:
-    image: redis:5.0.4-alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - ./data/redis:/data
+      - ./staticfiles:/app/staticfiles
+      - ./mediafiles:/app/mediafiles
+      - .:/app
+
+    expose:
+      - 8000
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+      - elastic
     restart: always
   rqworker:
-    image: b3_atlas/web
-    command: python /app/manage.py rqworker
-    networks:
-      private:
-    restart: always
+    image: b3_atlas/webservice
+    command: python manage.py rqworker
     depends_on:
-      - migration
-  web:
-    image: b3_atlas/web
+      - redis
+      - webservice
     volumes:
-      - ./:/app/
-    ports:
-      - 8000:8000
-    command: python manage.py runserver 0.0.0.0:8000
+      - .:/app
     restart: always
+      
+  redis:
+    image: redis:5.0.7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - default
+    restart: always
+  db:
+    image: postgres:11.6-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks: 
+      - default
+    env_file: .env.db
+    restart: always
+  nginx:
+    build: ./nginx
+    volumes:
+      - ./staticfiles:/app/staticfiles
+      - ./mediafiles:/app/mediafiles
+    ports:
+      - 8000:80
     depends_on:
-      - rqworker
-      - db
+      - webservice
+    restart: always
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
     environment:
-      - ROOT_URI: ${ATLAS_ROOT_URI}
-      - HELIOS_URI: ${ATLAS_HELIOS_URI}
-      - HYPERION_URI: ${ATLAS_HYPERION_URI}
-      - DJANGO_ENV: ${ATLAS_DJANGO_ENV}
-      - SECRET_KEY: ${ATLAS_SECRET_KEY}
-      - JWT_SECRET_KEY: ${ATLAS_JWT_SECRET_KEY}
-      - DB_NAME: ${ATLAS_DB_NAME}
-      - DB_POSTGRES_USER: ${ATLAS_DB_POSTGRES_USER}
-      - DB_PASSWORD: ${ATLAS_DB_PASSWORD}
-      - DB_HOST: ${ATLAS_DB_HOST}
-      - DB_PORT: ${ATLAS_DB_PORT}
-      - REDIS_HOST: ${ATLAS_REDIS_HOST}
-      - REDIS_PORT: ${ATLAS_REDIS_PORT}
-      - REDIS_DB: ${ATLAS_REDIS_DB}
-      - REDIS_DEFAULT_TIMEOUT: ${ATLAS_REDIS_DEFAULT_TIMEOUT}
-      - CSUI_USERNAME: ${ATLAS_CSUI_USERNAME}
-      - CSUI_PASSWORD: ${ATLAS_CSUI_PASSWORD}
-      - LINKEDIN_CLIENT_ID: ${ATLAS_LINKEDIN_CLIENT_ID}
-      - LINKEDIN_CLIENT_SECRET: ${ATLAS_LINKEDIN_CLIENT_SECRET}
-      - SENDGRID_API_KEY: ${ATLAS_SENDGRID_API_KEY}
-      - AWS_ACCESS_KEY_ID: ${ATLAS_AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY: ${ATLAS_AWS_SECRET_ACCESS_KEY}
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9200:9200
+    restart: always
+volumes:
+  redis_data:
+  postgres_data:
+  esdata:

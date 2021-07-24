@@ -39,5 +39,6 @@ fuzzywuzzy = "==0.16.0"
 sentry-sdk = "==0.7.10"
 sendgrid = "==6.0.4"
 django-jet = {git = "https://github.com/wisnuprama/django-jet.git",ref = "v1.1.0"}
-
+rq = "==1.1.0"
+PyJWT = "==1.7.1"
 [requires]

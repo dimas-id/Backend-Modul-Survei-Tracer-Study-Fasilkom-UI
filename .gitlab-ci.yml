@@ -19,8 +19,7 @@ deploy_staging:
     - echo "==UPDATE ENV FILE=="
     - sshpass -p $STAGING_VM_PASSWORD scp -o StrictHostKeyChecking=no $STAGING_ENV $VM_USER@$STAGING_VM_IP:$SERVICE_DIRECTORY/$ENV_FILE_NAME
     - sshpass -p $STAGING_VM_PASSWORD ssh -o StrictHostKeyChecking=no $VM_USER@$STAGING_VM_IP "cd $SERVICE_DIRECTORY ; echo "==PULLING LATEST MASTER==" ; git checkout master ; git pull origin master ; echo "==REBUILDING DOCKER IMAGE==" ; $DOCKER_COMPOSE_COMMAND"
-  only:
-    - master
+  when: manual
 
 deploy_production:
   stage: production

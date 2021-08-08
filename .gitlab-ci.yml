@@ -18,7 +18,7 @@ deploy_staging:
   script:
     - echo "==UPDATE ENV FILE=="
     - sshpass -p $STAGING_VM_PASSWORD scp -o StrictHostKeyChecking=no $STAGING_ENV $VM_USER@$STAGING_VM_IP:$SERVICE_DIRECTORY/$ENV_FILE_NAME
-    - sshpass -p $STAGING_VM_PASSWORD ssh -o StrictHostKeyChecking=no $VM_USER@$STAGING_VM_IP "cd $SERVICE_DIRECTORY ; echo "==PULLING LATEST MASTER==" ; git checkout master ; git pull origin master ; echo "==REBUILDING DOCKER IMAGE==" ; $DOCKER_COMPOSE_COMMAND"
+    - sshpass -p $STAGING_VM_PASSWORD ssh -o StrictHostKeyChecking=no $VM_USER@$STAGING_VM_IP "cd $SERVICE_DIRECTORY ; echo "==PULLING FROM REF BRANCH==" ; git checkout $CI_COMMIT_REF_NAME ; git pull origin $CI_COMMIT_REF_NAME ; echo "==REBUILDING DOCKER IMAGE==" ; $DOCKER_COMPOSE_COMMAND"
   when: manual
 
 deploy_production:

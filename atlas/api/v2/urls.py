@@ -2,6 +2,7 @@ from django.urls import path
 
 from atlas.api.v2.views import general
 from atlas.api.v2.views import account
+from atlas.api.v2.views import batch
 
 general = [
     path('/', general.api_v2, name='general-v2'),
@@ -9,6 +10,7 @@ general = [
 
 account = [
     path('/register', account.UserCreateView.as_view(), name='account_register_v2'),
+    path('/users', batch.UserBatchRetrieveView.as_view(), name='batch_retrieve_v2'),
 ]
 
 urlpatterns = [*general, *account]

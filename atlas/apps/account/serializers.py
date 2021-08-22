@@ -17,7 +17,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from atlas.apps.account.constants import C_PREFERENCES
 from atlas.apps.account.models import UserProfile
 from atlas.apps.account.services import UserService
-
+from atlas.apps.experience.serializers import EducationSerializer
 User = get_user_model()
 
 
@@ -153,6 +153,21 @@ class UserSerializer(serializers.ModelSerializer):
             'is_superuser',
             'is_verified',
             'is_completed',
+        )
+
+class UserBatchRetrieveSerializer(serializers.ModelSerializer):
+
+    educations = EducationSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'name',
+            'first_name',
+            'last_name',
+            'email',
+            'educations'
         )
 
 

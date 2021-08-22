@@ -316,3 +316,5 @@ PROXIES = {
   'http': 'http://proxy.cs.ui.ac.id:8080',
   'https': 'http://proxy.cs.ui.ac.id:8080',
 }
+
+USE_X_FORWARDED_HOST = True

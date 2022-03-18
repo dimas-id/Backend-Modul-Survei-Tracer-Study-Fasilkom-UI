@@ -1,3 +1,4 @@
+from dataclasses import field
 import re
 
 from deprecated import deprecated
@@ -9,6 +10,7 @@ from django.contrib.auth.password_validation import (
     UserAttributeSimilarityValidator)
 from django.db import transaction
 from django.utils import timezone
+from atlas.apps.experience.models import Position
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
@@ -17,7 +19,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from atlas.apps.account.constants import C_PREFERENCES
 from atlas.apps.account.models import UserProfile
 from atlas.apps.account.services import UserService
-from atlas.apps.experience.serializers import EducationSerializer
+from atlas.apps.experience.serializers import EducationSerializer, PositionSerializer, \
+    ClassAndProgramSerializer, PositionTitleSerializer
 User = get_user_model()
 
 
@@ -309,3 +312,57 @@ class RegisterUserSerializerV2(serializers.Serializer):
         if not reg_linkedin.match(linkedin_url):
             raise ValidationError(detail=f'Invalid linkedin URL (example: {LINKEDIN_BASIC_URL})')
         return linkedin_url
+
+class UserFullDetailByAdminSerializer(serializers.ModelSerializer):
+
+    educations = EducationSerializer(many=True, read_only=True)
+    positions = PositionSerializer(many=True, read_only=True)
+    profile = UserProfileSerializer()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'name',
+            'email',
+            'profile',
+            'educations',
+            'positions'
+        )
+
+class LinkedinUrlAndProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserProfile
+        fields = ('linkedin_url','profile_pic_url',)
+
+class UserFullDetaileByUserSerializer(serializers.ModelSerializer):
+
+    educations = ClassAndProgramSerializer(many=True, read_only=True)
+    positions = PositionSerializer(many=True, read_only=True)
+    profile = LinkedinUrlAndProfileSerializer()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'name',
+            'profile',
+            'educations',
+            'positions'
+        )
+
+class UserSearchRetrieveSerializer(serializers.ModelSerializer):
+
+    educations = ClassAndProgramSerializer(many=True, read_only=True)
+    positions = PositionTitleSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'name',
+            'educations',
+            'positions'
+        )
+

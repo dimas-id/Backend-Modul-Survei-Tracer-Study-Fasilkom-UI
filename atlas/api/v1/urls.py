@@ -29,10 +29,8 @@ account = [
          name='account_user_detail'),
     path('/users/<pk>/preference', account.UserPreferenceDetailView.as_view(),
          name='account_preference_detail'),
-     # path('/user-detail/<pk>', account.UserFullDetailView.as_view(),
-     #     name='account_user_full_detail'),
-     # path('/user-by-user/<pk>', account.UserDetailViewByUser.as_view(),
-     #     name='account_user_detail_by_user'),
+    path('/user-detail/<pk>', account.UserFullDetailView.as_view(),
+         name='account_user_full_detail'),
 ]
 
 experience = [

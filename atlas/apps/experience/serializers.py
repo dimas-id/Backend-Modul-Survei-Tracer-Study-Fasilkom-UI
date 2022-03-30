@@ -14,6 +14,14 @@ class PositionSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('user', 'company_metadata', 'is_current')
 
+class PositionTitleSerializer(serializers.ModelSerializer):
+
+    is_current = serializers.BooleanField(required=False)
+    
+    class Meta:
+        model = Position
+        fields = ('title','is_current')
+
 
 # Create bulk create for education endpoint
 class EducationListSerializer(serializers.ListSerializer):
@@ -33,4 +41,11 @@ class EducationSerializer(serializers.ModelSerializer):
         model = Education
         fields = '__all__'
         read_only_fields = ('user',)
+        list_serializer_class = EducationListSerializer
+
+class ClassAndProgramSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Education
+        fields = ('csui_class_year', 'csui_program')
         list_serializer_class = EducationListSerializer

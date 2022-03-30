@@ -14,11 +14,13 @@ from atlas.apps.account.models import User
 from atlas.apps.account.permissions import \
     IsAnonymous, AllowedRegister, HasPriviledgeToAccessUser
 from atlas.apps.account.serializers import \
-    UserSerializer, RegisterUserSerializer, UserPreferenceSerializer, \
-    UserTokenObtainPairSerializer
+    UserSerializer, RegisterUserSerializer, UserPreferenceSerializer, UserTokenObtainPairSerializer, \
+    UserFullDetailByAdminSerializer, UserFullDetaileByUserSerializer
 from atlas.apps.experience.models import Education
 from atlas.libs import redis
 from atlas.libs.permissions import IsOwnerOfObject
+
+from atlas.apps.account.permissions import VerifiedAccount
 
 
 class UserTokenObtainPairView(TokenViewBase):
@@ -119,3 +121,35 @@ class UserPreferenceDetailView(RetrieveUpdateAPIView):
         get user preference instance
         """
         return self.request.user
+
+class UserFullDetailView(RetrieveUpdateAPIView):
+    """
+    get:
+    retrieve the user and user profile
+    """
+
+    # we dont user IsOwnserOfObject because we need to check if user exists or not
+    permission_classes = [IsAuthenticated & (IsAdminUser|VerifiedAccount)]
+    lookup_field = 'pk'
+
+    def get_serializer_class(self):
+        if self.request.user.is_staff:
+            return UserFullDetailByAdminSerializer
+        elif self.request.user.is_verified:
+            return UserFullDetaileByUserSerializer
+
+    def get_object(self):
+        """
+        get user object.
+        throw 404 if not found.
+        """
+        pk = self.kwargs.get(self.lookup_field)
+        try:
+            user = get_object_or_404(User, pk=pk, is_active=True)
+        except ValidationError:
+            # fix uuid validation error pk='random string'
+            raise Http404
+
+        # check if user has permission to the user data
+        self.check_object_permissions(self.request, user)
+        return user

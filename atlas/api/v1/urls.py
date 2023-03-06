@@ -20,7 +20,9 @@ auth = [
     path('/external-auths/linkedin', external_auth.LinkedinRequestAPIView.as_view(),
          name='external_auth_linkedin'),
     path('/external-auths/linkedin/callback', external_auth.LinkedinCallbackAPIView.as_view(),
-         name='external_auth_linkedin_callback')
+         name='external_auth_linkedin_callback'),
+    path('/external-auths/sisidang', external_auth.SisidangAPIView.as_view(),
+         name='external_auth_sisidang')
 ]
 
 account = [
@@ -31,6 +33,8 @@ account = [
          name='account_preference_detail'),
     path('/user-detail/<pk>', account.UserFullDetailView.as_view(),
          name='account_user_full_detail'),
+    path('/users/<pk>/skills', account.SkillDetailView.as_view(),
+         name='account_skill_detail'),
 ]
 
 experience = [
@@ -43,6 +47,11 @@ experience = [
          name='experience_education_list_create'),
     path('/users/<user_id>/educations/<pk>', experience.EducationDetailView.as_view(),
          name='experience_education_detail'),
+
+    path('/users/<user_id>/other_educations', experience.OtherEducationListCreateView.as_view(),
+         name='experience_other_education_list_create'),
+    path('/users/<user_id>/other_educations/<pk>', experience.OtherEducationDetailView.as_view(),
+         name='experience_other_education_detail'),
 ]
 
 contact = [

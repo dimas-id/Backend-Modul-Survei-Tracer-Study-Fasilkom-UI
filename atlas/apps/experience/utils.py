@@ -5,7 +5,8 @@ from atlas.apps.account.constants import (
     C_UI_NAME_FIELD,
     C_UI_BIRTHDATE_FIELD,
     C_UI_PROGRAMS_FIELD,
-    C_UI_CLASS_YEAR_FIELD, )
+    C_UI_CLASS_YEAR_FIELD, 
+    C_UI_STATUS, )
 from atlas.apps.experience.models import Education
 from atlas.libs.string import get_most_matching, matching_partial
 
@@ -40,10 +41,17 @@ def extract_alumni_data(mahasiswa_data, input_program):
         # get ankgatan
         ui_angkatan = program.get(C_UI_CLASS_YEAR_FIELD)
 
-    return (ui_name, ui_npm, ui_birthdate, ui_program, ui_angkatan)
+        # get tahun lulus
+        ui_thn_lulus = None
+        ui_term_lulus = None
+        if program.get(C_UI_STATUS) == 'Lulus':
+            ui_thn_lulus = program.get('periode').get('tahun')
+            ui_term_lulus = program.get('periode').get('term')
+
+    return (ui_name, ui_npm, ui_birthdate, ui_program, ui_angkatan, ui_thn_lulus, ui_term_lulus)
 
 
-def validate_alumni_data(education, ui_name, ui_npm, ui_birthdate, ui_program, ui_angkatan):
+def validate_alumni_data(education, ui_name, ui_npm, ui_birthdate, ui_program, ui_angkatan, ui_thn_lulus, ui_term_lulus):
     """
     We are using scoring for validation and the minimum score is 70:
     npm: 15 points, because it is an optional field
@@ -75,7 +83,7 @@ def validate_alumni_data(education, ui_name, ui_npm, ui_birthdate, ui_program, u
 
     if ui_program == program:
         validation_score += 20
-
+    
     return validation_score >= 70
 
 

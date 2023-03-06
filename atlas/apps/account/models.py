@@ -10,7 +10,7 @@ from autoslug import AutoSlugField
 from atlas.libs.db.models import AbstractPrimaryUUIDable
 from atlas.libs.db.models import AbstractTimestampable
 from atlas.apps.account.managers import UserManager
-from atlas.apps.account.utils import default_preference
+from atlas.apps.account.utils import default_preference, default_top_skills
 from atlas.apps.account.utils import slugify_username
 from django.core.validators import RegexValidator
 from atlas.libs.core.validators import NumericRegex
@@ -44,6 +44,10 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
     preference = JSONField(_('User Preference'),
                            default=default_preference,
                            help_text=_('Here is the user preference, we can add some later'))
+    
+    top_skills = JSONField(_('Top Skills'),
+                           default=default_top_skills,
+                           help_text=_('Here is the top skills, we can add some later'))
 
     # some metas
     is_superuser = models.BooleanField(
@@ -79,6 +83,9 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
             'Designates that if this user email is not verified,'
             'then can\'t access other services except Account Service'
         ))
+    is_from_sisidang = models.BooleanField(
+        _('From Sisidang'),
+        default=False)
 
     USERNAME_FIELD = 'email'
     PROFILE_FIELD = 'profile'
@@ -125,7 +132,7 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractPrimaryUUIDable, Abstract
 
 URL_VALIDATOR_LINKEDIN_MSG = f'Invalid linkedin URL (example: https://linkedin.com/in/<username>'
 URL_VALIDATOR_LINKEDIN =  RegexValidator(
-    regex=r'https?:\/\/(www\.)?linkedin\.com\/in\/(\w+)', message=URL_VALIDATOR_LINKEDIN_MSG)
+    regex=r'https?:\/\/(www\.)?(id\.)?linkedin\.com\/in\/(\w+)', message=URL_VALIDATOR_LINKEDIN_MSG)
 
 
 class UserProfile(AbstractTimestampable):

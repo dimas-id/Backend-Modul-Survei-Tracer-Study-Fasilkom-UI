@@ -1,8 +1,10 @@
 from deprecated import deprecated
 from django.utils import timezone
 
-from atlas.apps.account.constants import C_PREFERENCES
+from atlas.apps.account.constants import C_PREFERENCES, C_TOP_SKILLS
 
+import random
+import string
 
 def slugify_username(value):
     return value.replace(' ', '.')
@@ -21,3 +23,15 @@ def default_preference():
         default[p] = False
     return default
 
+def default_top_skills():
+    default = {}
+    for p in C_TOP_SKILLS:
+        default[p] = False
+    return default
+
+def generate_random_password():
+    all = string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation
+    temp = random.sample(all, random.randrange(8, 17))
+    password = "".join(temp)
+    
+    return password

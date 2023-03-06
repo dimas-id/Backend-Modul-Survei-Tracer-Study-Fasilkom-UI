@@ -16,11 +16,11 @@ from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from atlas.apps.account.constants import C_PREFERENCES
+from atlas.apps.account.constants import C_PREFERENCES, C_TOP_SKILLS
 from atlas.apps.account.models import UserProfile
 from atlas.apps.account.services import UserService
 from atlas.apps.experience.serializers import EducationSerializer, PositionSerializer, \
-    ClassAndProgramSerializer, PositionTitleSerializer
+    ClassAndProgramSerializer, PositionTitleSerializer, OtherEducationSerializer
 User = get_user_model()
 
 
@@ -308,7 +308,63 @@ class RegisterUserSerializerV2(serializers.Serializer):
 
     def validate_linkedin_url(self, linkedin_url: str):
         LINKEDIN_BASIC_URL = 'https://linkedin.com/in/'
-        reg_linkedin = re.compile(r'https?:\/\/(www\.)?linkedin\.com\/in\/(\w+)')
+        reg_linkedin = re.compile(r'https?:\/\/(www\.)?(id\.)?linkedin\.com\/in\/(\w+)')
+        if not reg_linkedin.match(linkedin_url):
+            raise ValidationError(detail=f'Invalid linkedin URL (example: {LINKEDIN_BASIC_URL})')
+        return linkedin_url
+
+class RegisterBulkUserSerializerV2(serializers.Serializer):
+    
+    username_field = User.USERNAME_FIELD
+
+    # auth
+    email = serializers.EmailField()
+
+    # profile
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    birthdate = serializers.DateField()
+
+    linkedin_url = serializers.URLField(required=False, allow_blank=True)
+    phone_number = serializers.CharField()
+    residence_country = serializers.CharField()
+
+    def create(self, validated_data: dict):
+        """
+        create user based on validated data
+        """
+        auth_service = UserService()
+        request = self.context.get('request')
+        return auth_service.register_public_bulk_user(
+            request, identifier=validated_data[self.username_field], **validated_data)
+
+    def validate_email(self, email: str):
+        # normalize email
+        validated_email = email
+        if self.username_field == 'email':
+            validated_email = validated_email.lower()
+            if validated_email.endswith('@ui.ac.id'):
+                raise ValidationError('Can\'t register using UI email.')
+
+        # validate identifier (email/username) is unique
+        if User.objects.filter(**{self.username_field: validated_email}).exists():
+            raise ValidationError(f'{self.username_field} is already exists')
+
+        return validated_email
+
+    def validate_password(self, password: str):
+        request = self.context.get('request')
+        # validate password to minimum
+        MinimumLengthValidator(min_length=8).validate(password)
+        CommonPasswordValidator().validate(password)
+        UserAttributeSimilarityValidator(password, request.user)
+        NumericPasswordValidator().validate(password)
+
+        return password
+
+    def validate_linkedin_url(self, linkedin_url: str):
+        LINKEDIN_BASIC_URL = 'https://linkedin.com/in/'
+        reg_linkedin = re.compile(r'https?:\/\/(www\.)?(id\.)?linkedin\.com\/in\/(\w+)')
         if not reg_linkedin.match(linkedin_url):
             raise ValidationError(detail=f'Invalid linkedin URL (example: {LINKEDIN_BASIC_URL})')
         return linkedin_url
@@ -318,6 +374,7 @@ class UserFullDetailByAdminSerializer(serializers.ModelSerializer):
     educations = EducationSerializer(many=True, read_only=True)
     positions = PositionSerializer(many=True, read_only=True)
     profile = UserProfileSerializer()
+    other_educations = OtherEducationSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -327,6 +384,7 @@ class UserFullDetailByAdminSerializer(serializers.ModelSerializer):
             'email',
             'profile',
             'educations',
+            'other_educations',
             'positions'
         )
 
@@ -341,6 +399,7 @@ class UserFullDetaileByUserSerializer(serializers.ModelSerializer):
     educations = ClassAndProgramSerializer(many=True, read_only=True)
     positions = PositionSerializer(many=True, read_only=True)
     profile = LinkedinUrlAndProfileSerializer()
+    other_educations = OtherEducationSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -349,13 +408,21 @@ class UserFullDetaileByUserSerializer(serializers.ModelSerializer):
             'name',
             'profile',
             'educations',
+            'other_educations',
             'positions'
         )
+
+class ProfilePicSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserProfile
+        fields = ('profile_pic_url',)
 
 class UserSearchRetrieveSerializer(serializers.ModelSerializer):
 
     educations = ClassAndProgramSerializer(many=True, read_only=True)
     positions = PositionTitleSerializer(many=True, read_only=True)
+    profile = ProfilePicSerializer()
 
     class Meta:
         model = User
@@ -363,6 +430,63 @@ class UserSearchRetrieveSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'educations',
-            'positions'
+            'positions',
+            'profile'
         )
 
+class SkillSerializer(serializers.ModelSerializer):
+
+    top_skills = serializers.JSONField()
+
+    def validate_top_skills(self, new_top_skills: dict):
+        if type(new_top_skills) is not dict:
+            # JSON object only
+            raise serializers.ValidationError(
+                detail='Invalid object', code='invalid_top_skills')
+
+        validated_new_top_skills = {}
+        # just get the value that in C_PREFERENCES
+        for c in C_TOP_SKILLS:
+            selected_top_skills = new_top_skills.get(c, None)
+            if selected_top_skills is not None:
+                validated_new_top_skills[c] = selected_top_skills
+        
+        return validated_new_top_skills
+
+    def update(self, instance, validated_data):
+        TOP_SKILLS = 'top_skills'
+
+        # update preference
+        top_skills = dict(getattr(instance, TOP_SKILLS))
+        top_skills.update(validated_data.get(TOP_SKILLS))
+
+        # immutable
+        new_validated_data = dict(validated_data)
+        new_validated_data[TOP_SKILLS] = top_skills
+
+        return super().update(instance, new_validated_data)
+
+    class Meta:
+        model = User
+        read_only_fields = ('id',)
+        fields = ('id', 'top_skills')
+
+class LinkedinUrlSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserProfile
+        fields = ('linkedin_url',)
+
+class UserLinkedInSerializer(serializers.ModelSerializer):
+
+    profile = LinkedinUrlSerializer()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+            'is_from_sisidang',
+            'profile'
+        )

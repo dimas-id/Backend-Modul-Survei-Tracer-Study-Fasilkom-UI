@@ -42,3 +42,30 @@ class StudentManager(AbstractClientManager):
         """
         uri = f'/mahasiswa/nama/{nama}/'
         return self.get_client().get(uri=uri)
+
+
+class SisidangCS(AbstractCSUIClient, AbstractClient):
+
+    class Meta:
+        always_use_production = True
+        is_camelized = False
+        client_url = {
+            'production': 'https://sidang.cs.ui.ac.id',
+            'development': 'http://3d7c0bf8-e0d3-43bc-846c-462317f587ee.mock.pstmn.io/sisidang'
+        }
+class GraduatedStudentManager(AbstractClientManager):
+
+    client = SisidangCS()
+
+    def get_all_student_by_year_and_term(self, year: str, term: str):
+        """
+        this assuming that the api not change to pagination.
+        :param year: tahun lulus (ex: 2021/2022)
+        :type year: str
+        :param term: term lulus (ex: 2)
+        :type year: str
+        :return: return list of mahasiswa with given year and term and success status
+        :rtype: tuple(dict, boolean)
+        """ 
+        uri = f'/daftar-mahasiswa-sidang?tahun={year}&term={term}'
+        return self.get_client().get(uri=uri)

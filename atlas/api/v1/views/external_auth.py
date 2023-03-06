@@ -19,9 +19,14 @@ from rest_framework.response import Response
 from atlas.apps.external_auth.utils import LinkedinHelper
 from atlas.apps.external_auth.utils import extract_email_and_profile_from_linkedin_response
 from atlas.apps.external_auth.services import ExternalAuthService
+from atlas.apps.account.services import UserService
+from atlas.clients.csui.api import GraduatedStudentManager
 from atlas.clients.linkedin.api import LinkedinPersonManager
 from atlas.clients.linkedin.api import LinkedinOAuth2Manager
+from django.conf import settings
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
+user_service = UserService()
 
 class LinkedinRequestAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -68,3 +73,18 @@ class LinkedinCallbackAPIView(APIView):
             auth_login(request, user)
 
         return helper.redirect_to_frontend(user, created)
+
+class SisidangAPIView(APIView):
+    permission_classes = [IsAuthenticated & IsAdminUser]
+
+    def get(self, request, format=None):
+
+        tahun = self.request.query_params.get('tahun')
+        term = self.request.query_params.get('term')
+
+        settings.SISIDANG_RESPONSE = user_service.map_sisidang_response(tahun, term)
+        
+        return Response(
+            data={
+                'data': settings.SISIDANG_RESPONSE},
+            status=status.HTTP_200_OK)

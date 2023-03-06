@@ -2,13 +2,13 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
 from rest_framework import status
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from atlas.apps.experience.permissions import IsOwnerOfExperience
-from atlas.apps.experience.serializers import EducationSerializer, PositionSerializer
-from atlas.apps.experience.models import Position, Education
+from atlas.apps.experience.serializers import EducationSerializer, PositionSerializer, OtherEducationSerializer
+from atlas.apps.experience.models import Position, Education, OtherEducation
 from atlas.apps.experience.services import ExperienceService
 from atlas.libs import redis
 
@@ -112,7 +112,9 @@ class EducationListCreateView(AbstractExperienceListCreateView):
         Education.objects.filter(user=self.request.user).delete()
         obj = serializer.save(user=self.request.user)
         for education in obj:
-            redis.enqueue(experience_service.verify_user_registration, education=education)
+           # TODO jangan lupa dibalikin
+           redis.enqueue(experience_service.verify_user_registration, education=education)
+        #    experience_service.verify_user_registration(education=education)
 
     """
 
@@ -142,4 +144,23 @@ class EducationDetailView(AbstractExperienceDetailView):
     model_class = Education
     serializer_class = EducationSerializer
 
+class OtherEducationListCreateView(AbstractExperienceListCreateView):
+    """
+    post:
+    Create other education
 
+    get:
+    Return list of other education owned by user
+    """
+    model_class = OtherEducation
+    serializer_class = OtherEducationSerializer
+
+class OtherEducationDetailView(AbstractExperienceDetailView):
+    """
+    get:
+    put:
+    patch:
+    delete:
+    """
+    model_class = OtherEducation
+    serializer_class = OtherEducationSerializer

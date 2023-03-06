@@ -18,16 +18,37 @@ class Position(AbstractDateCreatedRecordable):
     user = models.ForeignKey(
         to=User, on_delete=models.CASCADE, related_name='positions')
 
-    title = models.CharField(_('Title'), max_length=64)
-    company_name = models.CharField(_('Company'), max_length=64)
-    location_name = models.CharField(_('Location'), max_length=64, null=True)
+    title = models.CharField(_('Title'), max_length=255)
+    company_name = models.CharField(_('Company'), max_length=255)
+    location_name = models.CharField(_('Location'), max_length=255, null=True)
     industry_name = models.CharField(_('Industry'), max_length=64)
 
-    date_started = models.DateField(_('Date Started'))
+    date_started = models.DateField(_('Date Started'), null=True, blank=True)
     date_ended = models.DateField(_('Date Ended'), null=True, blank=True)
 
     company_metadata = JSONField(null=True, blank=True, help_text=_(
         'Here is company metadata comes from linkedin'))
+    
+    is_from_sisidang = models.BooleanField(
+        _('From Sisidang'),
+        default=False)
+
+    SALARY_CHOICES = (
+        ('1', '<= 1.000.000'),
+        ('2', '1.000.001 - 3.000.000'),
+        ('3', '3.000.001 - 6.000.000'),
+        ('4', '6.000.001 - 10.000.000'),
+        ('5', '10.000.001 - 15.000.000'),
+        ('6', '15.000.001 - 20.000.000'),
+        ('7', '> 20.000.000'),
+    )
+
+    salary_range = models.CharField(
+        _('Rentang Gaji'), choices=SALARY_CHOICES, max_length=10, blank=True, null=True)
+
+    is_from_sisidang = models.BooleanField(
+        _('From Sisidang'),
+        default=False)
 
     @property
     def is_current(self):
@@ -73,10 +94,44 @@ class Education(AbstractDateCreatedRecordable):
     # Kosong, Aktif, Cuti, Overseas, Mengundurkan diri/keluar
     csui_graduation_status = models.CharField(
         _('Kelulusan'), max_length=32, blank=True, null=True)
+    
+    csui_graduation_year = models.SmallIntegerField(
+        _('Tahun Lulus'), blank=True, null=True)
+    
+    csui_graduation_term = models.SmallIntegerField(
+        _('Term Lulus'), blank=True, null=True)
 
     @property
     def set_as_verified(self):
         self.is_verified = True
         self.save()
 
+class OtherEducation(AbstractDateCreatedRecordable):
+    """
+    Represent other education experience
+    """
 
+    DEGREE_CHOICES = (
+        ('S1', 'Sarjana'),
+        ('S2', 'Magister'),
+        ('S3', 'Doktor'),
+    )
+
+    user = models.ForeignKey(
+        to=User, on_delete=models.CASCADE, related_name='other_educations')
+
+    # academic for validation purpose
+    country = models.CharField(
+        _('Negara'), max_length=255, blank=True, null=True)
+    university = models.CharField(
+        _('Universitas'), max_length=255, blank=True, null=True)
+    program = models.CharField(
+        _('Prodi'), max_length=255, blank=True, null=True)
+    degree = models.CharField(
+        _('Jenjang'), choices=DEGREE_CHOICES, max_length=2, blank=True, null=True)
+    class_year = models.SmallIntegerField(
+        _('Angkatan'), blank=True, null=True)
+    is_graduated = models.BooleanField(
+        _('Status'), default=False)
+    graduation_year = models.SmallIntegerField(
+        _('Tahun Lulus'), blank=True, null=True)

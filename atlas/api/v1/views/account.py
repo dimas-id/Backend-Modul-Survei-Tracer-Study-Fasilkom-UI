@@ -14,7 +14,7 @@ from atlas.apps.account.models import User
 from atlas.apps.account.permissions import \
     IsAnonymous, AllowedRegister, HasPriviledgeToAccessUser
 from atlas.apps.account.serializers import \
-    UserSerializer, RegisterUserSerializer, UserPreferenceSerializer, UserTokenObtainPairSerializer, \
+    UserSerializer, RegisterUserSerializer, UserPreferenceSerializer, UserTokenObtainPairSerializer, SkillSerializer, \
     UserFullDetailByAdminSerializer, UserFullDetaileByUserSerializer
 from atlas.apps.experience.models import Education
 from atlas.libs import redis
@@ -98,7 +98,9 @@ class UserDetailView(RetrieveUpdateAPIView):
         patch = self.partial_update(request, *args, **kwargs)
         educations = Education.objects.filter(user=kwargs.get(self.lookup_field)  if IsAdminUser else request.user)
         for education in educations:
+            # TODO jangan lupa dibalikin
             redis.enqueue(experience_service.verify_user_registration, education=education)
+            # experience_service.verify_user_registration(education=education)
         return patch
 
 
@@ -153,3 +155,23 @@ class UserFullDetailView(RetrieveUpdateAPIView):
         # check if user has permission to the user data
         self.check_object_permissions(self.request, user)
         return user
+
+class SkillDetailView(RetrieveUpdateAPIView):
+    """
+    get:
+    Retrieve user preference.
+
+    put:
+    Update user preference. Must be full field.
+
+    patch:
+    Update user preference. Partial field.
+    """
+    permission_classes = (IsOwnerOfObject,)
+    serializer_class = SkillSerializer
+
+    def get_object(self):
+        """
+        get user preference instance
+        """
+        return self.request.user

@@ -96,6 +96,8 @@ class ExperienceService:
                 setattr(education.user.profile, 'birthdate', data[2])
                 setattr(education, 'csui_program', data[3])
                 setattr(education, 'csui_class_year', data[4])
+                setattr(education, 'csui_graduation_year', data[5])
+                setattr(education, 'csui_graduation_term', data[6])
 
                 # get latest status, the default i think is Kosong in CSUI API
                 latest_status = mahasiswa_data.get(C_UI_PROGRAMS_FIELD)[0].get(
@@ -104,7 +106,7 @@ class ExperienceService:
                         latest_status)
                 if Education.objects.filter(id=education.id).exists():
                     education.user.profile.save(update_fields=('birthdate',))
-                    education.save(update_fields=('ui_sso_npm','csui_program','csui_class_year','csui_graduation_status'))
+                    education.save(update_fields=('ui_sso_npm','csui_program','csui_class_year','csui_graduation_status', 'csui_graduation_year', 'csui_graduation_term'))
         #Change user verification status
         check_verified_status(education.user)
 

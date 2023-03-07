@@ -1,7 +1,7 @@
 from rest_framework import serializers 
 from rest_framework.validators import UniqueValidator
 
-from atlas.apps.experience.models import Education, Position
+from atlas.apps.experience.models import Education, Position, OtherEducation
 
 
 class PositionSerializer(serializers.ModelSerializer):
@@ -20,7 +20,7 @@ class PositionTitleSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Position
-        fields = ('title','is_current')
+        fields = ('title','is_current', 'company_name')
 
 
 # Create bulk create for education endpoint
@@ -47,5 +47,20 @@ class ClassAndProgramSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Education
-        fields = ('csui_class_year', 'csui_program')
+        fields = ('csui_class_year', 'csui_program', 'csui_graduation_year', 'csui_graduation_term')
         list_serializer_class = EducationListSerializer
+
+# Create bulk create for other education endpoint
+class OtherEducationListSerializer(serializers.ListSerializer):
+
+    def create(self, validated_data):
+        other_educations = [OtherEducation(**item) for item in validated_data]
+        return OtherEducation.objects.bulk_create(other_educations)
+
+class OtherEducationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OtherEducation
+        fields = '__all__'
+        read_only_fields = ('user',)
+        list_serializer_class = OtherEducationListSerializer

@@ -72,6 +72,11 @@ services:
     ports:
       - 9200:9200
     restart: always
+  cron:
+    build: ./atlas/scripts/
+    command: ["crond","-f"]
+    volumes:
+      - .:/app
 volumes:
   redis_data:
   postgres_data:

@@ -43,8 +43,11 @@ class UserCreateView(APIView):
             data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
+        print(serializer)
+
         # save data
         user = serializer.save()
+        print("berhasil")
 
         # manually create jwt token
         refresh_token = RefreshToken.for_user(user)

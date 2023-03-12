@@ -74,6 +74,7 @@ APPS = [
     'atlas.apps.experience',
     'atlas.apps.external_auth',
     'atlas.apps.contact',
+    'atlas.apps.survei',
     'atlas.apps.validator'
 ]
 

@@ -1,7 +1,8 @@
+from unittest.mock import MagicMock, patch
 from django.test import TestCase
 from atlas.apps.account.models import User
 from atlas.apps.survei.services import SurveiService
-from atlas.apps.survei.models import Survei
+from atlas.apps.survei.models import Pertanyaan, Survei
 from rest_framework.test import APIRequestFactory
 from datetime import datetime
 
@@ -68,7 +69,51 @@ class TestSurveiModels(TestCase):
         survei_service = SurveiService()
         length = len(survei_service.list_survei())
         self.assertEqual(length, 3)
-    
+        
+    @patch('atlas.apps.survei.models.Survei.objects.get')
+    def test_get_survei_call_objects_get(self, objects_get_mock):
+        survei_service = SurveiService()
+        survei_service.get_survei(26)
+        objects_get_mock.assert_called_once_with(id=26)
+
+    @patch('atlas.apps.survei.models.Survei.objects.get')
+    def test_get_survei_return_survei(self, objects_get_mock):
+        survei_service = SurveiService()
+        survei_mock = MagicMock(spec=Survei)
+        objects_get_mock.configure_mock(return_value=survei_mock)
+        survei = survei_service.get_survei(26)
+        self.assertEqual(survei, survei_mock)
+
+    def test_get_survei_return_none_when_survei_not_exist(self):
+        survei_service = SurveiService()
+        survei = survei_service.get_survei(100)
+        self.assertEqual(survei, None)
+
+    @patch('atlas.apps.survei.models.Pertanyaan.objects.create')
+    def test_register_pertanyaan_skala_linier_call_objects_create_and_return(self, objects_create_mock):
+        survei_service = SurveiService()
+        survei_mock = MagicMock(spec=Survei)
+        create_parameters = {
+            'survei': survei_mock,
+            'pertanyaan': "Apa ya?",
+            'wajib_diisi': True
+        }
+        pertanyaan = survei_service.register_pertanyaan_skala_linier(
+            **create_parameters)
+        objects_create_mock.assert_called_once_with(
+            **create_parameters, jenis_jawaban='Skala Linear')
+        self.assertEqual(pertanyaan, objects_create_mock.return_value)
+
+    @patch('atlas.apps.survei.models.OpsiJawaban.objects.create')
+    def test_register_opsi_jawaban_skala_linier_call_objects_create_and_return(self, objects_create_mock):
+        survei_service = SurveiService()
+        pertanyaan_mock = MagicMock(spec=Pertanyaan)
+        opsi_jawaban = survei_service.register_opsi_jawaban_skala_linier(
+            pertanyaan=pertanyaan_mock, skala=5)
+        objects_create_mock.assert_called_once_with(
+            pertanyaan=pertanyaan_mock, opsi_jawaban=5)
+        self.assertEqual(opsi_jawaban, objects_create_mock.return_value)
+
     def test_service_list_return_none(self):
         survei_service = SurveiService()
         Survei.objects.filter(nama="survei 01").delete()

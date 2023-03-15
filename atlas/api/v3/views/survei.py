@@ -10,7 +10,7 @@ from atlas.apps.survei.services import SurveiService
 
 
 @api_view()
-@permission_classes([IsAuthenticated & IsAdminUser])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def get_list_survei(_):
     survei_service = SurveiService()
 
@@ -23,7 +23,7 @@ def get_list_survei(_):
 
 
 @api_view(http_method_names=['POST'])
-@permission_classes([IsAuthenticated & IsAdminUser])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def register_survei(request):
 
     serializer = SurveiSerialize(

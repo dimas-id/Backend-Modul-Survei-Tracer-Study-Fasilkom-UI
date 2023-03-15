@@ -9,7 +9,6 @@ JENIS_PERTANYAAN = [
     ('Kotak Centang', 'Kotak Centang'),
     ('Drop-Down', 'Drop-Down'),
     ('Skala Linear', 'Skala Linear'),
-    ('Drop-Down', 'Drop-Down'),
     ('Tanggal', 'Tanggal'),
     ('Waktu', 'Waktu')
 ]

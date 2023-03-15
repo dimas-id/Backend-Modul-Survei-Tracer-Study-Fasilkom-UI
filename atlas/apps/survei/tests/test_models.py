@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock
 from django.test import TestCase
 from atlas.apps.account.models import User
 from atlas.apps.survei.models import Survei, Pertanyaan, OpsiJawaban
@@ -26,12 +27,12 @@ class TestSurveiModels(TestCase):
         }
 
         user = User.objects.create(**user_data)
-        survei = Survei.objects.create(
+        self.survei = Survei.objects.create(
             **survei_data, creator=user)
-        pertanyaan = Pertanyaan.objects.create(
-            **pertanyaan_data, survei=survei)
-        OpsiJawaban.objects.create(
-            **opsi_jawaban_data, pertanyaan=pertanyaan)
+        self.pertanyaan = Pertanyaan.objects.create(
+            **pertanyaan_data, survei=self.survei)
+        self.opsi_jawaban = OpsiJawaban.objects.create(
+            **opsi_jawaban_data, pertanyaan=self.pertanyaan)
 
     def test_valid_model_survei_str(self):
         self.assertEqual(str(Survei.objects.get(
@@ -46,3 +47,21 @@ class TestSurveiModels(TestCase):
             opsi_jawaban="4")),
             "survei 01 - 1 + 1 = ? - 4")
         print(str(OpsiJawaban.objects.get(opsi_jawaban="4")))
+
+    def test_create_pertanyaan_is_valid(self):
+        pertanyaan = Pertanyaan.objects.create(
+            survei=self.survei,
+            pertanyaan="15 * 1 = ?",
+            jenis_jawaban='Pilihan Ganda',
+            wajib_diisi=True
+        )
+
+        self.assertIsInstance(pertanyaan, Pertanyaan)
+
+    def test_create_opsi_jawaban_is_valid(self):
+        opsi_jawaban = OpsiJawaban.objects.create(
+            pertanyaan=self.pertanyaan,
+            opsi_jawaban="15",
+        )
+
+        self.assertIsInstance(opsi_jawaban, OpsiJawaban)

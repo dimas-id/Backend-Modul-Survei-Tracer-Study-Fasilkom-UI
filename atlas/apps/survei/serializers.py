@@ -8,6 +8,9 @@ class SurveiSerialize(serializers.Serializer):
     deskripsi = serializers.CharField(max_length=1200)
     tanggal_dikirim = serializers.DateTimeField(required=False)
     sudah_dikirim = serializers.BooleanField(required=False)
+    tanggal_dibuat = serializers.DateTimeField(required=False)
+    tanggal_diedit = serializers.DateTimeField(required=False)
+    creator = serializers.CharField(max_length=150, required=False)
 
     # create new survei
     def create(self, validated_data):

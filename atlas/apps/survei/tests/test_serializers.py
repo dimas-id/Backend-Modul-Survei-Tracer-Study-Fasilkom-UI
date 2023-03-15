@@ -4,6 +4,9 @@ from atlas.apps.survei.models import Survei
 from rest_framework.test import APIRequestFactory
 from atlas.apps.survei.serializers import SurveiSerialize
 
+SURVEI_01 = "survei 01"
+SURVEI_03 = "Survei 03"
+API_SURVEI_CREATE = "/api/v3/survei/create"
 
 class TestSurveiModels(TestCase):
 
@@ -24,23 +27,23 @@ class TestSurveiModels(TestCase):
         Survei.objects.create(**survei_data, creator=user)
 
     def test_valid_serializer_create_survei(self):
-        request = self.factory.post(path="/api/v3/survei/create")
+        request = self.factory.post(path=API_SURVEI_CREATE)
         request.user = User.objects.get(first_name="indra")
         request.data = {
-            "nama": "Survei 03",
+            "nama": SURVEI_03,
             "deskripsi": "lorem ipsum keren"
         }
 
         surver_serialize = SurveiSerialize(
             data=request.data, context={'request': request})
         survei = surver_serialize.create(request.data)
-        self.assertEqual(survei, Survei.objects.get(nama="Survei 03"))
+        self.assertEqual(survei, Survei.objects.get(nama=SURVEI_03))
 
     def test_invalid_serializer_create_survei(self):
-        request = self.factory.post(path="/api/v3/survei/create")
+        request = self.factory.post(path=API_SURVEI_CREATE)
         request.user = User.objects.get(first_name="indra")
         request.data = {
-            "nama": "Survei 03"
+            "nama": SURVEI_03
         }
 
         surver_serialize = SurveiSerialize(
@@ -49,15 +52,15 @@ class TestSurveiModels(TestCase):
         self.assertIsNone(survei)
 
     def test_valid_serializer_update_survei(self):
-        request = self.factory.post(path="/api/v3/survei/create")
+        request = self.factory.post(path=API_SURVEI_CREATE)
         request.user = User.objects.get(first_name="indra")
         request.data = {
-            "nama": "Survei 03",
+            "nama": SURVEI_03,
             "deskripsi": "lorem ipsum keren"
         }
 
         surver_serialize = SurveiSerialize(
-            Survei.objects.get(nama="survei 01"), data=request.data, context={'request': request})
-        survei = surver_serialize.update(Survei.objects.get(nama = "survei 01"), request.data)
-        self.assertNotEqual(str(survei), "survei 01")
-        self.assertEqual(str(survei), "Survei 03")
+            Survei.objects.get(nama=SURVEI_01), data=request.data, context={'request': request})
+        survei = surver_serialize.update(Survei.objects.get(nama = SURVEI_01), request.data)
+        self.assertNotEqual(str(survei), SURVEI_01)
+        self.assertEqual(str(survei), SURVEI_03)

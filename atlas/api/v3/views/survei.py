@@ -14,8 +14,12 @@ from atlas.apps.survei.services import SurveiService
 def get_list_survei(_):
     survei_service = SurveiService()
 
-    serialize = SurveiSerialize(survei_service.list_survei(), many=True)
-    return Response(data={'survei': serialize.data}, status=status.HTTP_200_OK)
+    all_list = SurveiSerialize(survei_service.list_survei(), many=True)
+    sent_list = SurveiSerialize(survei_service.list_survei_sent(), many=True)
+    not_sent_list = SurveiSerialize(survei_service.list_survei_not_sent(), many=True)
+    
+    response_data = {'survei': all_list.data, 'survei_dikirim': sent_list.data, 'survei_belum_dikirim': not_sent_list.data}
+    return Response(data=response_data, status=status.HTTP_200_OK)
 
 
 @api_view(http_method_names=['POST'])

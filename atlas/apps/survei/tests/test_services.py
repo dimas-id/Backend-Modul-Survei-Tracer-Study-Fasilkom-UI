@@ -5,6 +5,7 @@ from atlas.apps.survei.models import Survei
 from rest_framework.test import APIRequestFactory
 from datetime import datetime
 
+SURVEI_04 = "survei 04"
 
 class TestSurveiModels(TestCase):
 
@@ -33,18 +34,22 @@ class TestSurveiModels(TestCase):
         Survei.objects.create(**survei_data_1, creator=user)
         Survei.objects.create(**survei_data_2, creator=user)
         Survei.objects.create(**survei_data_3, creator=user)
+        
+        survei = Survei.objects.get(nama = "survei 03")
+        survei.sudah_dikirim = True
+        survei.save()
 
     def test_valid_service_register_survei(self):
         request = self.factory.post(path="/api/v3/survei/create", data={
-            "nama": "survei 04",
+            "nama": SURVEI_04,
             "deskripsi": "lorem ipsum keren"
         })
 
         request.user = User.objects.get(first_name="indra")
         survei_service = SurveiService()
         survei = survei_service.register_suvei(
-            request, "survei 04", "keren", datetime.now(), False)
-        self.assertEqual(survei, Survei.objects.get(nama="survei 04"))
+            request, SURVEI_04, "keren", datetime.now(), False)
+        self.assertEqual(survei, Survei.objects.get(nama=SURVEI_04))
 
     def test_invalid_service_register_survei(self):
         request = self.factory.post(path="/api/v3/survei/create", data={
@@ -63,3 +68,21 @@ class TestSurveiModels(TestCase):
         survei_service = SurveiService()
         length = len(survei_service.list_survei())
         self.assertEqual(length, 3)
+    
+    def test_service_list_return_none(self):
+        survei_service = SurveiService()
+        Survei.objects.filter(nama="survei 01").delete()
+        Survei.objects.filter(nama="survei 02").delete()
+        Survei.objects.filter(nama="survei 03").delete()
+        length = len(survei_service.list_survei())
+        self.assertEqual(length, 0)
+    
+    def test_service_list_sent(self):
+        survei_service = SurveiService()
+        length = len(survei_service.list_survei_sent())
+        self.assertEqual(length, 1)
+    
+    def test_service_list_not_sent(self):
+        survei_service = SurveiService()
+        length = len(survei_service.list_survei_not_sent())
+        self.assertEqual(length, 2)

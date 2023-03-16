@@ -1,4 +1,3 @@
-from tokenize import String
 from rest_framework import serializers
 from atlas.apps.survei.models import JENIS_PERTANYAAN
 from atlas.apps.survei.services import SurveiService
@@ -18,10 +17,11 @@ class SurveiSerialize(serializers.Serializer):
     def create(self, validated_data):
         request = self.context.get('request')
         survei_service = SurveiService()
+
         try:
             survei = survei_service.register_suvei(request, **validated_data)
             return survei
-        except:
+        except TypeError:
             return None
 
     # update existing survei

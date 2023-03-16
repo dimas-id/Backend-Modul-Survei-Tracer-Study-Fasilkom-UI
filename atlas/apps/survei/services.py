@@ -14,7 +14,7 @@ class SurveiService:
             survei = Survei.objects.create(
                 nama=nama, deskripsi=deskripsi, creator=user, tanggal_dikirim=tanggal_dikirim, sudah_dikirim=sudah_dikirim)
             return survei
-        except:
+        except user_model.DoesNotExist:
             return None
 
     @transaction.atomic

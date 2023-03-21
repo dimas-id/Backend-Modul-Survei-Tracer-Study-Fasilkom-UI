@@ -3,6 +3,7 @@ from atlas.apps.survei.models import JENIS_PERTANYAAN
 from atlas.apps.survei.services import SurveiService
 
 
+
 class SurveiSerialize(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     nama = serializers.CharField(max_length=150)
@@ -36,7 +37,7 @@ class SurveiSerialize(serializers.Serializer):
             'sudah_dikirim', instance.sudah_dikirim)
         instance.save()
         return instance
-
+    
 
 class PertanyaanSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -49,6 +50,37 @@ class OpsiJawabanSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     opsi_jawaban = serializers.CharField(max_length=150)
 
+    
+class IsianRequestSerializer(serializers.Serializer):
+    survei_id = serializers.IntegerField(required=True)
+    pertanyaan = serializers.CharField(max_length=1200)
+    wajib_diisi = serializers.BooleanField(required=False)
+    jawaban = serializers.CharField(max_length=150, required=False)
+
+    def validate_survei_id(self, value):
+        survei_service = SurveiService()
+        try:
+            survei = survei_service.get_survei(value)
+            if survei is None:
+                raise serializers.ValidationError(
+                    "Survei dengan id {} tidak ditemukan".format(value))
+            return value
+        except:
+            raise serializers.ValidationError(
+                "Survei dengan id {} tidak ditemukan".format(value))
+
+    def create(self, validated_data):
+        survei_id = validated_data.get('survei_id')
+        pertanyaan = validated_data.get('pertanyaan')
+        wajib_diisi = validated_data.get('wajib_diisi')
+        survei_service = SurveiService()
+        try:
+            survei = survei_service.get_survei(survei_id)
+            pertanyaan = survei_service.register_pertanyaan_isian(survei=survei, pertanyaan=pertanyaan, wajib_diisi=wajib_diisi)
+            jawaban_isian_singkat = survei_service.register_opsi_jawaban_isian(pertanyaan=pertanyaan, isian="")
+            return {"pertanyaan": pertanyaan, "jawaban_isian_singkat": jawaban_isian_singkat}
+        except:
+            return None
 
 class SkalaLinierRequestSerializer(serializers.Serializer):
     survei_id = serializers.IntegerField(required=True)

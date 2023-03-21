@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 
 
 class SurveiService:
-
     @transaction.atomic
     def register_suvei(self, request, nama, deskripsi, tanggal_dikirim=None, sudah_dikirim=False):
         user_model = get_user_model()
@@ -20,7 +19,7 @@ class SurveiService:
     @transaction.atomic
     def list_survei(self):
         return Survei.objects.all()
-
+    
     @transaction.atomic
     def get_survei(self, survei_id):
         try:
@@ -29,6 +28,24 @@ class SurveiService:
         except Survei.DoesNotExist:
             return None
 
+    @transaction.atomic
+    def register_pertanyaan_isian(self, survei, pertanyaan, wajib_diisi=False):
+        pertanyaan = Pertanyaan.objects.create(
+            survei=survei, 
+            pertanyaan=pertanyaan, 
+            jenis_jawaban="Jawaban Singkat", 
+            wajib_diisi=wajib_diisi)
+        return pertanyaan
+        
+    @transaction.atomic
+    def register_opsi_jawaban_isian(self, pertanyaan, isian):
+        try:
+            jawaban_isian = OpsiJawaban.objects.create(
+                pertanyaan=pertanyaan, opsi_jawaban=isian)
+            return jawaban_isian
+        except:
+            return None
+        
     @transaction.atomic
     def register_pertanyaan_skala_linier(self, survei, pertanyaan, wajib_diisi=False):
         pertanyaan = Pertanyaan.objects.create(

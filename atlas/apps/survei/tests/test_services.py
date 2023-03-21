@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 from django.test import TestCase
 from atlas.apps.account.models import User
 from atlas.apps.survei.services import SurveiService
@@ -95,13 +95,28 @@ class TestSurveiModels(TestCase):
         survei_mock = MagicMock(spec=Survei)
         create_parameters = {
             'survei': survei_mock,
-            'pertanyaan': "Apa ya?",
+            'pertanyaan': "Mock Question",
             'wajib_diisi': True
         }
         pertanyaan = survei_service.register_pertanyaan_skala_linier(
             **create_parameters)
         objects_create_mock.assert_called_once_with(
             **create_parameters, jenis_jawaban='Skala Linear')
+        self.assertEqual(pertanyaan, objects_create_mock.return_value)
+
+    @patch('atlas.apps.survei.models.Pertanyaan.objects.create')
+    def test_register_pertanyaan_isian_call_objects_create_and_return(self, objects_create_mock):
+        survei_service = SurveiService()
+        survei_mock = MagicMock(spec=Survei)
+        create_parameters = {
+            'survei': survei_mock,
+            'pertanyaan': "Mock Question",
+            'wajib_diisi': True
+        }
+        pertanyaan = survei_service.register_pertanyaan_isian(
+            **create_parameters)
+        objects_create_mock.assert_called_once_with(
+            **create_parameters, jenis_jawaban='Jawaban Singkat')
         self.assertEqual(pertanyaan, objects_create_mock.return_value)
 
     @patch('atlas.apps.survei.models.OpsiJawaban.objects.create')
@@ -112,6 +127,16 @@ class TestSurveiModels(TestCase):
             pertanyaan=pertanyaan_mock, skala=5)
         objects_create_mock.assert_called_once_with(
             pertanyaan=pertanyaan_mock, opsi_jawaban=5)
+        self.assertEqual(opsi_jawaban, objects_create_mock.return_value)
+
+    @patch('atlas.apps.survei.models.OpsiJawaban.objects.create')
+    def test_register_opsi_jawaban_singkat_call_objects_create_and_return(self, objects_create_mock):
+        survei_service = SurveiService()
+        pertanyaan_mock = MagicMock(spec=Pertanyaan)
+        opsi_jawaban = survei_service.register_opsi_jawaban_isian(
+            pertanyaan=pertanyaan_mock, isian="Mock Isian")
+        objects_create_mock.assert_called_once_with(
+            pertanyaan=pertanyaan_mock, opsi_jawaban="Mock Isian")
         self.assertEqual(opsi_jawaban, objects_create_mock.return_value)
 
     def test_service_list_return_none(self):

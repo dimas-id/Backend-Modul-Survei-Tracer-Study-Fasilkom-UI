@@ -3,7 +3,7 @@ from django.test import TestCase
 from atlas.apps.account.models import User
 from atlas.apps.survei.models import OpsiJawaban, Pertanyaan, Survei
 from rest_framework.test import APIRequestFactory
-from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanSerializer, SkalaLinierRequestSerializer, SurveiSerialize
+from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanSerializer, SkalaLinierRequestSerializer, IsianRequestSerializer, SurveiSerialize
 from rest_framework import serializers
 
 SURVEI_01 = "survei 01"
@@ -62,11 +62,10 @@ class TestSurveiModels(TestCase):
         }
 
         surver_serialize = SurveiSerialize(
-            Survei.objects.get(nama=SURVEI_01), data=request.data, context={'request': request})
-        survei = surver_serialize.update(Survei.objects.get(nama = SURVEI_01), request.data)
-        self.assertNotEqual(str(survei), SURVEI_01)
-        self.assertEqual(str(survei), SURVEI_03)
-
+            Survei.objects.get(nama="survei 01"), data=request.data, context={'request': request})
+        survei = surver_serialize.update(Survei.objects.get(nama = "survei 01"), request.data)
+        self.assertNotEqual(str(survei), "survei 01")
+        self.assertEqual(str(survei), "Survei 03")
 
 class TestPertanyaanSerializer(TestCase):
 
@@ -255,3 +254,97 @@ class TestSkalaLinierRequestSerializer(TestCase):
 
         self.assertEqual(return_value.get("skala_linier"),
                          [opsi_jawaban_mock]*banyak)
+
+
+class TestJawabanSingkatRequestSerializer(TestCase):
+
+    def setUp(self) -> None:
+        self.serializer_data = {
+            'survei_id': 1,
+            'pertanyaan': 'Siapakah nama panggilan anda?',
+            'wajib_diisi': True,
+            'jawaban': 'Budi'
+        }
+
+        self.serializer = IsianRequestSerializer(
+            data=self.serializer_data)
+
+    def test_request_contains_expected_fields(self):
+        fields = self.serializer.get_fields()
+        self.assertEqual(set(fields), set(
+            ['survei_id', 'pertanyaan', 'wajib_diisi', 'jawaban']))
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_initial_request_is_valid(self, get_survei_mock):
+        self.assertTrue(self.serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_survei_id_is_required(self, get_survei_mock):
+        self.serializer_data.pop('survei_id')
+        serializer = IsianRequestSerializer(data=self.serializer_data)
+        self.assertFalse(serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_pertanyaan_is_required(self, get_survei_mock):
+        self.serializer_data.pop('pertanyaan')
+        serializer = IsianRequestSerializer(data=self.serializer_data)
+        self.assertFalse(serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_validate_called_get_survei_once(self, get_survei_mock):
+        self.serializer.is_valid()
+        get_survei_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
+    def test_validate_should_fail_if_get_survei_return_none(self):
+        self.assertFalse(self.serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
+    def test_validate_should_raise_error_if_get_survei_return_none(self):
+        self.serializer.is_valid()
+        self.assertRaises(serializers.ValidationError)
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=True))
+    def test_validate_should_succeed_if_get_survei_return_some(self):
+        self.assertTrue(self.serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
+    def test_validate_survey_id_should_raise_with_correct_message(self):
+        with self.assertRaises(serializers.ValidationError) as exc:
+            self.serializer.validate_survei_id(1)
+        self.assertEqual(str(exc.exception.detail[0]),
+                         "Survei dengan id 1 tidak ditemukan")
+
+    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_isian')
+    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_isian')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_call_get_survei_once_with_param(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
+        self.serializer.create(self.serializer_data)
+        get_survei_mock.assert_called_once_with(
+            self.serializer_data['survei_id'])
+
+    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_isian')
+    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_isian')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_register_pertanyaan_once(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
+        survei_mock = MagicMock(spec=Survei)
+        get_survei_mock.configure_mock(return_value=survei_mock)
+
+        self.serializer.create(self.serializer_data)
+
+        register_pertanyaan_mock.assert_called_once_with(
+            survei=survei_mock,
+            pertanyaan=self.serializer_data.get("pertanyaan"),
+            wajib_diisi=self.serializer_data.get("wajib_diisi")
+        )
+
+    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_isian')
+    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_isian')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_return_pertanyaan(
+            self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
+        pertanyaan_mock = MagicMock(spec=Pertanyaan)
+        register_pertanyaan_mock.configure_mock(return_value=pertanyaan_mock)
+
+        return_value = self.serializer.create(self.serializer_data)
+        self.assertEqual(return_value.get("pertanyaan"), pertanyaan_mock)

@@ -84,3 +84,41 @@ class TestIsian(RestTestCase):
         response = self.client.post(
             self.CREATE_ISIAN, request=request)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class TestRadioButton(RestTestCase):
+
+    CREATE_RADIOBUTTON = "/api/v3/pertanyaan/create/radiobutton"
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.user = RestTestCase.create_admin()
+
+    def test_register_radiobutton_not_authenticated(self):
+        request = self.factory.post(path=self.CREATE_RADIOBUTTON)
+        response = self.client.post(self.CREATE_RADIOBUTTON, request=request)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    @patch('atlas.api.v3.views.pertanyaan.RadioButtonRequestSerializer')
+    def test_register_radiobutton_call_request_serializer(self, serializer_mock):
+        self.authenticate(self.user)
+        request = self.factory.post(path=self.CREATE_RADIOBUTTON)
+        self.client.post(self.CREATE_RADIOBUTTON, request=request)
+        serializer_mock.assert_called_once()
+
+    @patch('atlas.api.v3.views.pertanyaan.RadioButtonRequestSerializer')
+    def test_register_return_400_when_serializer_is_not_valid(self, radiobutton_mock):
+        self.authenticate(self.user)
+        radiobutton_mock.return_value.is_valid.return_value = False
+        request = self.factory.post(path=self.CREATE_RADIOBUTTON)
+        response = self.client.post(self.CREATE_RADIOBUTTON, request=request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @patch('atlas.api.v3.views.pertanyaan.RadioButtonRequestSerializer')
+    def test_register_return_201_when_serializer_is_valid(self, radiobutton_mock):
+        self.authenticate(self.user)
+        radiobutton_mock.return_value.is_valid.return_value = True
+        request = self.factory.post(path=self.CREATE_RADIOBUTTON)
+        response = self.client.post(
+            self.CREATE_RADIOBUTTON, request=request)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

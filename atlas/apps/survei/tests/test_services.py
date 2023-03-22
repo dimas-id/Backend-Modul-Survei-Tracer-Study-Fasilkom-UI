@@ -156,3 +156,44 @@ class TestSurveiModels(TestCase):
         survei_service = SurveiService()
         length = len(survei_service.list_survei_not_sent())
         self.assertEqual(length, 2)
+
+    @patch('atlas.apps.survei.models.Pertanyaan.objects.create')
+    def test_register_pertanyaan_radiobutton_call_objects_create_and_return(self, objects_create_mock):
+        survei_service = SurveiService()
+        survei_mock = MagicMock(spec=Survei)
+        
+        create_parameters = {
+            'survei': survei_mock,
+            'pertanyaan': "Lulusan angkatan berapa Anda?",
+            'required': True
+        }
+        
+        pertanyaan = survei_service.register_pertanyaan_radiobutton(
+            survei=create_parameters["survei"],
+            pertanyaan=create_parameters["pertanyaan"],
+            wajib_diisi=create_parameters["required"])
+        
+        objects_create_mock.assert_called_once_with(
+            survei=create_parameters["survei"],
+            pertanyaan=create_parameters["pertanyaan"],
+            wajib_diisi=create_parameters["required"], 
+            jenis_jawaban='Pilihan Ganda')
+            
+        self.assertEqual(pertanyaan, objects_create_mock.return_value)
+
+    @patch('atlas.apps.survei.models.OpsiJawaban.objects.create')
+    def test_register_opsi_jawaban_radiobutton_call_objects_create_and_return(self, objects_create_mock):
+        survei_service = SurveiService()
+        pertanyaan_mock = MagicMock(spec=Pertanyaan)
+        
+        options = ["2018", "2019", "2020", "2021", "2022"]
+
+        opsi_jawaban = survei_service.register_opsi_jawaban_radiobutton(
+            pertanyaan=pertanyaan_mock, 
+            pilihan_jawaban=options)
+        
+        objects_create_mock.assert_called_once_with(
+            pertanyaan=pertanyaan_mock, 
+            opsi_jawaban=options)
+        
+        self.assertEqual(opsi_jawaban, objects_create_mock.return_value)

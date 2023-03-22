@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
-from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanSerializer, SkalaLinierRequestSerializer, IsianRequestSerializer
+from rest_framework.permissions import IsAuthenticated
+
+from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanSerializer, SkalaLinierRequestSerializer, IsianRequestSerializer, RadioButtonRequestSerializer
 
 
 @api_view(http_method_names=['POST'])
@@ -38,4 +40,28 @@ def register_isian(request):
     return Response(data={
         'pertanyaan': PertanyaanSerializer(pertanyaan).data,
         'jawaban_isian_singkat': OpsiJawabanSerializer(isian).data},
+        status=status.HTTP_201_CREATED)
+
+
+@api_view(http_method_names=['POST'])
+@permission_classes([IsAuthenticated, IsAdminUser])
+def register_radiobutton(request):
+    """Registering Radio Button Questions via API"""
+
+    serializer = RadioButtonRequestSerializer(data=request.data)
+    
+    if not serializer.is_valid():
+        return Response(data={'messages': serializer._errors},
+                        status=status.HTTP_400_BAD_REQUEST)
+    objects = serializer.save()
+
+    pertanyaan = objects.get("pertanyaan")
+    opsi_jawaban = objects.get("opsi_jawaban")
+
+    pertanyaan_obj = PertanyaanSerializer(pertanyaan).data
+    opsi_jawaban_obj = OpsiJawabanSerializer(opsi_jawaban, many=True).data
+
+    return Response(data={
+        'pertanyaan': pertanyaan_obj,
+        'opsi_jawaban': opsi_jawaban_obj},
         status=status.HTTP_201_CREATED)

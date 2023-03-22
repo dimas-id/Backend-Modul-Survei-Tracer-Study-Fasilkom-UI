@@ -2,7 +2,6 @@ from atlas.apps.survei.models import OpsiJawaban, Pertanyaan, Survei
 from django.db import (transaction)
 from django.contrib.auth import get_user_model
 
-
 class SurveiService:
     @transaction.atomic
     def register_suvei(self, request, nama, deskripsi, tanggal_dikirim=None, sudah_dikirim=False):
@@ -27,6 +26,14 @@ class SurveiService:
             return survei
         except Survei.DoesNotExist:
             return None
+        
+    @transaction.atomic
+    def list_survei_sent(self):
+        return Survei.objects.filter(sudah_dikirim=True)
+
+    @transaction.atomic
+    def list_survei_not_sent(self):
+        return Survei.objects.filter(sudah_dikirim=False)
 
     @transaction.atomic
     def register_pertanyaan_isian(self, survei, pertanyaan, wajib_diisi=False):
@@ -62,9 +69,17 @@ class SurveiService:
         return skala_linier
 
     @transaction.atomic
-    def list_survei_sent(self):
-        return Survei.objects.filter(sudah_dikirim=True)
+    def register_pertanyaan_radiobutton(self, survei, pertanyaan, wajib_diisi=False):
+        pertanyaan = Pertanyaan.objects.create(
+            survei=survei,
+            pertanyaan=pertanyaan,
+            jenis_jawaban="Pilihan Ganda",
+            wajib_diisi=wajib_diisi)
+        return pertanyaan
 
     @transaction.atomic
-    def list_survei_not_sent(self):
-        return Survei.objects.filter(sudah_dikirim=False)
+    def register_opsi_jawaban_radiobutton(self, pertanyaan, pilihan_jawaban):
+        opsi_jawaban_obj = OpsiJawaban.objects.create(
+            pertanyaan=pertanyaan, 
+            opsi_jawaban=pilihan_jawaban)
+        return opsi_jawaban_obj

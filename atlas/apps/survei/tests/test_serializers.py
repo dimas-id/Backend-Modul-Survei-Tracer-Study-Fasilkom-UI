@@ -3,7 +3,7 @@ from django.test import TestCase
 from atlas.apps.account.models import User
 from atlas.apps.survei.models import OpsiJawaban, Pertanyaan, Survei
 from rest_framework.test import APIRequestFactory
-from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanSerializer, SkalaLinierRequestSerializer, IsianRequestSerializer, SurveiSerialize, RadioButtonRequestSerializer, DropDownRequestSerializer
+from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanSerializer, SkalaLinierRequestSerializer, IsianRequestSerializer, SurveiSerialize, RadioButtonRequestSerializer, DropDownRequestSerializer, CheckBoxRequestSerializer
 from rest_framework import serializers
 
 SURVEI_01 = "survei 01"
@@ -66,6 +66,7 @@ class TestSurveiModels(TestCase):
         survei = surver_serialize.update(Survei.objects.get(nama = "survei 01"), request.data)
         self.assertNotEqual(str(survei), "survei 01")
         self.assertEqual(str(survei), "Survei 03")
+
 
 class TestPertanyaanSerializer(TestCase):
 
@@ -687,3 +688,118 @@ class TestDropdownRequestSerializer(TestCase):
         register_opsi_jawaban_mock.configure_mock(return_value=opsi_jawaban_mock)
         returned_create = self.serializer.create(self.serializer_data)
         self.assertEqual(returned_create.get("opsi_jawaban"), [opsi_jawaban_mock]*options_quantity)
+
+
+class TestCheckBoxRequestSerializer(TestCase):
+
+    def setUp(self) -> None:
+        self.serializer_data = {
+            'survei_id': 1,
+            'pertanyaan': 'Mata kuliah wajib apakah yang menurut anda berguna bagi pekerjaan anda sekarang ini?',
+            'required': True,
+            'option': ["DDP", "PBP", "SDA", "BasDat", "RPL", "PPL"],
+        }
+        self.serializer = CheckBoxRequestSerializer(data=self.serializer_data)
+
+    def test_request_contains_expected_fields(self):
+        fields = self.serializer.get_fields()
+        self.assertEqual(set(fields), set(
+            ['survei_id', 'pertanyaan', 'required', 'option']))
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_initial_request_is_valid(self, get_survei_mock):
+        self.assertTrue(self.serializer.is_valid())
+
+    def test_survei_id_is_required(self):
+        self.serializer_data.pop('survei_id')
+        serializer = CheckBoxRequestSerializer(data=self.serializer_data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_pertanyaan_is_required(self):
+        self.serializer_data.pop('pertanyaan')
+        serializer = CheckBoxRequestSerializer(data=self.serializer_data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_option_is_not_empty(self):
+        self.serializer_data['option'] = []
+        serializer = CheckBoxRequestSerializer(data=self.serializer_data)
+        self.assertFalse(serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_validate_called_get_survei_once(self, get_survei_mock):
+        self.serializer.is_valid()
+        get_survei_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=True))
+    def test_validate_should_succeed_if_get_survei_return_value(self):
+        self.assertTrue(self.serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
+    def test_validate_should_fail_if_get_survei_return_none(self):
+        self.assertFalse(self.serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
+    def test_validate_should_raise_error_if_get_survei_return_none(self):
+        self.serializer.is_valid()
+        self.assertRaises(serializers.ValidationError)
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
+    def test_validate_survey_id_should_raise_with_correct_message(self):
+        with self.assertRaises(serializers.ValidationError) as exc:
+            self.serializer.validate_survei_id(1)
+        self.assertEqual(str(exc.exception.detail[0]), "Survei with id 1 does not exist")
+
+    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_call_get_survei_once_with_param(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
+        self.serializer.create(self.serializer_data)
+        get_survei_mock.assert_called_once_with(self.serializer_data['survei_id'])
+
+    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_register_pertanyaan_once(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
+        survei_mock = MagicMock(spec=Survei)
+        get_survei_mock.configure_mock(return_value=survei_mock)
+        self.serializer.create(self.serializer_data)
+        register_pertanyaan_mock.assert_called_once_with(
+            survei=survei_mock,
+            pertanyaan=self.serializer_data.get("pertanyaan"),
+            wajib_diisi=self.serializer_data.get("required"))
+
+    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_register_radiobutton_as_requested(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
+        pertanyaan_mock = MagicMock(spec=Pertanyaan)
+        register_pertanyaan_mock.configure_mock(return_value=pertanyaan_mock)
+        self.serializer.create(self.serializer_data)
+        self.assertEqual(register_opsi_jawaban_mock.call_count, len(self.serializer_data['option']))
+        register_opsi_jawaban_mock.assert_has_calls(
+            [call(pertanyaan=pertanyaan_mock, pilihan_jawaban="DDP"),
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="PBP"),
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="SDA"),
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="BasDat"),
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="RPL"),
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="PPL"),])
+
+    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_return_pertanyaan(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
+        pertanyaan_mock = MagicMock(spec=Pertanyaan)
+        register_pertanyaan_mock.configure_mock(return_value=pertanyaan_mock)
+        returned_create = self.serializer.create(self.serializer_data)
+        self.assertEqual(returned_create.get("pertanyaan"), pertanyaan_mock)
+
+    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_checkbox')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_return_opsi_jawaban(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
+        options_quantity = len(self.serializer_data["option"])
+        opsi_jawaban_mock = MagicMock(spec=OpsiJawaban)
+        register_opsi_jawaban_mock.configure_mock(return_value=opsi_jawaban_mock)
+        opsi_jawaban_mock_registered = [opsi_jawaban_mock]*options_quantity
+        returned_create = self.serializer.create(self.serializer_data)
+        self.assertEqual(returned_create.get("opsi_jawaban"), opsi_jawaban_mock_registered)

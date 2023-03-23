@@ -83,3 +83,19 @@ class SurveiService:
             pertanyaan=pertanyaan, 
             opsi_jawaban=pilihan_jawaban)
         return opsi_jawaban_obj
+
+    @transaction.atomic
+    def register_pertanyaan_dropdown(self, survei, pertanyaan, wajib_diisi=False):
+        pertanyaan = Pertanyaan.objects.create(
+            survei=survei,
+            pertanyaan=pertanyaan,
+            jenis_jawaban="Drop-Down",
+            wajib_diisi=wajib_diisi)
+        return pertanyaan
+
+    @transaction.atomic
+    def register_opsi_jawaban_dropdown(self, pertanyaan, pilihan_jawaban):
+        opsi_jawaban_obj = OpsiJawaban.objects.create(
+            pertanyaan=pertanyaan, 
+            opsi_jawaban=pilihan_jawaban)
+        return opsi_jawaban_obj

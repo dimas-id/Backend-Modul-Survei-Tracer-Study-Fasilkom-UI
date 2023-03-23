@@ -193,3 +193,41 @@ class DropDownRequestSerializer(serializers.Serializer):
                     pilihan_jawaban=pilihan))
 
         return {"pertanyaan": pertanyaan_obj, "opsi_jawaban": opsi_jawaban_objs}
+
+
+class CheckBoxRequestSerializer(serializers.Serializer):
+    survei_id = serializers.IntegerField(required=True)
+    pertanyaan = serializers.CharField(required=True)
+    required = serializers.BooleanField(required=False, default=False)
+    option = serializers.ListField(
+        child=serializers.CharField(required=False, max_length=150), 
+        allow_empty=False, min_length=1)
+    
+    def validate_survei_id(self, survey_id):
+        """Check if survei with survei_id exists"""
+        survei_service = SurveiService()
+        if survei_service.get_survei(survey_id) == None:
+            raise serializers.ValidationError("Survei with id {} does not exist".format(survey_id))
+        return survey_id
+
+    def create(self, validated_data):
+        """Create pertanyaan and opsi pilihan jawaban objects"""
+        survei_service = SurveiService()
+
+        survei_obj = survei_service.get_survei(validated_data.get('survei_id'))
+
+        pertanyaan_obj = survei_service.register_pertanyaan_checkbox(
+            survei=survei_obj,
+            pertanyaan=validated_data.get("pertanyaan"),
+            wajib_diisi=validated_data.get("required"))
+
+        opsi_jawaban_objs = []
+        pilihan_jawaban_raw = validated_data.get("option")
+        
+        for pilihan in pilihan_jawaban_raw:
+            opsi_jawaban_objs.append(
+                survei_service.register_opsi_jawaban_checkbox(
+                    pertanyaan=pertanyaan_obj,
+                    pilihan_jawaban=pilihan))
+
+        return {"pertanyaan": pertanyaan_obj, "opsi_jawaban": opsi_jawaban_objs}

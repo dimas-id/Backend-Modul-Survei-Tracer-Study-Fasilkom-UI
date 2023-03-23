@@ -11,6 +11,7 @@ survei = [
     path('/pertanyaan/create/skala-linier', pertanyaan.register_skala_linier),
     path('/pertanyaan/create/jawaban-singkat', pertanyaan.register_isian),
     path('/pertanyaan/create/radiobutton', pertanyaan.register_radiobutton),
+    path('/pertanyaan/create/dropdown', pertanyaan.register_dropdown),
 ]
 
 urlpatterns = [*general, *survei]

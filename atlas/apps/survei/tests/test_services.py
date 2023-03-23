@@ -118,6 +118,21 @@ class TestSurveiModels(TestCase):
         objects_create_mock.assert_called_once_with(
             **create_parameters, jenis_jawaban='Jawaban Singkat')
         self.assertEqual(pertanyaan, objects_create_mock.return_value)
+    
+    @patch('atlas.apps.survei.models.Pertanyaan.objects.create')
+    def test_register_pertanyaan_dropdown_call_objects_create_and_return(self, objects_create_mock):
+        survei_service = SurveiService()
+        survei_mock = MagicMock(spec=Survei)
+        create_parameters = {
+            'survei': survei_mock,
+            'pertanyaan': "Mock Question",
+            'wajib_diisi': True
+        }
+        pertanyaan = survei_service.register_pertanyaan_dropdown(
+            **create_parameters)
+        objects_create_mock.assert_called_once_with(
+            **create_parameters, jenis_jawaban='Drop-Down')
+        self.assertEqual(pertanyaan, objects_create_mock.return_value)
 
     @patch('atlas.apps.survei.models.OpsiJawaban.objects.create')
     def test_register_opsi_jawaban_skala_linier_call_objects_create_and_return(self, objects_create_mock):
@@ -137,6 +152,21 @@ class TestSurveiModels(TestCase):
             pertanyaan=pertanyaan_mock, isian="Mock Isian")
         objects_create_mock.assert_called_once_with(
             pertanyaan=pertanyaan_mock, opsi_jawaban="Mock Isian")
+        self.assertEqual(opsi_jawaban, objects_create_mock.return_value)
+
+    @patch('atlas.apps.survei.models.OpsiJawaban.objects.create')
+    def test_register_opsi_jawaban_dropdown_call_objects_create_and_return(self, objects_create_mock):
+        survei_service = SurveiService()
+        pertanyaan_mock = MagicMock(spec=Pertanyaan)
+
+        options = ["Jakarta", "Bogor", "Depok", "Tangerang", "Bekasi"]
+
+        opsi_jawaban = survei_service.register_opsi_jawaban_dropdown(
+            pertanyaan=pertanyaan_mock, pilihan_jawaban=options)
+            
+        objects_create_mock.assert_called_once_with(
+            pertanyaan=pertanyaan_mock, opsi_jawaban=options)
+
         self.assertEqual(opsi_jawaban, objects_create_mock.return_value)
 
     def test_service_list_return_none(self):

@@ -122,3 +122,43 @@ class TestRadioButton(RestTestCase):
         response = self.client.post(
             self.CREATE_RADIOBUTTON, request=request)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+class TestDropDown(RestTestCase):
+
+    CREATE_DROPDOWN = "/api/v3/pertanyaan/create/dropdown"
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.user = RestTestCase.create_admin()
+
+    def test_register_dropdown_not_authenticated(self):
+        request = self.factory.post(path=self.CREATE_DROPDOWN)
+        response = self.client.post(
+            self.CREATE_DROPDOWN, request=request)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    @patch('atlas.api.v3.views.pertanyaan.DropDownRequestSerializer')
+    def test_register_dropdown_call_request_serializer(self, serializer_mock):
+        self.authenticate(self.user)
+        request = self.factory.post(path=self.CREATE_DROPDOWN)
+        self.client.post(
+            self.CREATE_DROPDOWN, request=request)
+        serializer_mock.assert_called_once()
+
+    @patch('atlas.api.v3.views.pertanyaan.DropDownRequestSerializer')
+    def test_register_return_400_when_serializer_is_not_valid(self, dropdown_mock):
+        self.authenticate(self.user)
+        dropdown_mock.return_value.is_valid.return_value = False
+        request = self.factory.post(path=self.CREATE_DROPDOWN)
+        response = self.client.post(
+            self.CREATE_DROPDOWN, request=request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @patch('atlas.api.v3.views.pertanyaan.DropDownRequestSerializer')
+    def test_register_return_201_when_serializer_is_valid(self, dropdown_mock):
+        self.authenticate(self.user)
+        dropdown_mock.return_value.is_valid.return_value = True
+        request = self.factory.post(path=self.CREATE_DROPDOWN)
+        response = self.client.post(
+            self.CREATE_DROPDOWN, request=request)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

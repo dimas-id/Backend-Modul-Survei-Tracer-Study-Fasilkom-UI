@@ -116,3 +116,5 @@ env-python3.7.9/
 
 # mypy
 .mypy_cache/
+
+.scannerwork/

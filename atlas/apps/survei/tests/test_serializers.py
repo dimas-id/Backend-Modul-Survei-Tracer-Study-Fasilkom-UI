@@ -1,14 +1,16 @@
 from unittest.mock import MagicMock, Mock, call, patch
+from django.forms import ValidationError
 from django.test import TestCase
 from atlas.apps.account.models import User
 from atlas.apps.survei.models import OpsiJawaban, Pertanyaan, Survei
 from rest_framework.test import APIRequestFactory
-from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanSerializer, SkalaLinierRequestSerializer, IsianRequestSerializer, SurveiSerialize, RadioButtonRequestSerializer, DropDownRequestSerializer, CheckBoxRequestSerializer
+from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanCreateRequestSerializer, PertanyaanSerializer, SkalaLinierRequestSerializer, IsianRequestSerializer, SurveiCreateRequestSerializer, IsianRequestSerializer, SurveiSerializer, RadioButtonRequestSerializer, RadioButtonRequestSerializer, DropDownRequestSerializer, CheckBoxRequestSerializer
 from rest_framework import serializers
 
 SURVEI_01 = "survei 01"
 SURVEI_03 = "Survei 03"
 API_SURVEI_CREATE = "/api/v3/survei/create"
+
 
 class TestSurveiModels(TestCase):
 
@@ -36,7 +38,7 @@ class TestSurveiModels(TestCase):
             "deskripsi": "lorem ipsum keren"
         }
 
-        surver_serialize = SurveiSerialize(
+        surver_serialize = SurveiSerializer(
             data=request.data, context={'request': request})
         survei = surver_serialize.create(request.data)
         self.assertEqual(survei, Survei.objects.get(nama=SURVEI_03))
@@ -48,7 +50,7 @@ class TestSurveiModels(TestCase):
             "nama": SURVEI_03
         }
 
-        surver_serialize = SurveiSerialize(
+        surver_serialize = SurveiSerializer(
             data=request.data, context={'request': request})
         survei = surver_serialize.create(request.data)
         self.assertIsNone(survei)
@@ -61,11 +63,12 @@ class TestSurveiModels(TestCase):
             "deskripsi": "lorem ipsum keren"
         }
 
-        surver_serialize = SurveiSerialize(
-            Survei.objects.get(nama="survei 01"), data=request.data, context={'request': request})
-        survei = surver_serialize.update(Survei.objects.get(nama = "survei 01"), request.data)
-        self.assertNotEqual(str(survei), "survei 01")
-        self.assertEqual(str(survei), "Survei 03")
+        surver_serialize = SurveiSerializer(
+            Survei.objects.get(nama=SURVEI_01), data=request.data, context={'request': request})
+        survei = surver_serialize.update(
+            Survei.objects.get(nama=SURVEI_01), request.data)
+        self.assertNotEqual(str(survei), SURVEI_01)
+        self.assertEqual(str(survei), SURVEI_03)
 
 
 class TestPertanyaanSerializer(TestCase):
@@ -112,7 +115,7 @@ class TestSkalaLinierRequestSerializer(TestCase):
         self.serializer_data = {
             'survei_id': 1,
             'pertanyaan': 'Dari 1-5 seberapa puas anda?',
-            'pertanyaan_wajib_diisi': True,
+            'required': True,
             'banyak_skala': 5,
             'mulai_dari_satu': True,
         }
@@ -123,7 +126,7 @@ class TestSkalaLinierRequestSerializer(TestCase):
     def test_request_contains_expected_fields(self):
         fields = self.serializer.get_fields()
         self.assertEqual(set(fields), set(
-            ['survei_id', 'pertanyaan', 'pertanyaan_wajib_diisi', 'banyak_skala', 'mulai_dari_satu']))
+            ['survei_id', 'pertanyaan', 'required', 'banyak_skala', 'mulai_dari_satu']))
 
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_initial_request_is_valid(self, get_survei_mock):
@@ -206,7 +209,7 @@ class TestSkalaLinierRequestSerializer(TestCase):
         register_pertanyaan_mock.assert_called_once_with(
             survei=survei_mock,
             pertanyaan=self.serializer_data.get("pertanyaan"),
-            wajib_diisi=self.serializer_data.get("pertanyaan_wajib_diisi")
+            wajib_diisi=self.serializer_data.get("required")
         )
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_skala_linier')
@@ -253,7 +256,7 @@ class TestSkalaLinierRequestSerializer(TestCase):
         return_value = self.serializer.create(self.serializer_data)
         banyak = self.serializer_data['banyak_skala']
 
-        self.assertEqual(return_value.get("skala_linier"),
+        self.assertEqual(return_value.get("opsi_jawaban"),
                          [opsi_jawaban_mock]*banyak)
 
 
@@ -263,7 +266,7 @@ class TestJawabanSingkatRequestSerializer(TestCase):
         self.serializer_data = {
             'survei_id': 1,
             'pertanyaan': 'Siapakah nama panggilan anda?',
-            'wajib_diisi': True,
+            'required': True,
             'jawaban': 'Budi'
         }
 
@@ -273,7 +276,7 @@ class TestJawabanSingkatRequestSerializer(TestCase):
     def test_request_contains_expected_fields(self):
         fields = self.serializer.get_fields()
         self.assertEqual(set(fields), set(
-            ['survei_id', 'pertanyaan', 'wajib_diisi', 'jawaban']))
+            ['survei_id', 'pertanyaan', 'required', 'jawaban']))
 
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_initial_request_is_valid(self, get_survei_mock):
@@ -336,7 +339,7 @@ class TestJawabanSingkatRequestSerializer(TestCase):
         register_pertanyaan_mock.assert_called_once_with(
             survei=survei_mock,
             pertanyaan=self.serializer_data.get("pertanyaan"),
-            wajib_diisi=self.serializer_data.get("wajib_diisi")
+            wajib_diisi=self.serializer_data.get("required")
         )
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_isian')
@@ -358,14 +361,15 @@ class TestRadioButtonRequestSerializer(TestCase):
             'survei_id': 1,
             'pertanyaan': 'Lulusan angkatan berapa Anda?',
             'required': True,
-            'option': ["2018", "2019", "2020", "2021", "2022"],
+            'data': ["2018", "2019", "2020", "2021", "2022"],
         }
-        self.serializer = RadioButtonRequestSerializer(data=self.serializer_data)
+        self.serializer = RadioButtonRequestSerializer(
+            data=self.serializer_data)
 
     def test_request_contains_expected_fields(self):
         fields = self.serializer.get_fields()
         self.assertEqual(set(fields), set(
-            ['survei_id', 'pertanyaan', 'required', 'option']))
+            ['survei_id', 'pertanyaan', 'required', 'data']))
 
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_initial_request_is_valid(self, get_survei_mock):
@@ -382,7 +386,7 @@ class TestRadioButtonRequestSerializer(TestCase):
         self.assertFalse(serializer.is_valid())
 
     def test_option_is_not_empty(self):
-        self.serializer_data['option'] = []
+        self.serializer_data['data'] = []
         serializer = RadioButtonRequestSerializer(data=self.serializer_data)
         self.assertFalse(serializer.is_valid())
 
@@ -408,14 +412,16 @@ class TestRadioButtonRequestSerializer(TestCase):
     def test_validate_survey_id_should_raise_with_correct_message(self):
         with self.assertRaises(serializers.ValidationError) as exc:
             self.serializer.validate_survei_id(1)
-        self.assertEqual(str(exc.exception.detail[0]), "Survei with id 1 does not exist")
+        self.assertEqual(
+            str(exc.exception.detail[0]), "Survei with id 1 does not exist")
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_radiobutton')
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_radiobutton')
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_create_should_call_get_survei_once_with_param(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
         self.serializer.create(self.serializer_data)
-        get_survei_mock.assert_called_once_with(self.serializer_data['survei_id'])
+        get_survei_mock.assert_called_once_with(
+            self.serializer_data['survei_id'])
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_radiobutton')
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_radiobutton')
@@ -436,13 +442,14 @@ class TestRadioButtonRequestSerializer(TestCase):
         pertanyaan_mock = MagicMock(spec=Pertanyaan)
         register_pertanyaan_mock.configure_mock(return_value=pertanyaan_mock)
         self.serializer.create(self.serializer_data)
-        self.assertEqual(register_opsi_jawaban_mock.call_count, len(self.serializer_data['option']))
+        self.assertEqual(register_opsi_jawaban_mock.call_count,
+                         len(self.serializer_data['data']))
         register_opsi_jawaban_mock.assert_has_calls(
             [call(pertanyaan=pertanyaan_mock, pilihan_jawaban="2018"),
              call(pertanyaan=pertanyaan_mock, pilihan_jawaban="2019"),
              call(pertanyaan=pertanyaan_mock, pilihan_jawaban="2020"),
              call(pertanyaan=pertanyaan_mock, pilihan_jawaban="2021"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="2022"),])
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="2022"), ])
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_radiobutton')
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_radiobutton')
@@ -457,12 +464,15 @@ class TestRadioButtonRequestSerializer(TestCase):
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_radiobutton')
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_create_should_return_opsi_jawaban(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
-        options_quantity = len(self.serializer_data["option"])
+        options_quantity = len(self.serializer_data["data"])
         opsi_jawaban_mock = MagicMock(spec=OpsiJawaban)
-        register_opsi_jawaban_mock.configure_mock(return_value=opsi_jawaban_mock)
+        register_opsi_jawaban_mock.configure_mock(
+            return_value=opsi_jawaban_mock)
         opsi_jawaban_mock_registered = [opsi_jawaban_mock]*options_quantity
         returned_create = self.serializer.create(self.serializer_data)
-        self.assertEqual(returned_create.get("opsi_jawaban"), opsi_jawaban_mock_registered)
+        self.assertEqual(returned_create.get("opsi_jawaban"),
+                         opsi_jawaban_mock_registered)
+
 
 class TestDropdownRequestSerializer(TestCase):
 
@@ -471,14 +481,14 @@ class TestDropdownRequestSerializer(TestCase):
             'survei_id': 1,
             'pertanyaan': 'Di manakah anda tinggal?',
             'required': True,
-            'opsi_jawaban' : ["Jakarta", "Bogor", "Depok", "Tangerang", "Bekasi"],
+            'data': ["Jakarta", "Bogor", "Depok", "Tangerang", "Bekasi"],
         }
         self.serializer = DropDownRequestSerializer(data=self.serializer_data)
 
     def test_request_contains_expected_fields(self):
         fields = self.serializer.get_fields()
         self.assertEqual(set(fields), set(
-            ['survei_id', 'pertanyaan', 'required', 'opsi_jawaban']))
+            ['survei_id', 'pertanyaan', 'required', 'data']))
 
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_initial_request_is_valid(self, get_survei_mock):
@@ -494,8 +504,8 @@ class TestDropdownRequestSerializer(TestCase):
         serializer = DropDownRequestSerializer(data=self.serializer_data)
         self.assertFalse(serializer.is_valid())
 
-    def test_option_is_not_empty(self):
-        self.serializer_data['option'] = []
+    def test_data_is_not_empty(self):
+        self.serializer_data['data'] = []
         serializer = SkalaLinierRequestSerializer(data=self.serializer_data)
         self.assertFalse(serializer.is_valid())
 
@@ -521,14 +531,16 @@ class TestDropdownRequestSerializer(TestCase):
     def test_validate_survey_id_should_raise_with_correct_message(self):
         with self.assertRaises(serializers.ValidationError) as exc:
             self.serializer.validate_survei_id(1)
-        self.assertEqual(str(exc.exception.detail[0]), "Survei with id 1 does not exist")
+        self.assertEqual(
+            str(exc.exception.detail[0]), "Survei with id 1 does not exist")
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_dropdown')
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_dropdown')
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_create_should_call_get_survei_once_with_param(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
         self.serializer.create(self.serializer_data)
-        get_survei_mock.assert_called_once_with(self.serializer_data['survei_id'])
+        get_survei_mock.assert_called_once_with(
+            self.serializer_data['survei_id'])
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_dropdown')
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_dropdown')
@@ -549,13 +561,14 @@ class TestDropdownRequestSerializer(TestCase):
         pertanyaan_mock = MagicMock(spec=Pertanyaan)
         register_pertanyaan_mock.configure_mock(return_value=pertanyaan_mock)
         self.serializer.create(self.serializer_data)
-        self.assertEqual(register_opsi_jawaban_mock.call_count, len(self.serializer_data['opsi_jawaban']))
+        self.assertEqual(register_opsi_jawaban_mock.call_count,
+                         len(self.serializer_data['data']))
         register_opsi_jawaban_mock.assert_has_calls(
-            [call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban A"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban B"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban C"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban D"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban E"),])
+            [call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jakarta",),
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Bogor"),
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Depok"),
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Tangerang"),
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Bekasi")])
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_dropdown')
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_dropdown')
@@ -570,124 +583,13 @@ class TestDropdownRequestSerializer(TestCase):
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_dropdown')
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_create_should_return_opsi_jawaban(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
-        options_quantity = len(self.serializer_data["opsi_jawaban"])
+        options_quantity = len(self.serializer_data["data"])
         opsi_jawaban_mock = MagicMock(spec=OpsiJawaban)
-        register_opsi_jawaban_mock.configure_mock(return_value=opsi_jawaban_mock)
-        opsi_jawaban_mock_registered = [opsi_jawaban_mock]*options_quantity
+        register_opsi_jawaban_mock.configure_mock(
+            return_value=opsi_jawaban_mock)
         returned_create = self.serializer.create(self.serializer_data)
-        self.assertEqual(returned_create.get("opsi_jawaban"), opsi_jawaban_mock_registered)
-
-class TestDropdownRequestSerializer(TestCase):
-
-    def setUp(self) -> None:
-        self.serializer_data = {
-            'survei_id': 1,
-            'pertanyaan': 'Di manakah anda tinggal?',
-            'required': True,
-            'opsi_jawaban' : ["Jakarta", "Bogor", "Depok", "Tangerang", "Bekasi"],
-        }
-        self.serializer = DropDownRequestSerializer(data=self.serializer_data)
-
-    def test_request_contains_expected_fields(self):
-        fields = self.serializer.get_fields()
-        self.assertEqual(set(fields), set(
-            ['survei_id', 'pertanyaan', 'required', 'opsi_jawaban']))
-
-    @patch('atlas.apps.survei.services.SurveiService.get_survei')
-    def test_initial_request_is_valid(self, get_survei_mock):
-        self.assertTrue(self.serializer.is_valid())
-
-    def test_survei_id_is_required(self):
-        self.serializer_data.pop('survei_id')
-        serializer = DropDownRequestSerializer(data=self.serializer_data)
-        self.assertFalse(serializer.is_valid())
-
-    def test_pertanyaan_is_required(self):
-        self.serializer_data.pop('pertanyaan')
-        serializer = DropDownRequestSerializer(data=self.serializer_data)
-        self.assertFalse(serializer.is_valid())
-
-    def test_option_is_not_empty(self):
-        self.serializer_data['option'] = []
-        serializer = SkalaLinierRequestSerializer(data=self.serializer_data)
-        self.assertFalse(serializer.is_valid())
-
-    @patch('atlas.apps.survei.services.SurveiService.get_survei')
-    def test_validate_called_get_survei_once(self, get_survei_mock):
-        self.serializer.is_valid()
-        get_survei_mock.assert_called_once()
-
-    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=True))
-    def test_validate_should_succeed_if_get_survei_return_value(self):
-        self.assertTrue(self.serializer.is_valid())
-
-    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
-    def test_validate_should_fail_if_get_survei_return_none(self):
-        self.assertFalse(self.serializer.is_valid())
-
-    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
-    def test_validate_should_raise_error_if_get_survei_return_none(self):
-        self.serializer.is_valid()
-        self.assertRaises(serializers.ValidationError)
-
-    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
-    def test_validate_survey_id_should_raise_with_correct_message(self):
-        with self.assertRaises(serializers.ValidationError) as exc:
-            self.serializer.validate_survei_id(1)
-        self.assertEqual(str(exc.exception.detail[0]), "Survei with id 1 does not exist")
-
-    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.get_survei')
-    def test_create_should_call_get_survei_once_with_param(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
-        self.serializer.create(self.serializer_data)
-        get_survei_mock.assert_called_once_with(self.serializer_data['survei_id'])
-
-    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.get_survei')
-    def test_create_should_register_pertanyaan_once(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
-        survei_mock = MagicMock(spec=Survei)
-        get_survei_mock.configure_mock(return_value=survei_mock)
-        self.serializer.create(self.serializer_data)
-        register_pertanyaan_mock.assert_called_once_with(
-            survei=survei_mock,
-            pertanyaan=self.serializer_data.get("pertanyaan"),
-            wajib_diisi=self.serializer_data.get("required"))
-
-    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.get_survei')
-    def test_create_should_register_dropdown_as_requested(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
-        pertanyaan_mock = MagicMock(spec=Pertanyaan)
-        register_pertanyaan_mock.configure_mock(return_value=pertanyaan_mock)
-        self.serializer.create(self.serializer_data)
-        self.assertEqual(register_opsi_jawaban_mock.call_count, len(self.serializer_data['opsi_jawaban']))
-        register_opsi_jawaban_mock.assert_has_calls(
-            [call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban A"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban B"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban C"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban D"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="Jawaban E"),])
-
-    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.get_survei')
-    def test_create_should_return_pertanyaan(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
-        pertanyaan_mock = MagicMock(spec=Pertanyaan)
-        register_pertanyaan_mock.configure_mock(return_value=pertanyaan_mock)
-        returned_create = self.serializer.create(self.serializer_data)
-        self.assertEqual(returned_create.get("pertanyaan"), pertanyaan_mock)
-
-    @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_dropdown')
-    @patch('atlas.apps.survei.services.SurveiService.get_survei')
-    def test_create_should_return_opsi_jawaban(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
-        options_quantity = len(self.serializer_data["opsi_jawaban"])
-        opsi_jawaban_mock = MagicMock(spec=OpsiJawaban)
-        register_opsi_jawaban_mock.configure_mock(return_value=opsi_jawaban_mock)
-        returned_create = self.serializer.create(self.serializer_data)
-        self.assertEqual(returned_create.get("opsi_jawaban"), [opsi_jawaban_mock]*options_quantity)
+        self.assertEqual(returned_create.get("opsi_jawaban"),
+                         [opsi_jawaban_mock]*options_quantity)
 
 
 class TestCheckBoxRequestSerializer(TestCase):
@@ -697,14 +599,14 @@ class TestCheckBoxRequestSerializer(TestCase):
             'survei_id': 1,
             'pertanyaan': 'Mata kuliah wajib apakah yang menurut anda berguna bagi pekerjaan anda sekarang ini?',
             'required': True,
-            'option': ["DDP", "PBP", "SDA", "BasDat", "RPL", "PPL"],
+            'data': ["DDP", "PBP", "SDA", "BasDat", "RPL", "PPL"],
         }
         self.serializer = CheckBoxRequestSerializer(data=self.serializer_data)
 
     def test_request_contains_expected_fields(self):
         fields = self.serializer.get_fields()
         self.assertEqual(set(fields), set(
-            ['survei_id', 'pertanyaan', 'required', 'option']))
+            ['survei_id', 'pertanyaan', 'required', 'data']))
 
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_initial_request_is_valid(self, get_survei_mock):
@@ -720,8 +622,8 @@ class TestCheckBoxRequestSerializer(TestCase):
         serializer = CheckBoxRequestSerializer(data=self.serializer_data)
         self.assertFalse(serializer.is_valid())
 
-    def test_option_is_not_empty(self):
-        self.serializer_data['option'] = []
+    def test_data_is_not_empty(self):
+        self.serializer_data['data'] = []
         serializer = CheckBoxRequestSerializer(data=self.serializer_data)
         self.assertFalse(serializer.is_valid())
 
@@ -747,14 +649,16 @@ class TestCheckBoxRequestSerializer(TestCase):
     def test_validate_survey_id_should_raise_with_correct_message(self):
         with self.assertRaises(serializers.ValidationError) as exc:
             self.serializer.validate_survei_id(1)
-        self.assertEqual(str(exc.exception.detail[0]), "Survei with id 1 does not exist")
+        self.assertEqual(
+            str(exc.exception.detail[0]), "Survei with id 1 does not exist")
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_checkbox')
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_checkbox')
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_create_should_call_get_survei_once_with_param(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
         self.serializer.create(self.serializer_data)
-        get_survei_mock.assert_called_once_with(self.serializer_data['survei_id'])
+        get_survei_mock.assert_called_once_with(
+            self.serializer_data['survei_id'])
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_checkbox')
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_checkbox')
@@ -775,14 +679,15 @@ class TestCheckBoxRequestSerializer(TestCase):
         pertanyaan_mock = MagicMock(spec=Pertanyaan)
         register_pertanyaan_mock.configure_mock(return_value=pertanyaan_mock)
         self.serializer.create(self.serializer_data)
-        self.assertEqual(register_opsi_jawaban_mock.call_count, len(self.serializer_data['option']))
+        self.assertEqual(register_opsi_jawaban_mock.call_count,
+                         len(self.serializer_data['data']))
         register_opsi_jawaban_mock.assert_has_calls(
             [call(pertanyaan=pertanyaan_mock, pilihan_jawaban="DDP"),
              call(pertanyaan=pertanyaan_mock, pilihan_jawaban="PBP"),
              call(pertanyaan=pertanyaan_mock, pilihan_jawaban="SDA"),
              call(pertanyaan=pertanyaan_mock, pilihan_jawaban="BasDat"),
              call(pertanyaan=pertanyaan_mock, pilihan_jawaban="RPL"),
-             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="PPL"),])
+             call(pertanyaan=pertanyaan_mock, pilihan_jawaban="PPL"), ])
 
     @patch('atlas.apps.survei.services.SurveiService.register_opsi_jawaban_checkbox')
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_checkbox')
@@ -797,9 +702,91 @@ class TestCheckBoxRequestSerializer(TestCase):
     @patch('atlas.apps.survei.services.SurveiService.register_pertanyaan_checkbox')
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_create_should_return_opsi_jawaban(self, get_survei_mock, register_pertanyaan_mock, register_opsi_jawaban_mock):
-        options_quantity = len(self.serializer_data["option"])
+        options_quantity = len(self.serializer_data["data"])
         opsi_jawaban_mock = MagicMock(spec=OpsiJawaban)
-        register_opsi_jawaban_mock.configure_mock(return_value=opsi_jawaban_mock)
+        register_opsi_jawaban_mock.configure_mock(
+            return_value=opsi_jawaban_mock)
         opsi_jawaban_mock_registered = [opsi_jawaban_mock]*options_quantity
         returned_create = self.serializer.create(self.serializer_data)
-        self.assertEqual(returned_create.get("opsi_jawaban"), opsi_jawaban_mock_registered)
+        self.assertEqual(returned_create.get("opsi_jawaban"),
+                         opsi_jawaban_mock_registered)
+
+
+class TestPertanyaanCreateRequestSerializer(TestCase):
+    def setUp(self):
+        self.serializer_data = {
+            'pertanyaan': 'pertanyaan desu',
+            'required': True,
+            'tipe': 'Jawaban Singkat',
+            'survei_id': 1,
+            'option': {}
+        }
+
+    @patch('atlas.apps.survei.serializers.IsianRequestSerializer')
+    def test_create_should_raise_error_if_serializer_is_not_valid(self, pertanyaan_serializer_mock):
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        pertanyaan_serializer_mock.return_value.is_valid.return_value = False
+        pertanyaan_serializer_mock.return_value.errors = "error"
+        with self.assertRaises(ValidationError):
+            serializer.create(self.serializer_data)
+
+    @patch('atlas.apps.survei.serializers.IsianRequestSerializer')
+    def test_create_should_raise_error_if_tipe_not_found(self, pertanyaan_serializer_mock):
+        self.serializer_data['tipe'] = 'tipe pertanyaan'
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        with self.assertRaises(ValidationError):
+            serializer.create(self.serializer_data)
+
+    @patch('atlas.apps.survei.serializers.SkalaLinierRequestSerializer')
+    def test_create_should_call_skala_linier(self, pertanyaan_serializer_mock):
+        self.serializer_data['tipe'] = 'Skala Linear'
+        self.serializer_data['option'] = {
+            'banyak_skala': 5
+        }
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.create(self.serializer_data)
+        pertanyaan_serializer_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.serializers.IsianRequestSerializer')
+    def test_create_should_call_isian(self, pertanyaan_serializer_mock):
+        self.serializer_data['tipe'] = 'Jawaban Singkat'
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.create(self.serializer_data)
+        pertanyaan_serializer_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.serializers.RadioButtonRequestSerializer')
+    def test_create_should_call_radio_button(self, pertanyaan_serializer_mock):
+        self.serializer_data['tipe'] = 'Pilihan Ganda'
+        self.serializer_data['option'] = {
+            'data': ["a", "b"]
+        }
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.create(self.serializer_data)
+        pertanyaan_serializer_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.serializers.CheckBoxRequestSerializer')
+    def test_create_should_call_checkbox(self, pertanyaan_serializer_mock):
+        self.serializer_data['tipe'] = 'Kotak Centang'
+        self.serializer_data['option'] = {
+            'data': ["a", "ini", 'itu']
+        }
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.create(self.serializer_data)
+        pertanyaan_serializer_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.serializers.DropDownRequestSerializer')
+    def test_create_should_call_dropdown(self, pertanyaan_serializer_mock):
+        self.serializer_data['tipe'] = 'Drop-Down'
+        self.serializer_data['option'] = {
+            'data': ['ichi', 'ni', 'san']
+        }
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.create(self.serializer_data)
+        pertanyaan_serializer_mock.assert_called_once()

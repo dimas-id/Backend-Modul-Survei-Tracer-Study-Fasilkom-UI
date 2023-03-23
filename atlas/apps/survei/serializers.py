@@ -1,10 +1,10 @@
+from django.forms import ValidationError
 from rest_framework import serializers
 from atlas.apps.survei.models import JENIS_PERTANYAAN
 from atlas.apps.survei.services import SurveiService
 
 
-
-class SurveiSerialize(serializers.Serializer):
+class SurveiSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     nama = serializers.CharField(max_length=150)
     deskripsi = serializers.CharField(max_length=1200)
@@ -37,7 +37,57 @@ class SurveiSerialize(serializers.Serializer):
             'sudah_dikirim', instance.sudah_dikirim)
         instance.save()
         return instance
-    
+
+
+class PertanyaanCreateRequestSerializer(serializers.Serializer):
+    option = serializers.DictField(required=False, default={})
+    pertanyaan = serializers.CharField(max_length=1200)
+    required = serializers.BooleanField()
+    tipe = serializers.ChoiceField(choices=JENIS_PERTANYAAN)
+    survei_id = serializers.IntegerField()
+
+    def create(self, validated_data):
+        tipe = validated_data["tipe"]
+        pertanyaan_serializer_class = None
+        data = {
+            'pertanyaan': validated_data['pertanyaan'],
+            'required': validated_data['required'],
+            'survei_id': validated_data['survei_id'],
+            **validated_data['option'],
+        }
+        if tipe == "Skala Linear":
+            pertanyaan_serializer_class = SkalaLinierRequestSerializer
+        elif tipe == "Pilihan Ganda":
+            pertanyaan_serializer_class = RadioButtonRequestSerializer
+        elif tipe == "Jawaban Singkat":
+            pertanyaan_serializer_class = IsianRequestSerializer
+        elif tipe == "Drop-Down":
+            pertanyaan_serializer_class = DropDownRequestSerializer
+        elif tipe == "Kotak Centang":
+            pertanyaan_serializer_class = CheckBoxRequestSerializer
+        else:
+            raise ValidationError(f"Tipe pertanyaan {tipe} tidak valid")
+        pertanyaan_serializer = pertanyaan_serializer_class(data=data)
+
+        if not pertanyaan_serializer.is_valid():
+            raise ValidationError(pertanyaan_serializer.errors)
+
+        return pertanyaan_serializer.save()
+
+
+class SurveiCreateRequestSerializer(serializers.Serializer):
+    nama = serializers.CharField(max_length=150)
+    deskripsi = serializers.CharField(max_length=1200)
+    pertanyaan = serializers.ListField(required=False)
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        survei_serializer = SurveiSerializer(
+            data={'nama': validated_data['nama'], 'deskripsi': validated_data['deskripsi']}, context={'request': request})
+        survei_serializer.is_valid(raise_exception=True)
+        survei = survei_serializer.save()
+        return survei
+
 
 class PertanyaanSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -50,11 +100,11 @@ class OpsiJawabanSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     opsi_jawaban = serializers.CharField(max_length=150)
 
-    
+
 class IsianRequestSerializer(serializers.Serializer):
     survei_id = serializers.IntegerField(required=True)
     pertanyaan = serializers.CharField(max_length=1200)
-    wajib_diisi = serializers.BooleanField(required=False)
+    required = serializers.BooleanField(required=False)
     jawaban = serializers.CharField(max_length=150, required=False)
 
     def validate_survei_id(self, value):
@@ -72,20 +122,23 @@ class IsianRequestSerializer(serializers.Serializer):
     def create(self, validated_data):
         survei_id = validated_data.get('survei_id')
         pertanyaan = validated_data.get('pertanyaan')
-        wajib_diisi = validated_data.get('wajib_diisi')
+        wajib_diisi = validated_data.get('required')
         survei_service = SurveiService()
         try:
             survei = survei_service.get_survei(survei_id)
-            pertanyaan = survei_service.register_pertanyaan_isian(survei=survei, pertanyaan=pertanyaan, wajib_diisi=wajib_diisi)
-            jawaban_isian_singkat = survei_service.register_opsi_jawaban_isian(pertanyaan=pertanyaan, isian="")
-            return {"pertanyaan": pertanyaan, "jawaban_isian_singkat": jawaban_isian_singkat}
+            pertanyaan = survei_service.register_pertanyaan_isian(
+                survei=survei, pertanyaan=pertanyaan, wajib_diisi=wajib_diisi)
+            jawaban_isian_singkat = survei_service.register_opsi_jawaban_isian(
+                pertanyaan=pertanyaan, isian="")
+            return {"pertanyaan": pertanyaan, "opsi_jawaban": [jawaban_isian_singkat]}
         except:
             return None
+
 
 class SkalaLinierRequestSerializer(serializers.Serializer):
     survei_id = serializers.IntegerField(required=True)
     pertanyaan = serializers.CharField(required=True)
-    pertanyaan_wajib_diisi = serializers.BooleanField(
+    required = serializers.BooleanField(
         required=False, default=False)
     banyak_skala = serializers.IntegerField(
         required=False, default=5, min_value=2, max_value=15)
@@ -108,7 +161,7 @@ class SkalaLinierRequestSerializer(serializers.Serializer):
         pertanyaan_obj = survei_service.register_pertanyaan_skala_linier(
             survei=survei_obj,
             pertanyaan=validated_data.get("pertanyaan"),
-            wajib_diisi=validated_data.get("pertanyaan_wajib_diisi"))
+            wajib_diisi=validated_data.get("required"))
 
         skala_linier_objs = []
         banyak_skala = validated_data.get('banyak_skala')
@@ -117,22 +170,23 @@ class SkalaLinierRequestSerializer(serializers.Serializer):
             skala_linier_objs.append(survei_service.register_opsi_jawaban_skala_linier(
                 pertanyaan=pertanyaan_obj, skala=i))
 
-        return {"pertanyaan": pertanyaan_obj, "skala_linier": skala_linier_objs}
+        return {"pertanyaan": pertanyaan_obj, "opsi_jawaban": skala_linier_objs}
 
 
 class RadioButtonRequestSerializer(serializers.Serializer):
     survei_id = serializers.IntegerField(required=True)
     pertanyaan = serializers.CharField(required=True)
     required = serializers.BooleanField(required=False, default=False)
-    option = serializers.ListField(
-        child=serializers.CharField(required=False, max_length=150), 
+    data = serializers.ListField(
+        child=serializers.CharField(required=False, max_length=150),
         allow_empty=False, min_length=1)
 
     def validate_survei_id(self, survey_id):
         """Check if survei with survei_id exists"""
         survei_service = SurveiService()
         if survei_service.get_survei(survey_id) == None:
-            raise serializers.ValidationError("Survei with id {} does not exist".format(survey_id))
+            raise serializers.ValidationError(
+                "Survei with id {} does not exist".format(survey_id))
         return survey_id
 
     def create(self, validated_data):
@@ -147,8 +201,8 @@ class RadioButtonRequestSerializer(serializers.Serializer):
             wajib_diisi=validated_data.get("required"))
 
         opsi_jawaban_objs = []
-        pilihan_jawaban_raw = validated_data.get("option")
-        
+        pilihan_jawaban_raw = validated_data.get("data")
+
         for pilihan in pilihan_jawaban_raw:
             opsi_jawaban_objs.append(
                 survei_service.register_opsi_jawaban_radiobutton(
@@ -157,19 +211,21 @@ class RadioButtonRequestSerializer(serializers.Serializer):
 
         return {"pertanyaan": pertanyaan_obj, "opsi_jawaban": opsi_jawaban_objs}
 
+
 class DropDownRequestSerializer(serializers.Serializer):
     survei_id = serializers.IntegerField(required=True)
     pertanyaan = serializers.CharField(required=True)
     required = serializers.BooleanField(required=False, default=False)
-    opsi_jawaban = serializers.ListField(
-        child=serializers.CharField(required=False, max_length=150), 
+    data = serializers.ListField(
+        child=serializers.CharField(required=False, max_length=150),
         allow_empty=False, min_length=1)
 
     def validate_survei_id(self, survey_id):
         """Check if survei with survei_id exists"""
         survei_service = SurveiService()
         if survei_service.get_survei(survey_id) == None:
-            raise serializers.ValidationError("Survei with id {} does not exist".format(survey_id))
+            raise serializers.ValidationError(
+                "Survei with id {} does not exist".format(survey_id))
         return survey_id
 
     def create(self, validated_data):
@@ -184,8 +240,8 @@ class DropDownRequestSerializer(serializers.Serializer):
             wajib_diisi=validated_data.get("required"))
 
         opsi_jawaban_objs = []
-        pilihan_jawaban_raw = validated_data.get("opsi_jawaban")
-        
+        pilihan_jawaban_raw = validated_data.get("data")
+
         for pilihan in pilihan_jawaban_raw:
             opsi_jawaban_objs.append(
                 survei_service.register_opsi_jawaban_dropdown(
@@ -199,15 +255,16 @@ class CheckBoxRequestSerializer(serializers.Serializer):
     survei_id = serializers.IntegerField(required=True)
     pertanyaan = serializers.CharField(required=True)
     required = serializers.BooleanField(required=False, default=False)
-    option = serializers.ListField(
-        child=serializers.CharField(required=False, max_length=150), 
+    data = serializers.ListField(
+        child=serializers.CharField(required=False, max_length=150),
         allow_empty=False, min_length=1)
-    
+
     def validate_survei_id(self, survey_id):
         """Check if survei with survei_id exists"""
         survei_service = SurveiService()
         if survei_service.get_survei(survey_id) == None:
-            raise serializers.ValidationError("Survei with id {} does not exist".format(survey_id))
+            raise serializers.ValidationError(
+                "Survei with id {} does not exist".format(survey_id))
         return survey_id
 
     def create(self, validated_data):
@@ -222,8 +279,8 @@ class CheckBoxRequestSerializer(serializers.Serializer):
             wajib_diisi=validated_data.get("required"))
 
         opsi_jawaban_objs = []
-        pilihan_jawaban_raw = validated_data.get("option")
-        
+        pilihan_jawaban_raw = validated_data.get("data")
+
         for pilihan in pilihan_jawaban_raw:
             opsi_jawaban_objs.append(
                 survei_service.register_opsi_jawaban_checkbox(

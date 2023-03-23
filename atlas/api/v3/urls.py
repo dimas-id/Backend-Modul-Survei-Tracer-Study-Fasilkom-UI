@@ -1,9 +1,5 @@
 from django.urls import path
-from atlas.api.v3.views import general, survei, pertanyaan
-
-general = [
-    path('/', general.api_v3, name='general-v3'),
-]
+from atlas.api.v3.views import survei, pertanyaan
 
 survei = [
     path('/survei/list', survei.get_list_survei),
@@ -15,4 +11,4 @@ survei = [
     path('/pertanyaan/create/checkbox', pertanyaan.register_checkbox),
 ]
 
-urlpatterns = [*general, *survei]
+urlpatterns = [*survei]

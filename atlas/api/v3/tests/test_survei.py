@@ -82,6 +82,7 @@ class TestRegisterSurveiModels(RestTestCase):
             self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['messages'], [])
 
     def test_create_survei_with_pertanyaan_skala_linier_is_valid(self):
         data = {
@@ -94,7 +95,6 @@ class TestRegisterSurveiModels(RestTestCase):
         response = self.client.post(
             self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data['errors']), 0)
 
     def test_create_survei_with_pertanyaan_isian_is_valid(self):
         data = {
@@ -107,7 +107,6 @@ class TestRegisterSurveiModels(RestTestCase):
         response = self.client.post(
             self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data['errors']), 0)
 
     def test_create_survei_with_pertanyaan_pilihan_ganda_is_valid(self):
         data = {
@@ -120,12 +119,11 @@ class TestRegisterSurveiModels(RestTestCase):
         response = self.client.post(
             self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data['errors']), 0)
 
     def test_create_survei_with_pertanyaan_checkbox_is_valid(self):
         data = {
-            'nama': 'Survei pacil ganda',
-            'deskripsi': 'survei tentang pacil ganda',
+            'nama': 'Survei pacil checkbox',
+            'deskripsi': 'survei tentang pacil checkbox',
             'pertanyaan': [
                 self.pertanyaan_checkbox,
             ]
@@ -133,12 +131,11 @@ class TestRegisterSurveiModels(RestTestCase):
         response = self.client.post(
             self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data['errors']), 0)
 
     def test_create_survei_with_pertanyaan_dropdown_is_valid(self):
         data = {
-            'nama': 'Survei pacil ganda',
-            'deskripsi': 'survei tentang pacil ganda',
+            'nama': 'Survei pacil dropdown',
+            'deskripsi': 'survei tentang pacil dropdown',
             'pertanyaan': [
                 self.pertanyaan_dropdown,
             ]
@@ -146,7 +143,6 @@ class TestRegisterSurveiModels(RestTestCase):
         response = self.client.post(
             self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data['errors']), 0)
 
     def test_create_survei_not_valid_pertanyaan(self):
         data = {
@@ -159,8 +155,8 @@ class TestRegisterSurveiModels(RestTestCase):
         }
         response = self.client.post(
             self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data['errors']), 1)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['messages'], [True, False])
 
     def test_survei_pertanyaan_return_dict_error(self):
         data = {
@@ -170,7 +166,8 @@ class TestRegisterSurveiModels(RestTestCase):
         }
         response = self.client.post(
             self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
-        self.assertEqual(len(response.data['errors']), 1)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['messages'], [False])
 
     def test_survei_pertanyaan_serializer_not_valid_error(self):
         data = {
@@ -180,7 +177,19 @@ class TestRegisterSurveiModels(RestTestCase):
         }
         response = self.client.post(
             self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
-        self.assertEqual(len(response.data['errors']), 1)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['messages'], [False])
+
+    def test_survei_pertanyaan_not_valid_error(self):
+        data = {
+            'nama': 'Survei test',
+            'deskripsi': 'survei yoi',
+            'pertanyaan': 'this should be a list'
+        }
+        response = self.client.post(
+            self.CREATE_SURVEI_URL, json.dumps(data), content_type=self.JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['messages'], [])
 
 
 class TestGetSurveiAPI(RestTestCase):

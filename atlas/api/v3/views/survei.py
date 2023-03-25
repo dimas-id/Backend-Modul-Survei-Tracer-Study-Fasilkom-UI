@@ -31,40 +31,70 @@ def register_survei(request):
     survei_request_serializer = SurveiCreateRequestSerializer(
         data=request.data, context={'request': request})
 
-    if not survei_request_serializer.is_valid():
-        return Response(data={'messages': survei_request_serializer._errors},
-                        status=status.HTTP_400_BAD_REQUEST)
+    survei_is_valid = survei_request_serializer.is_valid()
 
+    # Check 'nama','deskripsi','pertanyaan param
+    if not survei_is_valid:
+        survei_request_serializer = SurveiCreateRequestSerializer(
+            data={
+                'nama': 'DELETE ME',
+                'deskripsi': 'You should not be able to see this',
+                'pertanyaan': request.data.get('pertanyaan') or []
+            },
+            context={'request': request}
+        )
+
+    # Check 'pertanyaan' param again
+    if not survei_request_serializer.is_valid():
+        survei_request_serializer = SurveiCreateRequestSerializer(
+            data={
+                'nama': 'DELETE ME',
+                'deskripsi': 'You should not be able to see this',
+                'pertanyaan': []
+            },
+            context={'request': request}
+        )
+
+    survei_request_serializer.is_valid()
+    # if survei is not valid, survei will later be deleted
     survei = survei_request_serializer.save()
 
     pertanyaan_list_data = survei_request_serializer.validated_data.get(
-        'pertanyaan') or []
+        'pertanyaan')
+    success_matrix = []
+    valid_pertanyaan_list = []
 
-    errors = []
-    serialized_pertanyaan_list = []
-
-    for i, pertanyaan_data in enumerate(pertanyaan_list_data):
+    for pertanyaan_data in pertanyaan_list_data:
 
         if not isinstance(pertanyaan_data, dict):
-            errors.append(f"Data pertanyaan ke-{i+1} tidak valid")
+            success_matrix.append(False)
             continue
 
         pertanyaan_serializer = PertanyaanCreateRequestSerializer(
             data={**pertanyaan_data, 'survei_id': survei.id})
-        try:
-            if not pertanyaan_serializer.is_valid():
-                raise ValidationError(pertanyaan_serializer._errors)
-            pertanyaan_objects = pertanyaan_serializer.save()
-            serialized_pertanyaan_list.append({
-                'pertanyaan': PertanyaanSerializer(
-                    pertanyaan_objects.get('pertanyaan')).data,
-                'opsi_jawaban': OpsiJawabanSerializer(
-                    pertanyaan_objects.get('opsi_jawaban'), many=True).data})
-        except ValidationError as e:
-            errors.append(f"Pertanyaan ke-{i+1} error: {e}")
+        if not pertanyaan_serializer.is_valid():
+            success_matrix.append(False)
+            continue
+
+        success_matrix.append(True)
+        valid_pertanyaan_list.append(pertanyaan_serializer)
+
+    if not survei_is_valid or (False in success_matrix):
+        survei.delete()
+        return Response(data={
+            'status': 'failed',
+            'messages': success_matrix,
+        }, status=status.HTTP_400_BAD_REQUEST)
+    serialized_pertanyaan_list = []
+    for pertanyaan in valid_pertanyaan_list:
+        pertanyaan_obj = pertanyaan.save()
+        serialized_pertanyaan_list.append({
+            'pertanyaan': PertanyaanSerializer(
+                pertanyaan_obj.get('pertanyaan')).data,
+            'opsi_jawaban': OpsiJawabanSerializer(
+                pertanyaan_obj.get('opsi_jawaban'), many=True).data})
 
     return Response(data={
         'survei': SurveiSerializer(survei).data,
-        'pertanyaan': serialized_pertanyaan_list,
-        'errors': errors},
+        'pertanyaan': serialized_pertanyaan_list},
         status=status.HTTP_201_CREATED)

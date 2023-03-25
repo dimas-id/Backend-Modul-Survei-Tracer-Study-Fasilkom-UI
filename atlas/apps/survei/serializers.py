@@ -46,6 +46,35 @@ class PertanyaanCreateRequestSerializer(serializers.Serializer):
     tipe = serializers.ChoiceField(choices=JENIS_PERTANYAAN)
     survei_id = serializers.IntegerField()
 
+    def is_valid(self, raise_exception=False):
+        if (not super(PertanyaanCreateRequestSerializer,
+                      self).is_valid(raise_exception=raise_exception)):
+            return False
+        tipe = self.validated_data["tipe"]
+        pertanyaan_serializer_class = None
+        if tipe == "Skala Linear":
+            pertanyaan_serializer_class = SkalaLinierRequestSerializer
+        elif tipe == "Pilihan Ganda":
+            pertanyaan_serializer_class = RadioButtonRequestSerializer
+        elif tipe == "Jawaban Singkat":
+            pertanyaan_serializer_class = IsianRequestSerializer
+        elif tipe == "Drop-Down":
+            pertanyaan_serializer_class = DropDownRequestSerializer
+        elif tipe == "Kotak Centang":
+            pertanyaan_serializer_class = CheckBoxRequestSerializer
+        else:
+            return False
+        data = {
+            'pertanyaan': self.validated_data['pertanyaan'],
+            'required': self.validated_data['required'],
+            'survei_id': self.validated_data['survei_id'],
+            **self.validated_data['option'],
+        }
+
+        pertanyaan_serializer = pertanyaan_serializer_class(data=data)
+
+        return pertanyaan_serializer.is_valid(raise_exception=raise_exception)
+
     def create(self, validated_data):
         tipe = validated_data["tipe"]
         pertanyaan_serializer_class = None
@@ -68,10 +97,7 @@ class PertanyaanCreateRequestSerializer(serializers.Serializer):
         else:
             raise ValidationError(f"Tipe pertanyaan {tipe} tidak valid")
         pertanyaan_serializer = pertanyaan_serializer_class(data=data)
-
-        if not pertanyaan_serializer.is_valid():
-            raise ValidationError(pertanyaan_serializer.errors)
-
+        pertanyaan_serializer.is_valid()
         return pertanyaan_serializer.save()
 
 

@@ -722,14 +722,64 @@ class TestPertanyaanCreateRequestSerializer(TestCase):
             'option': {}
         }
 
-    @patch('atlas.apps.survei.serializers.IsianRequestSerializer')
-    def test_create_should_raise_error_if_serializer_is_not_valid(self, pertanyaan_serializer_mock):
+    @patch('atlas.apps.survei.serializers.IsianRequestSerializer.is_valid', return_value=True)
+    def test_is_valid_should_return_true_if_pertanyaan_valid(self, is_valid_mock):
         serializer = PertanyaanCreateRequestSerializer(
             data=self.serializer_data)
-        pertanyaan_serializer_mock.return_value.is_valid.return_value = False
-        pertanyaan_serializer_mock.return_value.errors = "error"
-        with self.assertRaises(ValidationError):
-            serializer.create(self.serializer_data)
+        self.assertTrue(serializer.is_valid())
+
+    @patch('atlas.apps.survei.serializers.IsianRequestSerializer.is_valid', return_value=False)
+    def test_is_valid_should_return_false_if_pertanyaan_not_valid(self, is_valid_mock):
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_is_valid_should_return_false_if_tipe_not_found(self):
+        self.serializer_data['tipe'] = 'Waktu'
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        self.assertFalse(serializer.is_valid())
+
+    @patch('atlas.apps.survei.serializers.SkalaLinierRequestSerializer.is_valid')
+    def test_is_valid_should_call_skala_linier(self, is_valid_mock):
+        self.serializer_data['tipe'] = 'Skala Linear'
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.is_valid()
+        is_valid_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.serializers.IsianRequestSerializer.is_valid')
+    def test_is_valid_should_call_isian(self, is_valid_mock):
+        self.serializer_data['tipe'] = 'Jawaban Singkat'
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.is_valid()
+        is_valid_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.serializers.RadioButtonRequestSerializer.is_valid')
+    def test_is_valid_should_call_radio_button(self, is_valid_mock):
+        self.serializer_data['tipe'] = 'Pilihan Ganda'
+
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.is_valid()
+        is_valid_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.serializers.CheckBoxRequestSerializer.is_valid')
+    def test_is_valid_should_call_checkbox(self, is_valid_mock):
+        self.serializer_data['tipe'] = 'Kotak Centang'
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.is_valid()
+        is_valid_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.serializers.DropDownRequestSerializer.is_valid')
+    def test_is_valid_should_call_dropdown(self, is_valid_mock):
+        self.serializer_data['tipe'] = 'Drop-Down'
+        serializer = PertanyaanCreateRequestSerializer(
+            data=self.serializer_data)
+        serializer.is_valid()
+        is_valid_mock.assert_called_once()
 
     @patch('atlas.apps.survei.serializers.IsianRequestSerializer')
     def test_create_should_raise_error_if_tipe_not_found(self, pertanyaan_serializer_mock):

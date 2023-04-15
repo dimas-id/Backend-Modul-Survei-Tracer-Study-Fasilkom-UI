@@ -11,6 +11,8 @@ from django.urls import reverse
 from atlas.apps.survei.serializers import RadioButtonRequestSerializer
 from atlas.libs.test import RestTestCase
 
+from atlas.apps.survei.models import Pertanyaan, Survei, OpsiJawaban
+
 
 class TestRegisterSurveiModels(RestTestCase):
 
@@ -194,10 +196,47 @@ class TestRegisterSurveiModels(RestTestCase):
 
 class TestGetSurveiAPI(RestTestCase):
     LIST_SURVEI_URL = "/api/v3/survei/list"
+    SURVEI_BY_ID_1_URL = "/api/v3/survei/?survei_id=1"
+    SURVEI_BY_ID_2_URL = "/api/v3/survei/?survei_id=2"
 
     def setUp(self):
         self.factory = APIRequestFactory()
         self.user = RestTestCase.create_admin()
+        survei_data_1 = {
+            'id': 1,
+            'nama': 'Test Survei',
+            'deskripsi': 'ini adalah survei pertama',
+        }
+        pertanyaan_data_1 = {
+            'pertanyaan': 'q1',
+            'wajib_diisi': True,
+            'survei_id':1 ,
+            'jenis_jawaban': 'Jawaban Singkat'
+        }
+        pertanyaan_data_2 = {
+            'id': 20,
+            'pertanyaan': 'q2',
+            'wajib_diisi': True,
+            'survei_id':1 ,
+            'jenis_jawaban': 'Pilihan Ganda'
+        }
+        
+        opsi_jawaban_1 = {
+            'opsi_jawaban': 'Google',
+            'pertanyaan_id': 20
+        }
+        
+        opsi_jawaban_2 = {
+            'opsi_jawaban': 'Chat GPT',
+            'pertanyaan_id': 20
+        }
+        
+        self.survei = Survei.objects.create(**survei_data_1, creator=self.user)
+        self.pertanyaan1 = Pertanyaan.objects.create(**pertanyaan_data_1)
+        self.pertanyaan2 = Pertanyaan.objects.create(**pertanyaan_data_2)
+        self.opsi_jawaban_1 = OpsiJawaban.objects.create(**opsi_jawaban_1)
+        self.opsi_jawaban_2 = OpsiJawaban.objects.create(**opsi_jawaban_2)
+        
 
     def test_valid_get_survei(self):
         self.authenticate(self.user)
@@ -211,3 +250,20 @@ class TestGetSurveiAPI(RestTestCase):
             self.LIST_SURVEI_URL)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_get_survei_by_id(self):
+        self.authenticate(self.user)
+        
+        response = self.client.get(self.SURVEI_BY_ID_1_URL)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['survei']['nama'], 'Test Survei')
+        self.assertEqual(len(response.data['list_pertanyaan']), 2)
+        self.assertEqual(len(response.data['list_opsi_jawaban']), 2)
+    
+    def test_get_survei_by_id_not_found(self):
+        self.authenticate(self.user)
+        response = self.client.get(
+            self.SURVEI_BY_ID_2_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

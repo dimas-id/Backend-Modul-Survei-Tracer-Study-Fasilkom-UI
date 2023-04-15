@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, Mock, patch
 from django.test import TestCase
 from atlas.apps.account.models import User
 from atlas.apps.survei.services import SurveiService
-from atlas.apps.survei.models import Pertanyaan, Survei
+from atlas.apps.survei.models import Pertanyaan, Survei, OpsiJawaban
 from rest_framework.test import APIRequestFactory
 from datetime import datetime
 
@@ -18,6 +18,7 @@ class TestSurveiModels(TestCase):
         }
 
         survei_data_1 = {
+            'id': 1,
             'nama': 'survei 01',
             'deskripsi': 'ini adalah survei pertama',
         }
@@ -30,11 +31,41 @@ class TestSurveiModels(TestCase):
             'deskripsi': 'ini adalah survei ketiga',
         }
 
+        pertanyaan_data_1 = {
+            'pertanyaan': 'apakah betul?',
+            'wajib_diisi': True,
+            'survei_id':1 ,
+            'jenis_jawaban': 'Jawaban Singkat'
+        }
+        pertanyaan_data_2 = {
+            'id': 2,
+            'pertanyaan': 'apakah benar?',
+            'wajib_diisi': True,
+            'survei_id':1 ,
+            'jenis_jawaban': 'Pilihan Ganda'
+        }
+        
+        opsi_jawaban_1 = {
+            'opsi_jawaban': 'Tokopedia',
+            'pertanyaan_id': 2
+        }
+        
+        opsi_jawaban_2 = {
+            'opsi_jawaban': 'Shopee',
+            'pertanyaan_id': 2
+        }
+        
         self.factory = APIRequestFactory()
         user = User.objects.create(**user_data)
         Survei.objects.create(**survei_data_1, creator=user)
         Survei.objects.create(**survei_data_2, creator=user)
         Survei.objects.create(**survei_data_3, creator=user)
+        
+        Pertanyaan.objects.create(**pertanyaan_data_1)
+        Pertanyaan.objects.create(**pertanyaan_data_2)
+        
+        OpsiJawaban.objects.create(**opsi_jawaban_1)
+        OpsiJawaban.objects.create(**opsi_jawaban_2)
         
         survei = Survei.objects.get(nama = "survei 03")
         survei.sudah_dikirim = True
@@ -268,3 +299,24 @@ class TestSurveiModels(TestCase):
             opsi_jawaban=options)
         
         self.assertEqual(opsi_jawaban, objects_create_mock.return_value)
+    
+    
+    def test_service_get_list_pertanyaan(self):
+        survei_service = SurveiService()
+        length = len(survei_service.get_list_pertanyaan_by_survei_id(1))
+        self.assertEqual(length, 2)
+    
+    def test_service_get_list_pertanyaan_survei_not_found(self):
+        survei_service = SurveiService()
+        length = len(survei_service.get_list_pertanyaan_by_survei_id(2))
+        self.assertEqual(length, 0)
+    
+    def test_service_get_list_opsi_jawaban(self):
+        survei_service = SurveiService()
+        length = len(survei_service.get_list_opsi_jawaban(1))
+        self.assertEqual(length, 2)
+    
+    def test_service_get_list_opsi_jawaban_survei_not_found(self):
+        survei_service = SurveiService()
+        length = len(survei_service.get_list_opsi_jawaban(2))
+        self.assertEqual(length, 0)

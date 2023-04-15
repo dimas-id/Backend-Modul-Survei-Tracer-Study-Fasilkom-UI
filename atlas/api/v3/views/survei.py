@@ -24,6 +24,23 @@ def get_list_survei(_):
                      'survei_belum_dikirim': not_sent_list.data}
     return Response(data=response_data, status=status.HTTP_200_OK)
 
+@api_view()
+@permission_classes([IsAuthenticated])
+def get_survei_by_id(request):
+    survei_id = request.query_params.get('survei_id')
+    survei_service = SurveiService()
+    
+    survei = survei_service.get_survei(survei_id)
+    if survei == None:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    serialized_survei = SurveiSerializer(survei).data
+    list_pertanyaan = PertanyaanSerializer(survei_service.get_list_pertanyaan_by_survei_id(survei_id), many=True).data
+    list_opsi_jawaban = OpsiJawabanSerializer(survei_service.get_list_opsi_jawaban(survei_id), many=True).data
+    response_data = {'survei': serialized_survei, 'list_pertanyaan': list_pertanyaan, 'list_opsi_jawaban': list_opsi_jawaban}
+    
+    return Response(data=response_data, status=status.HTTP_200_OK)
+    
 
 @api_view(http_method_names=['POST'])
 @permission_classes([IsAuthenticated, IsAdminUser])

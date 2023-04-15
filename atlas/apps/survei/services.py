@@ -28,6 +28,18 @@ class SurveiService:
             return None
         
     @transaction.atomic
+    def get_list_pertanyaan_by_survei_id(self, s_id):
+        return Pertanyaan.objects.filter(survei_id = s_id)
+    
+    @transaction.atomic
+    def get_list_opsi_jawaban(self, s_id):
+        list_pertanyaan = self.get_list_pertanyaan_by_survei_id(s_id)
+        list_id_pertanyaan = []
+        for pertanyaan in list_pertanyaan:
+            list_id_pertanyaan.append(pertanyaan.id)
+        return OpsiJawaban.objects.filter(pertanyaan_id__in=list_id_pertanyaan)
+    
+    @transaction.atomic
     def list_survei_sent(self):
         return Survei.objects.filter(sudah_dikirim=True)
 

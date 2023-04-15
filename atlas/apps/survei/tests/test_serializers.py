@@ -98,6 +98,7 @@ class TestOpsiJawabanSerializer(TestCase):
         self.opsi_jawaban_data = {
             'id': 1,
             'opsi_jawaban': 'Opsi 1',
+            'pertanyaan_id': 1
         }
 
         self.serializer = OpsiJawabanSerializer(
@@ -106,7 +107,7 @@ class TestOpsiJawabanSerializer(TestCase):
     def test_contains_expected_fields(self):
         fields = self.serializer.get_fields()
         self.assertEqual(set(fields), set(
-            ['id', 'opsi_jawaban']))
+            ['id', 'opsi_jawaban', 'pertanyaan_id']))
 
 
 class TestSkalaLinierRequestSerializer(TestCase):

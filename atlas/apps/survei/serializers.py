@@ -125,6 +125,7 @@ class PertanyaanSerializer(serializers.Serializer):
 class OpsiJawabanSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     opsi_jawaban = serializers.CharField(max_length=150)
+    pertanyaan_id = serializers.IntegerField()
 
 
 class IsianRequestSerializer(serializers.Serializer):

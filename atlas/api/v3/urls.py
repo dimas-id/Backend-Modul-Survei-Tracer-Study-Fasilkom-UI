@@ -1,5 +1,7 @@
 from django.urls import path
 from atlas.api.v3.views import survei, pertanyaan, response
+from atlas.api.v3.views.email_template import EmailTemplateCreateView, EmailTemplateDeleteView, EmailTemplateListView, EmailTemplateUpdateView
+
 
 survei = [
     path('/survei/list', survei.get_list_survei),
@@ -13,4 +15,15 @@ survei = [
     path('/pertanyaan/create/checkbox', pertanyaan.register_checkbox),
 ]
 
-urlpatterns = [*survei]
+email_template = [
+    path('/email-templates', EmailTemplateListView.as_view(),
+         name='email_templates_list'),
+    path('/email-templates/create', EmailTemplateCreateView.as_view(),
+         name='email_templates_create'),
+    path('/email-templates/<int:pk>', EmailTemplateUpdateView.as_view(),
+         name='email_templates_update'),
+    path('/email-templates/<int:pk>/delete',
+         EmailTemplateDeleteView.as_view(), name='email_templates_delete'),
+]
+
+urlpatterns = [*survei, *email_template]

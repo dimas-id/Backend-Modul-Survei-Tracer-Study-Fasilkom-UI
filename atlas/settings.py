@@ -76,7 +76,8 @@ APPS = [
     'atlas.apps.contact',
     'atlas.apps.survei',
     'atlas.apps.response',
-    'atlas.apps.validator'
+    'atlas.apps.validator',
+    'atlas.apps.email_blaster',
 ]
 
 MODULES = [

@@ -1,32 +1,148 @@
+image: nikolaik/python-nodejs:python3.7-nodejs16-alpine
 stages:
-  - staging
-  - production
+  - key
+  - test
+  - sonarqube
 
-variables:
-  SERVICE_DIRECTORY: /home/admin/${CI_PROJECT_NAME}
-  DOCKER_COMPOSE_COMMAND: docker-compose  -f docker-compose.prod.yml up -d --build
-  VM_USER: admin
-  ENV_FILE_NAME: .env
+cache:
+  paths:
+    - .sonar/cache
+    - .cache/pip
+    - venv
 
 before_script:
   - apk update
-  - apk add openssh-client bash sshpass
-  - export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-  
-deploy_staging:
-  stage: staging
-  script:
-    - echo "==UPDATE ENV FILE=="
-    - sshpass -p $STAGING_VM_PASSWORD scp -o StrictHostKeyChecking=no $STAGING_ENV $VM_USER@$STAGING_VM_IP:$SERVICE_DIRECTORY/$ENV_FILE_NAME
-    - sshpass -p $STAGING_VM_PASSWORD ssh -o StrictHostKeyChecking=no $VM_USER@$STAGING_VM_IP "cd $SERVICE_DIRECTORY ; echo "==PULLING FROM REF BRANCH==" ; git checkout -b $CI_COMMIT_REF_NAME ; git checkout $CI_COMMIT_REF_NAME ; git pull origin $CI_COMMIT_REF_NAME ; echo "==REBUILDING DOCKER IMAGE==" ; $DOCKER_COMPOSE_COMMAND"
-  when: manual
+  - python3 -V
+  - python3 -m venv venv
+  - source ./venv/bin/activate
+  - echo $ENVAR > .env
+  - export $(cat .env | xargs)
+  - pip install --upgrade pip
+  - ./dependency_install.sh
+  - pip3 install -r requirements.txt
 
-deploy_production:
-  stage: production
+key_staging:
+  stage: key
+  only:
+    - staging #put or rename your working branches here
+    - master
   script:
-    - echo "==UPDATE ENV FILE=="
-    - sshpass -p $PRODUCTION_VM_PASSWORD scp -o StrictHostKeyChecking=no $PRODUCTION_ENV $VM_USER@$PRODUCTION_VM_IP:$SERVICE_DIRECTORY/$ENV_FILE_NAME
-    - sshpass -p $PRODUCTION_VM_PASSWORD ssh -o StrictHostKeyChecking=no $VM_USER@$PRODUCTION_VM_IP "cd $SERVICE_DIRECTORY ; echo "==PULLING LATEST MASTER==" ; git checkout master ; git pull origin master ; echo "==REBUILDING DOCKER IMAGE==" ; $DOCKER_COMPOSE_COMMAND"
+    - echo "SONAR_TOKEN=$SONAR_TOKEN_STAGING" > .sonar_key
+    - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_STAGING" >> .sonar_key
+  artifacts:
+    paths:
+      - .sonar_key
+
+key_azzam:
+  stage: key
+  only:
+    - PBI-10-isian_dan_file #put or rename your working branches here
+    - PBI-24-mengedit_survei
+  script:
+    - echo "SONAR_TOKEN=$SONAR_TOKEN_AZZAM" > .sonar_key
+    - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_AZZAM" >> .sonar_key
+  artifacts:
+    paths:
+      - .sonar_key
+
+key_chris:
+  stage: key
+  only:
+    - PBI-16-melihat_list_survei #put or rename your working branches here
+    - PBI-18-mengisi_survei
+    - PBI-17-autofill_data_diri
+  script:
+    - echo "SONAR_TOKEN=$SONAR_TOKEN_CHRIS" > .sonar_key
+    - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_CHRIS" >> .sonar_key
+  artifacts:
+    paths:
+      - .sonar_key
+
+key_dimas:
+  stage: key
+  only:
+    - PBI-9-radiobutton #put your working branches here
+    - PBI-15-tujuan_email_blaster
+  script:
+    - echo "SONAR_TOKEN=$SONAR_TOKEN_DIMAS" > .sonar_key
+    - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_DIMAS" >> .sonar_key
+  artifacts:
+    paths:
+      - .sonar_key
+
+key_haikal:
+  stage: key
+  only:
+    - PBI-2-deployment #put or rename your working branches here
+    - PBI-14-dropdown 
+    - PBI-25-menghapus_survei
+  script:
+    - echo "SONAR_TOKEN=$SONAR_TOKEN_HAIKAL" > .sonar_key
+    - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_HAIKAL" >> .sonar_key
+  artifacts:
+    paths:
+      - .sonar_key
+
+key_indra:
+  stage: key
+  only:
+    - PBI-1-membuat_survei #put or rename your working branches here
+    - PBI-19-visualisasi
+  script:
+    - echo "SONAR_TOKEN=$SONAR_TOKEN_INDRA" > .sonar_key
+    - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_INDRA" >> .sonar_key
+  artifacts:
+    paths:
+      - .sonar_key
+
+key_josh:
+  stage: key
+  only:
+    - PBI-13-skala_linier ##put or rename your working branches here
+    - PBI-
+  script:
+    - echo "SONAR_TOKEN=$SONAR_TOKEN_JOSH" > .sonar_key
+    - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_JOSH" >> .sonar_key
+  artifacts:
+    paths:
+      - .sonar_key
+
+python_coverage_unit_test:
+  stage: test
+  script:
+    - coverage run --include="./*" --omit="./manage.py" manage.py test --keepdb || true #ignore nonzero exit code
+    - coverage report -m
+    - coverage xml -i -o ./reports/coverage-report.xml
+  artifacts:
+    paths:
+      - ./reports/coverage-report.xml
+      - ./reports/unittest-report.xml
   only:
     - master
-  when: manual
+    - staging
+    - PBI-2-deployment
+  allow_failure: true
+
+sonarqube_report:
+  stage: sonarqube
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
+    GIT_DEPTH: "0" # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - export $(cat .sonar_key | xargs)
+    - sonar-scanner -X
+      -Dsonar.host.url=$SONAR_HOST_URL
+      -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT_KEY
+    - ls -la ./reports/
+  allow_failure: true

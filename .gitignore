@@ -53,8 +53,10 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+reports
 *.cover
 .hypothesis/
+.scannerwork
 
 # Translations
 *.mo

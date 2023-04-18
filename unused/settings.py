@@ -14,8 +14,6 @@ import os
 import sys
 from datetime import timedelta
 
-import dj_database_url
-
 import environ
 import sentry_sdk
 from django.utils.translation import gettext_lazy as _
@@ -77,9 +75,7 @@ APPS = [
     'atlas.apps.external_auth',
     'atlas.apps.contact',
     'atlas.apps.survei',
-    'atlas.apps.response',
-    'atlas.apps.validator',
-    'atlas.apps.email_blaster',
+    'atlas.apps.validator'
 ]
 
 MODULES = [
@@ -148,34 +144,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'atlas.wsgi.application'
 
-DATABASE_URL = env('DATABASE_URL')
-TEST_DATABASE_URL = env('HEROKU_POSTGRESQL_RED_URL')
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-if 'test' in sys.argv:
-    # Configuration for test database
-    DATABASES = {
-        'default': {
-            'NAME': env('TEST_DB_NAME'), 
-            'USER': env('TEST_DB_POSTGRES_USER'), 
-            'PASSWORD': env('TEST_DB_PASSWORD'), 
-            'HOST': env('TEST_DB_HOST'), 
-            'PORT': env('TEST_DB_PORT'), 
-            'CONN_MAX_AGE': 600, 
-            'OPTIONS': {'sslmode': 'require'}, 
-            'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-            'TEST': {
-                'NAME': env('TEST_DB_NAME')
-                }
-            }
-        }
-else:
-    DATABASES = {
-        'default': dj_database_url.config(
-            conn_max_age=600, ssl_require=True, default=DATABASE_URL)
+DATABASES = {
+    'default': {
+        'ENGINE': env('ATLAS_SQL_ENGINE'),
+        'NAME': env('ATLAS_DB_NAME'),
+        'USER': env('ATLAS_DB_POSTGRES_USER'),
+        'PASSWORD': env('ATLAS_DB_PASSWORD'),
+        'HOST': env('ATLAS_DB_HOST'),
+        'PORT': env('ATLAS_DB_PORT')
     }
-
+}
 
 # Django Rest Framework
 APPEND_SLASH = False
@@ -213,14 +193,13 @@ AUTOSLUG_SLUGIFY_FUNCTION = slugify
 
 # django-rq
 RQ_QUEUES = {
-    'default': {
-        'HOST': env('ATLAS_REDIS_HOST'),
-        'PORT': env('ATLAS_REDIS_PORT'),
-        'DB': env('ATLAS_REDIS_DB'),
-        'USERNAME': env('ATLAS_REDIS_USERNAME'),
-        'PASSWORD': env('ATLAS_REDIS_PASSWORD'),
-        'DEFAULT_TIMEOUT': env('ATLAS_REDIS_DEFAULT_TIMEOUT'),
-    },
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.environ.get('REDISCLOUD_URL'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
 }
 
 SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
@@ -343,9 +322,3 @@ PROXIES = {
 USE_X_FORWARDED_HOST = True
 
 SISIDANG_RESPONSE = []
-
-# XMLTestRunner
-
-TEST_RUNNER = 'xmlrunner.extra.djangotestrunner.XMLTestRunner'
-TEST_OUTPUT_DIR = "./reports"
-TEST_OUTPUT_FILE_NAME = "unittest-report.xml"

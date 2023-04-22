@@ -117,10 +117,6 @@ python_coverage_unit_test:
     paths:
       - ./reports/coverage-report.xml
       - ./reports/unittest-report.xml
-  only:
-    - master
-    - staging
-    - PBI-2-deployment
   allow_failure: true
 
 sonarqube_report:

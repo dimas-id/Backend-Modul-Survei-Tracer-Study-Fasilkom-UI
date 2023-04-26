@@ -61,7 +61,7 @@ key_chris:
 key_dimas:
   stage: key
   only:
-    - PBI-9-radiobutton #put your working branches here
+    - PBI-9-radiobutton #put or rename your working branches here
     - PBI-15-tujuan_email_blaster
   script:
     - echo "SONAR_TOKEN=$SONAR_TOKEN_DIMAS" > .sonar_key
@@ -98,7 +98,7 @@ key_indra:
 key_josh:
   stage: key
   only:
-    - PBI-13-skala_linier ##put or rename your working branches here
+    - PBI-13-skala_linier #put or rename your working branches here
     - PBI-
   script:
     - echo "SONAR_TOKEN=$SONAR_TOKEN_JOSH" > .sonar_key

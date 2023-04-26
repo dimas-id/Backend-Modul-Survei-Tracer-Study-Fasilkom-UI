@@ -41,6 +41,18 @@ def get_survei_by_id(request):
     
     return Response(data=response_data, status=status.HTTP_200_OK)
     
+@api_view(http_method_names=['DELETE'])
+@permission_classes([IsAuthenticated, IsAdminUser])
+def delete_survei_by_id(request):
+    survei_id = request.query_params.get('survei_id')
+    survei_service = SurveiService()
+
+    survei = survei_service.delete_survei(survei_id)
+    if survei[0] == SurveiService.DELETE_NOT_FOUND:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    elif survei[0] == SurveiService.DELETE_PUBLISHED:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(http_method_names=['POST'])
 @permission_classes([IsAuthenticated, IsAdminUser])

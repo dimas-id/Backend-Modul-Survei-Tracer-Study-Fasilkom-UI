@@ -267,3 +267,55 @@ class TestGetSurveiAPI(RestTestCase):
             self.SURVEI_BY_ID_2_URL)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class TestDeleteSurveiAPI(RestTestCase):
+    ID_VALID = 1
+    ID_PUBLISHED = 2
+    ID_NOT_EXIST = 3
+    ENDPOINT = "/api/v3/survei/delete/?survei_id="
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.admin_user = RestTestCase.create_admin()
+        self.non_admin_user = RestTestCase.create_user()
+        survei_data_1 = {
+            'id': self.ID_VALID,
+            'nama': 'Test Survei',
+            'deskripsi': 'ini adalah survei pertama',
+            'sudah_dikirim': False
+        }
+        survei_data_2 = {
+            'id': self.ID_PUBLISHED,
+            'nama': 'Test Survei',
+            'deskripsi': 'ini adalah survei kedua. Survei ini sudah dikirim.',
+            'sudah_dikirim': True
+        }
+        self.survei = Survei.objects.create(**survei_data_1, creator=self.admin_user)
+        self.pertanyaan1 = Survei.objects.create(**survei_data_2, creator=self.admin_user)
+        
+    def test_delete_survei_by_id(self):
+        self.authenticate(self.admin_user)
+        response = self.client.delete(self.ENDPOINT + str(self.ID_VALID))
+        
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.data, None)
+
+    def test_delete_survei_by_id_not_authorized(self):
+        response = self.client.delete(self.ENDPOINT + str(self.ID_VALID))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+    def test_delete_survei_by_id_not_admin(self):
+        self.authenticate(self.non_admin_user)
+        response = self.client.delete(self.ENDPOINT + str(self.ID_VALID))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_survei_by_id_not_exist(self):
+        self.authenticate(self.admin_user)
+        response = self.client.delete(self.ENDPOINT + str(self.ID_NOT_EXIST))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_survei_by_id_published(self):
+        self.authenticate(self.admin_user)
+        response = self.client.delete(self.ENDPOINT + str(self.ID_PUBLISHED))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

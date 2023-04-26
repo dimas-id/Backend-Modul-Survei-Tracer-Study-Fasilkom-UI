@@ -3,6 +3,7 @@ from django.test import TestCase
 from atlas.apps.account.models import User
 from atlas.apps.survei.services import SurveiService
 from atlas.apps.survei.models import Pertanyaan, Survei, OpsiJawaban
+from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from datetime import datetime
 
@@ -100,7 +101,49 @@ class TestSurveiModels(TestCase):
         survei_service = SurveiService()
         length = len(survei_service.list_survei())
         self.assertEqual(length, 3)
+
+    @patch('atlas.apps.survei.models.Survei.objects')    
+    def test_service_delete_survei_valid(self, survei_objects_mock):
+        survei_service = SurveiService()
+        mock_survei = MagicMock(spec_set=Survei, id=1)
+        survei_objects_mock.get.return_value = mock_survei 
+
+        success_value = (SurveiService.DELETE_SUCCESS, (1, {'Survei': 1}))
+        mock_survei.delete.return_value = success_value[1]
+        actual_value = survei_service.delete_survei(1)
+
+        survei_objects_mock.get.assert_called_once_with(id=1)
+        mock_survei.delete.assert_called_once()
+        self.assertEqual(actual_value, success_value)
+
+    @patch('atlas.apps.survei.models.Survei.objects')    
+    def test_service_delete_survei_not_found(self, survei_objects_mock):
+        survei_service = SurveiService()
+        mock_survei = MagicMock(spec_set=Survei, id=1)
+        survei_objects_mock.get.side_effect = Survei.DoesNotExist
         
+        fail_value = (SurveiService.DELETE_NOT_FOUND, None)
+        survei_objects_mock.delete.return_value = fail_value[1]
+        actual_value = survei_service.delete_survei(2)
+
+        survei_objects_mock.get.assert_called_once_with(id=2)
+        mock_survei.delete.assert_not_called()
+        self.assertEqual(actual_value, fail_value)
+    
+    @patch('atlas.apps.survei.models.Survei.objects')    
+    def test_service_delete_survei_published(self, survei_objects_mock):
+        survei_service = SurveiService()
+        mock_survei = MagicMock(spec_set=Survei, id=1, sudah_dikirim=True)
+        survei_objects_mock.get.return_value = mock_survei
+        
+        fail_value = (SurveiService.DELETE_PUBLISHED, None)
+        survei_objects_mock.delete.return_value = fail_value[1]
+        actual_value = survei_service.delete_survei(1)
+
+        survei_objects_mock.get.assert_called_once_with(id=1)
+        mock_survei.delete.assert_not_called()
+        self.assertEqual(actual_value, fail_value)
+
     @patch('atlas.apps.survei.models.Survei.objects.get')
     def test_get_survei_call_objects_get(self, objects_get_mock):
         survei_service = SurveiService()

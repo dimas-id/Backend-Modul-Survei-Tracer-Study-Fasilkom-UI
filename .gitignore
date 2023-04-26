@@ -120,3 +120,6 @@ env-python3.7.9/
 .mypy_cache/
 
 .scannerwork/
+
+# sonarqube reports
+.reports/

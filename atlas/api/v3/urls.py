@@ -5,6 +5,7 @@ from atlas.api.v3.views.email_template import EmailTemplateCreateView, EmailTemp
 survei = [
     path('/survei/list', survei.get_list_survei),
     path('/survei/create', survei.register_survei),
+    path('/survei/delete/', survei.delete_survei_by_id),
     path('/survei/', survei.get_survei_by_id),
     path('/survei/isi', response.isi_survei),
     path('/pertanyaan/create/skala-linier', pertanyaan.register_skala_linier),

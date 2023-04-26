@@ -26,7 +26,6 @@ class SurveiSerializer(serializers.Serializer):
             return None
 
     # update existing survei
-
     def update(self, instance, validated_data):
         instance.nama = validated_data.get('nama', instance.nama)
         instance.deskripsi = validated_data.get(

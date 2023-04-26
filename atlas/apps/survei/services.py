@@ -3,6 +3,10 @@ from django.db import (transaction)
 from django.contrib.auth import get_user_model
 
 class SurveiService:
+    DELETE_SUCCESS = 0
+    DELETE_NOT_FOUND = 1
+    DELETE_PUBLISHED = 2
+    
     @transaction.atomic
     def register_suvei(self, request, nama, deskripsi, tanggal_dikirim=None, sudah_dikirim=False):
         user_model = get_user_model()
@@ -127,3 +131,23 @@ class SurveiService:
             pertanyaan=pertanyaan, 
             opsi_jawaban=pilihan_jawaban)
         return opsi_jawaban_obj
+    
+    @transaction.atomic
+    def delete_survei(self, survei_id):
+        '''
+        Return `(status, value)`:\n
+        - `status` bernilai 0 jika success; 1 jika not-found
+        - `value` bernilai return value fungsi `delete()` Django
+        '''
+        delete_status = self.DELETE_NOT_FOUND
+        delete_value = None
+        try:
+            survei = Survei.objects.get(id=survei_id)
+            if survei.sudah_dikirim == True:
+                delete_status = self.DELETE_PUBLISHED
+            else:
+                delete_value = survei.delete()
+                delete_status = self.DELETE_SUCCESS
+        except Survei.DoesNotExist:
+            delete_status = self.DELETE_NOT_FOUND
+        return (delete_status, delete_value)

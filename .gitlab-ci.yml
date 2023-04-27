@@ -37,7 +37,7 @@ key_azzam:
   stage: key
   only:
     - PBI-10-isian_dan_file #put or rename your working branches here
-    - PBI-24-mengedit_survei
+    - PBI-24-mengedit-survei
   script:
     - echo "SONAR_TOKEN=$SONAR_TOKEN_AZZAM" > .sonar_key
     - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_AZZAM" >> .sonar_key

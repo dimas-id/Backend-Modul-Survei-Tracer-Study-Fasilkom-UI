@@ -74,7 +74,7 @@ key_haikal:
   stage: key
   only:
     - PBI-2-deployment #put or rename your working branches here
-    - PBI-14-dropdown 
+    - PBI-14-dropdown
     - PBI-25-menghapus_survei
   script:
     - echo "SONAR_TOKEN=$SONAR_TOKEN_HAIKAL" > .sonar_key
@@ -98,8 +98,8 @@ key_indra:
 key_josh:
   stage: key
   only:
-    - PBI-13-skala_linier #put or rename your working branches here
-    - PBI-
+    - PBI-13-skala_linier
+    - PBI-12-kirim_email
   script:
     - echo "SONAR_TOKEN=$SONAR_TOKEN_JOSH" > .sonar_key
     - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_JOSH" >> .sonar_key

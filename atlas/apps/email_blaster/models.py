@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class EmailTemplate(models.Model):
     title = models.CharField(max_length=150)
     email_subject = models.CharField(max_length=150)

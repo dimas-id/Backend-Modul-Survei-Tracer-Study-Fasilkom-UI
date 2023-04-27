@@ -67,3 +67,5 @@ urllib3
 wheel
 whitenoise
 wrapt
+celery
+importlib-metadata==4.8.3

@@ -148,14 +148,26 @@ WSGI_APPLICATION = 'atlas.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': env('ATLAS_SQL_ENGINE'),
-        'NAME': env('ATLAS_DB_NAME'),
-        'USER': env('ATLAS_DB_POSTGRES_USER'),
-        'PASSWORD': env('ATLAS_DB_PASSWORD'),
-        'HOST': env('ATLAS_DB_HOST'),
-        'PORT': env('ATLAS_DB_PORT')
+if 'test' in sys.argv:
+    # Configuration for test database
+    DATABASES = {
+        'default': {
+            'NAME': env('TEST_DB_NAME'),
+            'USER': env('TEST_DB_POSTGRES_USER'),
+            'PASSWORD': env('TEST_DB_PASSWORD'),
+            'HOST': env('TEST_DB_HOST'),
+            'PORT': env('TEST_DB_PORT'),
+            'CONN_MAX_AGE': 600,
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'TEST': {
+                'NAME': env('TEST_DB_NAME')
+            }
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600, default=DATABASE_URL)
     }
 }
 
@@ -323,3 +335,25 @@ PROXIES = {
 USE_X_FORWARDED_HOST = True
 
 SISIDANG_RESPONSE = []
+
+# XMLTestRunner
+
+TEST_RUNNER = 'xmlrunner.extra.djangotestrunner.XMLTestRunner'
+TEST_OUTPUT_DIR = "./reports"
+TEST_OUTPUT_FILE_NAME = "unittest-report.xml"
+
+REDIS_URL = f"redis://{env('ATLAS_REDIS_HOST')}:{env('ATLAS_REDIS_PORT')}/{env('ATLAS_REDIS_DB')}"
+BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 3600}
+
+# email blaster
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+if TESTING:
+    EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')

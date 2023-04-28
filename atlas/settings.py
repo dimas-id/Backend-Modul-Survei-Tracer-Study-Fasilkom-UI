@@ -20,6 +20,7 @@ from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
 
 from atlas.libs.utils.slug import slugify
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -167,9 +168,8 @@ if 'test' in sys.argv:
 else:
     DATABASES = {
         'default': dj_database_url.config(
-            conn_max_age=600, default=DATABASE_URL)
+            conn_max_age=600, default=env('DATABASE_URL'))
     }
-}
 
 # Django Rest Framework
 APPEND_SLASH = False
@@ -221,7 +221,7 @@ SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 SERVICE_IP_ADDRESS = env('ATLAS_SERVICE_IP_ADDRESS')
 
 ALLOWED_HOSTS = ('localhost', '127.0.0.1', ROOT_URI, SERVICE_IP_ADDRESS)
-CORS_ORIGIN_WHITELIST = (HYPERION_URI, TOP_LEVEL_DOMAIN)
+CORS_ALLOWED_ORIGINS = (HYPERION_URI, TOP_LEVEL_DOMAIN)
 CORS_ORIGIN_ALLOW_ALL = True
 
 AUTHENTICATION_BACKENDS = (

@@ -21,6 +21,7 @@ class Survei(models.Model):
     deskripsi = models.CharField(max_length=1200)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     tanggal_dikirim = models.DateTimeField(null=True, blank=True)
+    sudah_final = models.BooleanField(default=False)
     sudah_dikirim = models.BooleanField(default=False)
     tanggal_dibuat = models.DateTimeField(auto_now_add=True)
     tanggal_diedit = models.DateTimeField(auto_now=True)

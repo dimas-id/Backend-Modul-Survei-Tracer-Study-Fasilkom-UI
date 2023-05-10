@@ -2,27 +2,40 @@ from atlas.apps.survei.models import OpsiJawaban, Pertanyaan, Survei
 from django.db import (transaction)
 from django.contrib.auth import get_user_model
 
+
 class SurveiService:
     DELETE_SUCCESS = 0
     DELETE_NOT_FOUND = 1
     DELETE_PUBLISHED = 2
-    
+
     @transaction.atomic
-    def register_suvei(self, request, nama, deskripsi, tanggal_dikirim=None, sudah_dikirim=False):
+    def register_suvei(self, request, nama, deskripsi, tanggal_dikirim=None, sudah_dikirim=False, sudah_final=False):
         user_model = get_user_model()
 
         try:
             user = user_model.objects.get(email=request.user)
             survei = Survei.objects.create(
-                nama=nama, deskripsi=deskripsi, creator=user, tanggal_dikirim=tanggal_dikirim, sudah_dikirim=sudah_dikirim)
+                nama=nama, deskripsi=deskripsi, creator=user, tanggal_dikirim=tanggal_dikirim, sudah_dikirim=sudah_dikirim, sudah_final=sudah_final)
             return survei
         except user_model.DoesNotExist:
             return None
 
     @transaction.atomic
+    def finalize(self, id):
+        try:
+            survei = Survei.objects.get(id=id)
+            if (survei.sudah_final):
+                return False
+            survei.sudah_final = True
+            survei.save()
+            return survei.sudah_final
+        except Survei.DoesNotExist:
+            return None
+
+    @transaction.atomic
     def list_survei(self):
         return Survei.objects.all()
-    
+
     @transaction.atomic
     def get_survei(self, survei_id):
         try:
@@ -30,11 +43,11 @@ class SurveiService:
             return survei
         except Survei.DoesNotExist:
             return None
-        
+
     @transaction.atomic
     def get_list_pertanyaan_by_survei_id(self, s_id):
-        return Pertanyaan.objects.filter(survei_id = s_id)
-    
+        return Pertanyaan.objects.filter(survei_id=s_id)
+
     @transaction.atomic
     def get_list_opsi_jawaban(self, s_id):
         list_pertanyaan = self.get_list_pertanyaan_by_survei_id(s_id)
@@ -42,7 +55,7 @@ class SurveiService:
         for pertanyaan in list_pertanyaan:
             list_id_pertanyaan.append(pertanyaan.id)
         return OpsiJawaban.objects.filter(pertanyaan_id__in=list_id_pertanyaan)
-    
+
     @transaction.atomic
     def list_survei_sent(self):
         return Survei.objects.filter(sudah_dikirim=True)
@@ -54,12 +67,12 @@ class SurveiService:
     @transaction.atomic
     def register_pertanyaan_isian(self, survei, pertanyaan, wajib_diisi=False):
         pertanyaan = Pertanyaan.objects.create(
-            survei=survei, 
-            pertanyaan=pertanyaan, 
-            jenis_jawaban="Jawaban Singkat", 
+            survei=survei,
+            pertanyaan=pertanyaan,
+            jenis_jawaban="Jawaban Singkat",
             wajib_diisi=wajib_diisi)
         return pertanyaan
-        
+
     @transaction.atomic
     def register_opsi_jawaban_isian(self, pertanyaan, isian):
         try:
@@ -68,7 +81,7 @@ class SurveiService:
             return jawaban_isian
         except:
             return None
-        
+
     @transaction.atomic
     def register_pertanyaan_skala_linier(self, survei, pertanyaan, wajib_diisi=False):
         pertanyaan = Pertanyaan.objects.create(
@@ -96,7 +109,7 @@ class SurveiService:
     @transaction.atomic
     def register_opsi_jawaban_radiobutton(self, pertanyaan, pilihan_jawaban):
         opsi_jawaban_obj = OpsiJawaban.objects.create(
-            pertanyaan=pertanyaan, 
+            pertanyaan=pertanyaan,
             opsi_jawaban=pilihan_jawaban)
         return opsi_jawaban_obj
 
@@ -112,10 +125,10 @@ class SurveiService:
     @transaction.atomic
     def register_opsi_jawaban_dropdown(self, pertanyaan, pilihan_jawaban):
         opsi_jawaban_obj = OpsiJawaban.objects.create(
-            pertanyaan=pertanyaan, 
+            pertanyaan=pertanyaan,
             opsi_jawaban=pilihan_jawaban)
         return opsi_jawaban_obj
-    
+
     @transaction.atomic
     def register_pertanyaan_checkbox(self, survei, pertanyaan, wajib_diisi=False):
         pertanyaan = Pertanyaan.objects.create(
@@ -128,10 +141,10 @@ class SurveiService:
     @transaction.atomic
     def register_opsi_jawaban_checkbox(self, pertanyaan, pilihan_jawaban):
         opsi_jawaban_obj = OpsiJawaban.objects.create(
-            pertanyaan=pertanyaan, 
+            pertanyaan=pertanyaan,
             opsi_jawaban=pilihan_jawaban)
         return opsi_jawaban_obj
-    
+
     @transaction.atomic
     def delete_survei(self, survei_id):
         '''

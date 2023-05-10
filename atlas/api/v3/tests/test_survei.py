@@ -193,6 +193,41 @@ class TestRegisterSurveiModels(RestTestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['messages'], [])
 
+class TestRegisterSurveiModels(RestTestCase):
+
+    CREATE_SURVEI_URL = "/api/v3/survei/create"
+    JSON_CONTENT_TYPE = "application/json"
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.user = RestTestCase.create_user()
+        self.admin = RestTestCase.create_admin()
+        self.URL = "/api/v3/survei/finalize"
+
+        survei_data_1 = {
+            'id': 1,
+            'nama': 'Test Survei',
+            'deskripsi': 'ini adalah survei pertama',
+        }
+        self.survei = Survei.objects.create(**survei_data_1, creator=self.user)
+
+
+    def test_valid_and_invalid_api_register_survei(self):
+        self.authenticate(self.admin)
+        response = self.client.get(f'{self.URL}/1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(f'{self.URL}/1')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.get(f'{self.URL}/0')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_unauthorized_user(self):
+        self.authenticate(self.user)
+        response = self.client.get(f'{self.URL}/1')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class TestGetSurveiAPI(RestTestCase):
     LIST_SURVEI_URL = "/api/v3/survei/list"

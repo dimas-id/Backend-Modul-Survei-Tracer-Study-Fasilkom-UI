@@ -7,6 +7,7 @@ survei = [
     path('/survei/create', survei.register_survei),
     path('/survei/delete/', survei.delete_survei_by_id),
     path('/survei/', survei.get_survei_by_id),
+    path('/survei/finalize/<str:id>', survei.finalize),
     path('/survei/edit', survei.edit_survei_by_id),
     path('/survei/isi', response.isi_survei),
     path('/pertanyaan/create/skala-linier', pertanyaan.register_skala_linier),

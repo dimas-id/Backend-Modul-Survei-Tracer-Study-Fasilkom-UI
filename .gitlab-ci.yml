@@ -88,6 +88,7 @@ key_indra:
   only:
     - PBI-1-membuat_survei #put or rename your working branches here
     - PBI-19-visualisasi
+    - PBI-20-finalisasi-survei
   script:
     - echo "SONAR_TOKEN=$SONAR_TOKEN_INDRA" > .sonar_key
     - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_INDRA" >> .sonar_key

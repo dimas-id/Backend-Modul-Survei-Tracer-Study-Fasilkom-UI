@@ -24,23 +24,28 @@ def get_list_survei(_):
                      'survei_belum_dikirim': not_sent_list.data}
     return Response(data=response_data, status=status.HTTP_200_OK)
 
+
 @api_view()
 @permission_classes([IsAuthenticated])
 def get_survei_by_id(request):
     survei_id = request.query_params.get('survei_id')
     survei_service = SurveiService()
-    
+
     survei = survei_service.get_survei(survei_id)
     if survei == None:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
+
     serialized_survei = SurveiSerializer(survei).data
-    list_pertanyaan = PertanyaanSerializer(survei_service.get_list_pertanyaan_by_survei_id(survei_id), many=True).data
-    list_opsi_jawaban = OpsiJawabanSerializer(survei_service.get_list_opsi_jawaban(survei_id), many=True).data
-    response_data = {'survei': serialized_survei, 'list_pertanyaan': list_pertanyaan, 'list_opsi_jawaban': list_opsi_jawaban}
-    
+    list_pertanyaan = PertanyaanSerializer(
+        survei_service.get_list_pertanyaan_by_survei_id(survei_id), many=True).data
+    list_opsi_jawaban = OpsiJawabanSerializer(
+        survei_service.get_list_opsi_jawaban(survei_id), many=True).data
+    response_data = {'survei': serialized_survei,
+                     'list_pertanyaan': list_pertanyaan, 'list_opsi_jawaban': list_opsi_jawaban}
+
     return Response(data=response_data, status=status.HTTP_200_OK)
-    
+
+
 @api_view(http_method_names=['DELETE'])
 @permission_classes([IsAuthenticated, IsAdminUser])
 def delete_survei_by_id(request):
@@ -53,6 +58,7 @@ def delete_survei_by_id(request):
     elif survei[0] == SurveiService.DELETE_PUBLISHED:
         return Response(status=status.HTTP_403_FORBIDDEN)
     return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(http_method_names=['POST'])
 @permission_classes([IsAuthenticated, IsAdminUser])
@@ -156,7 +162,7 @@ def edit_survei_by_id(request):
             context={'request': request}
         )
 
-                # Check 'pertanyaan' param again
+        # Check 'pertanyaan' param again
     if not survei_request_serializer.is_valid():
         survei_request_serializer = SurveiCreateRequestSerializer(
             data={
@@ -166,7 +172,7 @@ def edit_survei_by_id(request):
             },
             context={'request': request}
         )
-    
+
     survei_request_serializer.is_valid()
     survei = survei_request_serializer.save()
 
@@ -222,3 +228,17 @@ def edit_survei_by_id(request):
         },
         status=status.HTTP_200_OK,
     )
+
+
+@api_view(http_method_names=['GET'])
+@permission_classes([IsAdminUser, IsAuthenticated])
+def finalize(req, id):
+    survei_service = SurveiService()
+    response = survei_service.finalize(id)
+
+    if (response == None):
+        return Response(data={'status': 'failed', 'message': f'Survei with id {id} does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    elif (response == False):
+        return Response(data={'status': 'failed', 'message': f'Survei with id {id} has been finalize'}, status=status.HTTP_400_BAD_REQUEST)
+    elif (response == True):
+        return Response(data={'status': 'success', 'message': f'Survei with id {id} has been finalize'}, status=status.HTTP_200_OK)

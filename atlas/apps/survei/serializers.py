@@ -10,6 +10,7 @@ class SurveiSerializer(serializers.Serializer):
     deskripsi = serializers.CharField(max_length=1200)
     tanggal_dikirim = serializers.DateTimeField(required=False)
     sudah_dikirim = serializers.BooleanField(required=False)
+    sudah_final = serializers.BooleanField(required=False)
     tanggal_dibuat = serializers.DateTimeField(required=False)
     tanggal_diedit = serializers.DateTimeField(required=False)
     creator = serializers.CharField(max_length=150, required=False)
@@ -34,6 +35,8 @@ class SurveiSerializer(serializers.Serializer):
             'tanggal_dikirim', instance.tanggal_dikirim)
         instance.sudah_dikirim = validated_data.get(
             'sudah_dikirim', instance.sudah_dikirim)
+        instance.sudah_final = validated_data.get(
+            'sudah_dikirim', instance.sudah_final)
         instance.save()
         return instance
 

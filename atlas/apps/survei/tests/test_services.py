@@ -9,6 +9,7 @@ from datetime import datetime
 
 SURVEI_04 = "survei 04"
 
+
 class TestSurveiModels(TestCase):
 
     def setUp(self):
@@ -35,40 +36,40 @@ class TestSurveiModels(TestCase):
         pertanyaan_data_1 = {
             'pertanyaan': 'apakah betul?',
             'wajib_diisi': True,
-            'survei_id':1 ,
+            'survei_id': 1,
             'jenis_jawaban': 'Jawaban Singkat'
         }
         pertanyaan_data_2 = {
             'id': 2,
             'pertanyaan': 'apakah benar?',
             'wajib_diisi': True,
-            'survei_id':1 ,
+            'survei_id': 1,
             'jenis_jawaban': 'Pilihan Ganda'
         }
-        
+
         opsi_jawaban_1 = {
             'opsi_jawaban': 'Tokopedia',
             'pertanyaan_id': 2
         }
-        
+
         opsi_jawaban_2 = {
             'opsi_jawaban': 'Shopee',
             'pertanyaan_id': 2
         }
-        
+
         self.factory = APIRequestFactory()
         user = User.objects.create(**user_data)
         Survei.objects.create(**survei_data_1, creator=user)
         Survei.objects.create(**survei_data_2, creator=user)
         Survei.objects.create(**survei_data_3, creator=user)
-        
+
         Pertanyaan.objects.create(**pertanyaan_data_1)
         Pertanyaan.objects.create(**pertanyaan_data_2)
-        
+
         OpsiJawaban.objects.create(**opsi_jawaban_1)
         OpsiJawaban.objects.create(**opsi_jawaban_2)
-        
-        survei = Survei.objects.get(nama = "survei 03")
+
+        survei = Survei.objects.get(nama="survei 03")
         survei.sudah_dikirim = True
         survei.save()
 
@@ -102,11 +103,23 @@ class TestSurveiModels(TestCase):
         length = len(survei_service.list_survei())
         self.assertEqual(length, 3)
 
-    @patch('atlas.apps.survei.models.Survei.objects')    
+    def test_valid_and_invalid_finalize(self):
+        survei_service = SurveiService()
+        survei = Survei.objects.get(nama="survei 03")
+        self.assertTrue(survei_service.finalize(survei.id))
+        self.assertTrue((Survei.objects.get(id=survei.id)).sudah_final)
+
+        self.assertFalse(survei_service.finalize(survei.id))
+        self.assertTrue((Survei.objects.get(id=survei.id)).sudah_final)
+
+        Survei.objects.all().delete()
+        self.assertIsNone(survei_service.finalize(survei.id))
+
+    @patch('atlas.apps.survei.models.Survei.objects')
     def test_service_delete_survei_valid(self, survei_objects_mock):
         survei_service = SurveiService()
         mock_survei = MagicMock(spec_set=Survei, id=1)
-        survei_objects_mock.get.return_value = mock_survei 
+        survei_objects_mock.get.return_value = mock_survei
 
         success_value = (SurveiService.DELETE_SUCCESS, (1, {'Survei': 1}))
         mock_survei.delete.return_value = success_value[1]
@@ -116,12 +129,12 @@ class TestSurveiModels(TestCase):
         mock_survei.delete.assert_called_once()
         self.assertEqual(actual_value, success_value)
 
-    @patch('atlas.apps.survei.models.Survei.objects')    
+    @patch('atlas.apps.survei.models.Survei.objects')
     def test_service_delete_survei_not_found(self, survei_objects_mock):
         survei_service = SurveiService()
         mock_survei = MagicMock(spec_set=Survei, id=1)
         survei_objects_mock.get.side_effect = Survei.DoesNotExist
-        
+
         fail_value = (SurveiService.DELETE_NOT_FOUND, None)
         survei_objects_mock.delete.return_value = fail_value[1]
         actual_value = survei_service.delete_survei(2)
@@ -129,13 +142,13 @@ class TestSurveiModels(TestCase):
         survei_objects_mock.get.assert_called_once_with(id=2)
         mock_survei.delete.assert_not_called()
         self.assertEqual(actual_value, fail_value)
-    
-    @patch('atlas.apps.survei.models.Survei.objects')    
+
+    @patch('atlas.apps.survei.models.Survei.objects')
     def test_service_delete_survei_published(self, survei_objects_mock):
         survei_service = SurveiService()
         mock_survei = MagicMock(spec_set=Survei, id=1, sudah_dikirim=True)
         survei_objects_mock.get.return_value = mock_survei
-        
+
         fail_value = (SurveiService.DELETE_PUBLISHED, None)
         survei_objects_mock.delete.return_value = fail_value[1]
         actual_value = survei_service.delete_survei(1)
@@ -192,7 +205,7 @@ class TestSurveiModels(TestCase):
         objects_create_mock.assert_called_once_with(
             **create_parameters, jenis_jawaban='Jawaban Singkat')
         self.assertEqual(pertanyaan, objects_create_mock.return_value)
-    
+
     @patch('atlas.apps.survei.models.Pertanyaan.objects.create')
     def test_register_pertanyaan_dropdown_call_objects_create_and_return(self, objects_create_mock):
         survei_service = SurveiService()
@@ -237,7 +250,7 @@ class TestSurveiModels(TestCase):
 
         opsi_jawaban = survei_service.register_opsi_jawaban_dropdown(
             pertanyaan=pertanyaan_mock, pilihan_jawaban=options)
-            
+
         objects_create_mock.assert_called_once_with(
             pertanyaan=pertanyaan_mock, opsi_jawaban=options)
 
@@ -250,12 +263,12 @@ class TestSurveiModels(TestCase):
         Survei.objects.filter(nama="survei 03").delete()
         length = len(survei_service.list_survei())
         self.assertEqual(length, 0)
-    
+
     def test_service_list_sent(self):
         survei_service = SurveiService()
         length = len(survei_service.list_survei_sent())
         self.assertEqual(length, 1)
-    
+
     def test_service_list_not_sent(self):
         survei_service = SurveiService()
         length = len(survei_service.list_survei_not_sent())
@@ -265,100 +278,99 @@ class TestSurveiModels(TestCase):
     def test_register_pertanyaan_radiobutton_call_objects_create_and_return(self, objects_create_mock):
         survei_service = SurveiService()
         survei_mock = MagicMock(spec=Survei)
-        
+
         create_parameters = {
             'survei': survei_mock,
             'pertanyaan': "Lulusan angkatan berapa Anda?",
             'required': True
         }
-        
+
         pertanyaan = survei_service.register_pertanyaan_radiobutton(
             survei=create_parameters["survei"],
             pertanyaan=create_parameters["pertanyaan"],
             wajib_diisi=create_parameters["required"])
-        
+
         objects_create_mock.assert_called_once_with(
             survei=create_parameters["survei"],
             pertanyaan=create_parameters["pertanyaan"],
-            wajib_diisi=create_parameters["required"], 
+            wajib_diisi=create_parameters["required"],
             jenis_jawaban='Pilihan Ganda')
-            
+
         self.assertEqual(pertanyaan, objects_create_mock.return_value)
 
     @patch('atlas.apps.survei.models.OpsiJawaban.objects.create')
     def test_register_opsi_jawaban_radiobutton_call_objects_create_and_return(self, objects_create_mock):
         survei_service = SurveiService()
         pertanyaan_mock = MagicMock(spec=Pertanyaan)
-        
+
         options = ["2018", "2019", "2020", "2021", "2022"]
 
         opsi_jawaban = survei_service.register_opsi_jawaban_radiobutton(
-            pertanyaan=pertanyaan_mock, 
+            pertanyaan=pertanyaan_mock,
             pilihan_jawaban=options)
-        
+
         objects_create_mock.assert_called_once_with(
-            pertanyaan=pertanyaan_mock, 
+            pertanyaan=pertanyaan_mock,
             opsi_jawaban=options)
-        
+
         self.assertEqual(opsi_jawaban, objects_create_mock.return_value)
 
     @patch('atlas.apps.survei.models.Pertanyaan.objects.create')
     def test_register_pertanyaan_checkbox_call_objects_create_and_return(self, objects_create_mock):
         survei_service = SurveiService()
         survei_mock = MagicMock(spec=Survei)
-        
+
         create_parameters = {
             'survei': survei_mock,
             'pertanyaan': "Mata kuliah wajib apakah yang menurut anda berguna bagi pekerjaan anda sekarang ini?",
             'required': True
         }
-        
+
         pertanyaan = survei_service.register_pertanyaan_checkbox(
             survei=create_parameters["survei"],
             pertanyaan=create_parameters["pertanyaan"],
             wajib_diisi=create_parameters["required"])
-        
+
         objects_create_mock.assert_called_once_with(
             survei=create_parameters["survei"],
             pertanyaan=create_parameters["pertanyaan"],
-            wajib_diisi=create_parameters["required"], 
+            wajib_diisi=create_parameters["required"],
             jenis_jawaban='Kotak Centang')
-            
+
         self.assertEqual(pertanyaan, objects_create_mock.return_value)
 
     @patch('atlas.apps.survei.models.OpsiJawaban.objects.create')
     def test_register_opsi_jawaban_checkbox_call_objects_create_and_return(self, objects_create_mock):
         survei_service = SurveiService()
         pertanyaan_mock = MagicMock(spec=Pertanyaan)
-        
+
         options = ["DDP", "PBP", "SDA", "BasDat", "RPL", "PPL"]
 
         opsi_jawaban = survei_service.register_opsi_jawaban_checkbox(
-            pertanyaan=pertanyaan_mock, 
+            pertanyaan=pertanyaan_mock,
             pilihan_jawaban=options)
-        
+
         objects_create_mock.assert_called_once_with(
-            pertanyaan=pertanyaan_mock, 
+            pertanyaan=pertanyaan_mock,
             opsi_jawaban=options)
-        
+
         self.assertEqual(opsi_jawaban, objects_create_mock.return_value)
-    
-    
+
     def test_service_get_list_pertanyaan(self):
         survei_service = SurveiService()
         length = len(survei_service.get_list_pertanyaan_by_survei_id(1))
         self.assertEqual(length, 2)
-    
+
     def test_service_get_list_pertanyaan_survei_not_found(self):
         survei_service = SurveiService()
         length = len(survei_service.get_list_pertanyaan_by_survei_id(2))
         self.assertEqual(length, 0)
-    
+
     def test_service_get_list_opsi_jawaban(self):
         survei_service = SurveiService()
         length = len(survei_service.get_list_opsi_jawaban(1))
         self.assertEqual(length, 2)
-    
+
     def test_service_get_list_opsi_jawaban_survei_not_found(self):
         survei_service = SurveiService()
         length = len(survei_service.get_list_opsi_jawaban(2))

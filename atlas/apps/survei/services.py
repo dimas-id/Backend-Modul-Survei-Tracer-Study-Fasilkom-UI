@@ -58,11 +58,19 @@ class SurveiService:
 
     @transaction.atomic
     def list_survei_sent(self):
-        return Survei.objects.filter(sudah_dikirim=True)
+        return Survei.objects.filter(sudah_final=True, sudah_dikirim=True).order_by('-tanggal_dikirim')
 
     @transaction.atomic
     def list_survei_not_sent(self):
         return Survei.objects.filter(sudah_dikirim=False)
+
+    @transaction.atomic
+    def list_survei_draft(self):
+        return Survei.objects.filter(sudah_final=False, sudah_dikirim=False).order_by('-tanggal_diedit')
+    
+    @transaction.atomic
+    def list_survei_finalized(self):
+        return Survei.objects.filter(sudah_final=True, sudah_dikirim=False).order_by('-tanggal_diedit')
 
     @transaction.atomic
     def register_pertanyaan_isian(self, survei, pertanyaan, wajib_diisi=False):

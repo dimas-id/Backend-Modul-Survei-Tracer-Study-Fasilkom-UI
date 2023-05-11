@@ -264,10 +264,34 @@ class TestSurveiModels(TestCase):
         length = len(survei_service.list_survei())
         self.assertEqual(length, 0)
 
+    
+    def test_service_list_draft(self):
+        survei = Survei.objects.get(nama="survei 03")
+        survei.sudah_final = True
+        survei.save()
+        survei_service = SurveiService()
+        length = len(survei_service.list_survei_draft())
+        self.assertEqual(length, 2)
+    
+    def test_service_list_finalized(self):
+        survei = Survei.objects.get(nama="survei 01")
+        survei.sudah_final = True
+        survei.save()
+        survei_service = SurveiService()
+        length = len(survei_service.list_survei_finalized())
+        self.assertEqual(length, 1)
+        
     def test_service_list_sent(self):
+        survei = Survei.objects.get(nama="survei 03")
+        survei.sudah_final = True
+        survei.save()
+        survei = Survei.objects.get(nama="survei 02")
+        survei.sudah_dikirim = True
+        survei.sudah_final = True
+        survei.save()
         survei_service = SurveiService()
         length = len(survei_service.list_survei_sent())
-        self.assertEqual(length, 1)
+        self.assertEqual(length, 2)
 
     def test_service_list_not_sent(self):
         survei_service = SurveiService()

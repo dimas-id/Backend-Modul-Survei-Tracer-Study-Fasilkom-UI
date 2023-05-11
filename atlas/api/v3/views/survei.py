@@ -9,21 +9,19 @@ from rest_framework.permissions import IsAuthenticated
 from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanCreateRequestSerializer, PertanyaanSerializer, SurveiCreateRequestSerializer, SurveiSerializer
 from atlas.apps.survei.services import SurveiService
 
-
 @api_view()
 @permission_classes([IsAuthenticated, IsAdminUser])
 def get_list_survei(_):
     survei_service = SurveiService()
 
-    all_list = SurveiSerializer(survei_service.list_survei(), many=True)
+    draft_list = SurveiSerializer(survei_service.list_survei_draft(), many=True)
     sent_list = SurveiSerializer(survei_service.list_survei_sent(), many=True)
-    not_sent_list = SurveiSerializer(
-        survei_service.list_survei_not_sent(), many=True)
+    finalized_list = SurveiSerializer(
+        survei_service.list_survei_finalized(), many=True)
 
-    response_data = {'survei': all_list.data, 'survei_dikirim': sent_list.data,
-                     'survei_belum_dikirim': not_sent_list.data}
+    response_data = {'survei_draft': draft_list.data, 'survei_dikirim': sent_list.data,
+                     'survei_finalized': finalized_list.data}
     return Response(data=response_data, status=status.HTTP_200_OK)
-
 
 @api_view()
 @permission_classes([IsAuthenticated])

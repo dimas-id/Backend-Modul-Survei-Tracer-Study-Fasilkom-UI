@@ -51,6 +51,7 @@ key_chris:
     - PBI-16-melihat_list_survei #put or rename your working branches here
     - PBI-18-mengisi_survei
     - PBI-17-autofill_data_diri
+    - PBI-66-list_finalize_pada_lihat_survei
   script:
     - echo "SONAR_TOKEN=$SONAR_TOKEN_CHRIS" > .sonar_key
     - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_CHRIS" >> .sonar_key

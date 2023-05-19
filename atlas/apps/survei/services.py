@@ -9,7 +9,7 @@ class SurveiService:
     DELETE_PUBLISHED = 2
 
     @transaction.atomic
-    def register_suvei(self, request, nama, deskripsi, tanggal_dikirim=None, sudah_dikirim=False, sudah_final=False):
+    def register_survei(self, request, nama, deskripsi, tanggal_dikirim=None, sudah_dikirim=False, sudah_final=False):
         user_model = get_user_model()
 
         try:
@@ -170,5 +170,22 @@ class SurveiService:
                 delete_value = survei.delete()
                 delete_status = self.DELETE_SUCCESS
         except Survei.DoesNotExist:
+            delete_status = self.DELETE_NOT_FOUND
+        return (delete_status, delete_value)
+    
+    @transaction.atomic
+    def delete_all_pertanyaan_by_survei_id(self, survei_id):
+        '''
+        Return `(status, value)`:\n
+        - `status` bernilai 0 jika success; 1 jika not-found
+        - `value` bernilai return value fungsi `delete()` Django
+        '''
+        delete_status = self.DELETE_NOT_FOUND
+        delete_value = None
+        try:
+            pertanyaan = Pertanyaan.objects.filter(survei_id=survei_id)
+            delete_value = pertanyaan.delete()
+            delete_status = self.DELETE_SUCCESS
+        except Pertanyaan.DoesNotExist:
             delete_status = self.DELETE_NOT_FOUND
         return (delete_status, delete_value)

@@ -81,7 +81,7 @@ class TestSurveiModels(TestCase):
 
         request.user = User.objects.get(first_name="indra")
         survei_service = SurveiService()
-        survei = survei_service.register_suvei(
+        survei = survei_service.register_survei(
             request, SURVEI_04, "keren", datetime.now(), False)
         self.assertEqual(survei, Survei.objects.get(nama=SURVEI_04))
 
@@ -94,7 +94,7 @@ class TestSurveiModels(TestCase):
         request.user = User.objects.get(first_name="indra")
         User.objects.filter(first_name="indra").delete()
         survei_service = SurveiService()
-        survei = survei_service.register_suvei(
+        survei = survei_service.register_survei(
             request, "survei 01", "keren", datetime.now(), False)
         self.assertIsNone(survei)
 
@@ -398,4 +398,53 @@ class TestSurveiModels(TestCase):
     def test_service_get_list_opsi_jawaban_survei_not_found(self):
         survei_service = SurveiService()
         length = len(survei_service.get_list_opsi_jawaban(2))
+        self.assertEqual(length, 0)
+
+    def test_service_delete_all_pertanyaan_by_survei_id_valid(self):
+        survei_service = SurveiService()
+        mock_survei = Survei.objects.get(nama="survei 01")
+        mock_survei_id = mock_survei.id
+
+        length_before_delete = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+        self.assertNotEqual(length_before_delete, 0)
+
+        success_value = SurveiService.DELETE_SUCCESS
+        actual_value = survei_service.delete_all_pertanyaan_by_survei_id(mock_survei_id)[0]
+
+        self.assertEqual(actual_value, success_value)
+        
+        length = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+        self.assertEqual(length, 0)
+
+    def test_service_delete_all_pertanyaan_by_survei_id_survei_not_exist(self):
+        survei_service = SurveiService()
+        mock_survei_id = 696969
+
+        length_before_delete = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+        self.assertEqual(length_before_delete, 0)
+
+        fail_value = SurveiService.DELETE_SUCCESS
+        actual_value = survei_service.delete_all_pertanyaan_by_survei_id(mock_survei_id)
+
+        self.assertEqual(actual_value[0], fail_value)
+        self.assertEqual(actual_value[1], (0, {}))
+        
+        length = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+        self.assertEqual(length, 0)
+
+    def test_service_delete_all_pertanyaan_by_survei_id_pertanyaan_not_exist(self):
+        survei_service = SurveiService()
+        mock_survei = Survei.objects.get(nama="survei 02")
+        mock_survei_id = mock_survei.id
+
+        length_before_delete = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+        self.assertEqual(length_before_delete, 0)
+
+        fail_value = SurveiService.DELETE_SUCCESS
+        actual_value = survei_service.delete_all_pertanyaan_by_survei_id(mock_survei_id)
+
+        self.assertEqual(actual_value[0], fail_value)
+        self.assertEqual(actual_value[1], (0, {}))
+        
+        length = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
         self.assertEqual(length, 0)

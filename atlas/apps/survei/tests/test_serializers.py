@@ -10,6 +10,7 @@ from rest_framework import serializers
 SURVEI_01 = "survei 01"
 SURVEI_03 = "Survei 03"
 API_SURVEI_CREATE = "/api/v3/survei/create"
+API_SURVEI_EDIT = "/api/v3/survei/edit"
 
 
 class TestSurveiModels(TestCase):
@@ -841,3 +842,61 @@ class TestPertanyaanCreateRequestSerializer(TestCase):
             data=self.serializer_data)
         serializer.create(self.serializer_data)
         pertanyaan_serializer_mock.assert_called_once()
+
+
+class TestCreateRequestSerializer(TestCase):
+    def setUp(self):
+        self.user_data = {
+            'first_name': "Ai",
+            'last_name': 'Hoshino',
+            'email': 'ai@hoshino.com'
+        }
+
+        self.survei_data = {
+            'nama': SURVEI_01,
+            'deskripsi': 'Gracie dan Greeshel adalah oshiku',
+        }
+
+        self.survei_data_edit = {
+            'nama': SURVEI_03,
+            'deskripsi': 'Alya dan Cathie adalah oshiku',
+        }
+
+        self.factory = APIRequestFactory()
+        user = User.objects.create(**self.user_data)
+        Survei.objects.create(**self.survei_data, creator=user)
+        Survei.objects.create(**self.survei_data_edit, creator=user)
+
+    def test_create_survei_attribute(self):
+        request = self.factory.post(path=API_SURVEI_CREATE)
+        request.data = self.survei_data
+        request.user = User.objects.get(email=self.user_data['email'])
+
+        survei_serializer = SurveiSerializer(
+            data=request.data, context={'request': request})
+        survei_serializer.is_valid(raise_exception=True)
+        survei = survei_serializer.save()
+
+        survei_request_serializer = SurveiCreateRequestSerializer(data=request.data, context={'request': request})
+        survei_request_serializer.is_valid()
+        survei_create = survei_request_serializer.save()
+
+        self.assertEqual(survei.nama, survei_create.nama)
+        self.assertEqual(survei.deskripsi, survei_create.deskripsi)
+        self.assertEqual(survei.creator, survei_create.creator)
+        self.assertEqual(survei.sudah_dikirim, survei_create.sudah_dikirim)
+        self.assertEqual(survei.sudah_final, survei_create.sudah_final)
+
+    def test_update_survei_attribute(self):
+        request = self.factory.put(path=API_SURVEI_EDIT)
+        request.data = self.survei_data_edit
+        request.user = User.objects.get(email=self.user_data['email'])
+
+        survei_edit = Survei.objects.get(nama=self.survei_data_edit['nama'])            
+
+        survei_request_serializer = SurveiCreateRequestSerializer(data=request.data, context={'request': request}, instance=survei_edit)
+        survei_request_serializer.is_valid()
+        survei_create = survei_request_serializer.save()
+
+        self.assertEqual(self.survei_data_edit['nama'], survei_create.nama)
+        self.assertEqual(self.survei_data_edit['deskripsi'], survei_create.deskripsi)

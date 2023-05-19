@@ -21,7 +21,7 @@ class SurveiSerializer(serializers.Serializer):
         survei_service = SurveiService()
 
         try:
-            survei = survei_service.register_suvei(request, **validated_data)
+            survei = survei_service.register_survei(request, **validated_data)
             return survei
         except TypeError:
             return None
@@ -113,6 +113,16 @@ class SurveiCreateRequestSerializer(serializers.Serializer):
         survei_serializer = SurveiSerializer(
             data={'nama': validated_data['nama'], 'deskripsi': validated_data['deskripsi']}, context={'request': request})
         survei_serializer.is_valid(raise_exception=True)
+        survei = survei_serializer.save()
+        return survei
+    
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        survei_serializer = SurveiSerializer(
+            instance = instance, data={'nama': validated_data['nama'], 'deskripsi': validated_data['deskripsi']})
+        survei_serializer.is_valid(raise_exception=True)
+        survei = survei_serializer.update(
+            instance, request.data)
         survei = survei_serializer.save()
         return survei
 

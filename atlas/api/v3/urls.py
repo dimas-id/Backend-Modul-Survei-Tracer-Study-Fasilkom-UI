@@ -1,5 +1,5 @@
 from django.urls import path
-from atlas.api.v3.views import survei, pertanyaan, response, visualisasi, email_blaster
+from atlas.api.v3.views import survei, pertanyaan, response, visualisasi, email_blaster, recipients
 from atlas.api.v3.views.email_template import EmailTemplateCreateView, EmailTemplateDeleteView, EmailTemplateListView, EmailTemplateUpdateView
 
 survei = [
@@ -32,9 +32,14 @@ email_template = [
          EmailTemplateDeleteView.as_view(), name='email_templates_delete'),
 ]
 
+recipients = [
+    path('/recipients/csv/upload', recipients.upload_email_csv, name='upload_csv'),
+]
+
 email_blaster = [
     path('/email-blaster/send', email_blaster.send_email, name='send_email'),
     path('/email-blaster/preview', email_blaster.preview_email, name='preview_email')
 ]
 
-urlpatterns = [*survei, *visualisasi, *email_template, *email_blaster]
+urlpatterns = [*survei, *visualisasi, *
+               email_template, *recipients, *email_blaster]

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+import csv
 from atlas.apps.email_blaster.models import EmailTemplate
 from atlas.apps.email_blaster.services import EmailTemplateService
 from atlas.apps.survei.services import SurveiService
@@ -32,4 +32,23 @@ class EmailSendRequestSerializer(serializers.Serializer):
         if service.get_survei(value) == None:
             raise serializers.ValidationError(
                 "Survei with id {} does not exist".format(value))
+        return value
+
+
+class CSVFilesSerializer(serializers.Serializer):
+    """Serializer for CSV files
+    """
+
+    csv_files = serializers.ListField(child=serializers.FileField())
+
+    def validate_csv_files(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                "At least one CSV file is required.")
+
+        for file in value:
+            if not file.name.endswith('.csv'):
+                raise serializers.ValidationError(
+                    f"File '{file.name}' is not a CSV file.")
+
         return value

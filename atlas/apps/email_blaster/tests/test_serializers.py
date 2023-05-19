@@ -1,8 +1,9 @@
 from unittest.mock import patch
 from atlas.apps.email_blaster.models import EmailTemplate
-from atlas.apps.email_blaster.serializers import EmailSendRequestSerializer, EmailTemplateSerializer
+from atlas.apps.email_blaster.serializers import CSVFilesSerializer, EmailSendRequestSerializer, EmailTemplateSerializer
 from rest_framework.test import APITestCase
 from rest_framework import serializers
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class EmailTemplateSerializerTestCase(APITestCase):
@@ -108,3 +109,30 @@ class EmailSendRequestSerializerTestCase(APITestCase):
                 self.data['survei_id'])
         ):
             serializer.validate_survei_id(self.data['survei_id'])
+
+
+class CSVFilesSerializerTestCase(APITestCase):
+    def setUp(self):
+        self.serializer = CSVFilesSerializer()
+
+    def test_validate_csv_files_no_files(self):
+        data = {'csv_files': []}
+        with self.assertRaises(serializers.ValidationError) as cm:
+            self.serializer.validate_csv_files(data['csv_files'])
+        self.assertIn("At least one CSV file is required.", str(cm.exception))
+
+    def test_validate_csv_files_valid(self):
+        valid_file = SimpleUploadedFile(
+            'valid.csv', b'csv content', content_type='text/csv')
+        data = {'csv_files': [valid_file]}
+        validated_files = self.serializer.validate_csv_files(data['csv_files'])
+        self.assertEqual(validated_files, data['csv_files'])
+
+    def test_validate_csv_files_invalid_file(self):
+        non_csv_file = SimpleUploadedFile(
+            'non_csv.txt', b'text content', content_type='text/plain')
+        data = {'csv_files': [non_csv_file]}
+        with self.assertRaises(serializers.ValidationError) as cm:
+            self.serializer.validate_csv_files(data['csv_files'])
+        self.assertIn("File 'non_csv.txt' is not a CSV file.",
+                      str(cm.exception))

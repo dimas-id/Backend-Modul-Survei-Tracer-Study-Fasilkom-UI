@@ -102,6 +102,7 @@ key_josh:
   only:
     - PBI-13-skala_linier
     - PBI-12-kirim_email
+    - PBI-69-parsing_csv
   script:
     - echo "SONAR_TOKEN=$SONAR_TOKEN_JOSH" > .sonar_key
     - echo "SONAR_PROJECT_KEY=$SONAR_PROJECT_KEY_JOSH" >> .sonar_key

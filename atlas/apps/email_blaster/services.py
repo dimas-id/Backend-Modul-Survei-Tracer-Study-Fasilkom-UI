@@ -1,5 +1,7 @@
+import csv
+from email_validator import validate_email, EmailNotValidError
 from smtplib import SMTPException
-
+from django.core.validators import EmailValidator
 from atlas.apps.email_blaster.models import EmailTemplate
 from .celery import app
 from django.core.mail import EmailMessage
@@ -38,3 +40,70 @@ class EmailTemplateService:
             return email_template
         except EmailTemplate.DoesNotExist:
             return None
+
+
+class CSVEmailParser:
+    """Service to parse CSV file(s) and return list of valid emails and list of invalid emails
+    """
+
+    def parse_csv(self, file):
+        """Parse CSV file and return list of valid emails and list of invalid emails
+
+        Args:
+            file {string} -- CSV file
+
+        Returns:
+            tuple -- (list of valid emails, list of invalid emails)
+        """
+        valid_emails = []
+        invalid_emails = []
+
+        data = file.read().decode('utf-8')
+        lines = data.splitlines()
+        reader = csv.reader(lines)
+
+        for row in reader:
+            for email in row:
+                email = email.strip()
+                if self.is_valid_email(email):
+                    valid_emails.append(email)
+                else:
+                    invalid_emails.append(email)
+
+        return valid_emails, invalid_emails
+
+    def parse_csvs(self, files):
+        """Parse list of CSV files and return list of valid emails and list of invalid emails
+
+        Args:
+            files {list} -- list of CSV files
+
+        Returns:
+            tuple -- (list of valid emails, list of invalid emails)
+        """
+        valid_emails = []
+        invalid_emails = []
+
+        for file in files:
+            valid, invalid = self.parse_csv(file)
+            valid_emails.extend(valid)
+            invalid_emails.extend(invalid)
+
+        return valid_emails, invalid_emails
+
+    @staticmethod
+    def is_valid_email(value):
+        """Check if email is valid
+
+        Args:
+            value {string} -- email address
+
+        Returns:
+            boolean -- True if email is valid, False if not
+        """
+
+        try:
+            validate_email(value, check_deliverability=False)
+            return True
+        except EmailNotValidError:
+            return False

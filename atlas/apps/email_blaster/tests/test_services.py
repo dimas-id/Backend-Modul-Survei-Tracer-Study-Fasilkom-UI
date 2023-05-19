@@ -1,7 +1,8 @@
 from unittest.mock import call, patch, Mock
 from django.test import TestCase
 from atlas.apps.email_blaster.models import EmailTemplate
-from atlas.apps.email_blaster.services import EmailTemplateService, send_email_task, EmailSendService
+from atlas.apps.email_blaster.services import CSVEmailParser, EmailTemplateService, send_email_task, EmailSendService
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class EmailSendTaskTestCase(TestCase):
@@ -79,3 +80,61 @@ class EmailTemplateServiceTestCase(TestCase):
             result = self.service.get_email_template(100)
 
         self.assertIsNone(result)
+
+
+class CSVEmailParserTest(TestCase):
+
+    def setUp(self):
+        self.CSV_CONTENT = 'text/csv'
+        self.valid_email = ['email1@example.com', 'email2@example.com']
+        self.invalid_email = ['invalid_email1', 'invalid_email2']
+
+        self.parser = CSVEmailParser()
+
+        self.mixed_csv_file = SimpleUploadedFile(
+            'mixed.csv',
+            f"{','.join(self.invalid_email)},{','.join(self.valid_email)}".encode(
+                'utf-8'),
+            content_type=self.CSV_CONTENT)
+
+        self.invalid_csv_file = SimpleUploadedFile(
+            'invalid.csv',
+            f"{','.join(self.invalid_email)}".encode('utf-8'),
+            content_type=self.CSV_CONTENT)
+
+        self.valid_csv_file = SimpleUploadedFile(
+            'valid.csv', f"{','.join(self.valid_email)}".encode('utf-8'),
+            content_type=self.CSV_CONTENT
+        )
+
+    def test_parse_csv_mixed(self):
+        valid_emails, invalid_emails = self.parser.parse_csv(
+            self.mixed_csv_file)
+        self.assertEqual(
+            valid_emails, self.valid_email)
+        self.assertEqual(invalid_emails, self.invalid_email)
+
+    def test_parse_csv_valid_email(self):
+        valid_emails, invalid_emails = self.parser.parse_csv(
+            self.valid_csv_file)
+        self.assertEqual(valid_emails, self.valid_email)
+        self.assertEqual(invalid_emails, [])
+
+    def test_parse_csv_invalid_email(self):
+        valid_emails, invalid_emails = self.parser.parse_csv(
+            self.invalid_csv_file)
+        self.assertEqual(valid_emails, [])
+        self.assertEqual(invalid_emails, self.invalid_email)
+
+    def test_parse_csvs_mixed(self):
+        files = [self.valid_csv_file, self.invalid_csv_file]
+        valid_emails, invalid_emails = self.parser.parse_csvs(files)
+        self.assertEqual(
+            valid_emails, self.valid_email)
+        self.assertEqual(invalid_emails, self.invalid_email)
+
+    def test_is_valid_email_valid(self):
+        self.assertTrue(self.parser.is_valid_email('email@example.com'))
+
+    def test_is_valid_email_invalid(self):
+        self.assertFalse(self.parser.is_valid_email('invalid_email'))

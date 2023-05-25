@@ -1,3 +1,4 @@
+import datetime
 from atlas.apps.survei.models import OpsiJawaban, Pertanyaan, Survei
 from django.db import (transaction)
 from django.contrib.auth import get_user_model
@@ -67,7 +68,7 @@ class SurveiService:
     @transaction.atomic
     def list_survei_draft(self):
         return Survei.objects.filter(sudah_final=False, sudah_dikirim=False).order_by('-tanggal_diedit')
-    
+
     @transaction.atomic
     def list_survei_finalized(self):
         return Survei.objects.filter(sudah_final=True, sudah_dikirim=False).order_by('-tanggal_diedit')
@@ -172,7 +173,7 @@ class SurveiService:
         except Survei.DoesNotExist:
             delete_status = self.DELETE_NOT_FOUND
         return (delete_status, delete_value)
-    
+
     @transaction.atomic
     def delete_all_pertanyaan_by_survei_id(self, survei_id):
         '''
@@ -189,3 +190,11 @@ class SurveiService:
         except Pertanyaan.DoesNotExist:
             delete_status = self.DELETE_NOT_FOUND
         return (delete_status, delete_value)
+
+    @transaction.atomic
+    def set_kirim(self, survei_id):
+        if Survei.objects.filter(id=survei_id).exists():
+            survei = Survei.objects.get(id=survei_id)
+            survei.sudah_dikirim = True
+            survei.tanggal_dikirim = datetime.datetime.now()
+            survei.save()

@@ -23,19 +23,21 @@ class SendEmailTest(RestTestCase):
     @patch('atlas.api.v3.views.email_blaster.EmailSendService')
     @patch('atlas.api.v3.views.email_blaster.EmailTemplateService')
     @patch('atlas.api.v3.views.email_blaster.EmailSendRequestSerializer')
-    def test_send_email_success(self, mock_serializer, email_template_service_mock, email_send_service_mock):
+    @patch('atlas.api.v3.views.email_blaster.SurveiService')
+    def test_send_email_success(self, mock_serializer, survei_service_mock, email_template_service_mock, email_send_service_mock):
         self.authenticate(self.user)
         mock_serializer.return_value.is_valid.return_value = True
 
         data = {
             "email_template_id": 1,
             "survei_id": 1,
-            "recipients": ["test1@example.com", "test2@example.com"],
+            "recipients": ["test13@example.com", "test12@example.com"],
             "wait_delay": 0,
             "batch_size": 1
         }
 
         response = self.client.post(self.send_email_url, data, format='json')
+        survei_service_mock.return_value.set_kirim.aseert_called_once_with(1)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_send_email_missing_required_fields(self):
@@ -43,7 +45,7 @@ class SendEmailTest(RestTestCase):
         self.authenticate(self.user)
         data = {
             "survei_id": 1,
-            "recipients": ["test1@example.com", "test3@example.com"],
+            "recipients": ["test13@example.com", "test3@example.com"],
             "wait_delay": 0,
             "batch_size": 1
         }
@@ -57,7 +59,7 @@ class SendEmailTest(RestTestCase):
         data = {
             "email_template_id": 999,
             "survei_id": 1,
-            "recipients": ["test11@example.com", "tes@example.com"],
+            "recipients": ["test14@example.com", "tes5@example.com"],
             "wait_delay": 0,
             "batch_size": 1
         }
@@ -71,7 +73,7 @@ class SendEmailTest(RestTestCase):
         data = {
             "email_template_id": 1,
             "survei_id": -1,
-            "recipients": ["test11@example.com", "tes@example.com"],
+            "recipients": ["test15@example.com", "tes5@example.com"],
             "wait_delay": 0,
             "batch_size": 1
         }

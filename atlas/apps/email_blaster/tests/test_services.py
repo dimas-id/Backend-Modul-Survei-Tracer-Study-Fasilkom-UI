@@ -1,7 +1,10 @@
-from unittest.mock import call, patch, Mock
+from unittest.mock import MagicMock, Mock, call, patch
 from django.test import TestCase
 from atlas.apps.email_blaster.models import EmailTemplate
-from atlas.apps.email_blaster.services import CSVEmailParser, EmailTemplateService, send_email_task, EmailSendService
+from atlas.apps.email_blaster.services import CSVEmailParser, EmailTemplateService, send_email_task, EmailSendService, EmailRecipientService
+from atlas.apps.survei.models import Survei
+from atlas.apps.account.models import User
+from atlas.apps.email_blaster.models import EmailRecipient
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 
@@ -138,3 +141,67 @@ class CSVEmailParserTest(TestCase):
 
     def test_is_valid_email_invalid(self):
         self.assertFalse(self.parser.is_valid_email('invalid_email'))
+
+
+class TestEmailRecipientService(TestCase):
+
+    def setUp(self):
+        
+        user_data = {
+            'first_name': "dimas",
+            'last_name': 'ilham',
+            'email': 'dimas@gmail.com'
+        }
+
+        survei_data = {
+            'nama': 'survei 2',
+            'deskripsi': 'ini adalah survei',
+        }
+
+        email_recipient_data = {
+            'tanggal_dikirim' : "2023-03-18 20:48:35.792775+07",
+            'group_recipients_years' : [2021, 2022],
+            'group_recipients_terms' : [2, 1],
+            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"]
+        }
+
+        self.user = User.objects.create(**user_data)
+        self.survei = Survei.objects.create(**survei_data, creator=self.user)
+        self.email_recipient_data = EmailRecipient.objects.create(**email_recipient_data, survei = self.survei)
+
+        self.email_input_list = ["a@abc.com", "b@bcd.com", "dimas@gmail.com"]
+        self.email_correct_output = ["dimas@gmail.com"]
+    
+    @patch('atlas.apps.email_blaster.models.EmailRecipient.objects.create')
+    def test_create_should_call_create(self, objects_create_mock):
+        email_recipient_service = EmailRecipientService()
+        create_parameters = {
+            'survei': self.survei,
+            'group_recipients_years' : [2021, 2022],
+            'group_recipients_terms' : [2, 1],
+            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"]
+        }
+        email_recipient_data = email_recipient_service.create_email_recipient_data(**create_parameters)
+        objects_create_mock.assert_called_once_with(**create_parameters)
+
+    @patch('atlas.apps.email_blaster.models.EmailRecipient.objects.create')
+    def test_create_should_return(self, objects_create_mock):
+        email_recipient_service = EmailRecipientService()
+        create_parameters = {
+            'survei': self.survei,
+            'group_recipients_years' : [2021, 2022],
+            'group_recipients_terms' : [2, 1],
+            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"]
+        }
+        email_recipient_data = email_recipient_service.create_email_recipient_data(**create_parameters)
+        self.assertEqual(email_recipient_data, objects_create_mock.return_value)
+
+    def test_get_user_email_by_id_with_correct_id(self):
+        email_recipient_service = EmailRecipientService()
+        email_found = email_recipient_service.get_user_email_by_id(self.user.id)
+        self.assertEqual(email_found, self.user.email)
+        
+    def test_get_user_email_by_id_with_incorrect_id(self):
+        email_recipient_service = EmailRecipientService()
+        email_found = email_recipient_service.get_user_email_by_id('12345')
+        self.assertIsNone(email_found)

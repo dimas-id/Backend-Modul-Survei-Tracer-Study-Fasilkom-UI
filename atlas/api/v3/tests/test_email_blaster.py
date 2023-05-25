@@ -2,7 +2,7 @@ import json
 from unittest.mock import Mock, patch
 from django.urls import reverse
 
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APIRequestFactory
 from rest_framework import status
 from atlas.libs.test import RestTestCase
 

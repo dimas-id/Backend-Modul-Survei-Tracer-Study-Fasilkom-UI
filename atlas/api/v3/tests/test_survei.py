@@ -249,7 +249,7 @@ class TestGetSurveiAPI(RestTestCase):
             'jenis_jawaban': 'Jawaban Singkat'
         }
         pertanyaan_data_2 = {
-            'id': 20,
+            'id': 999,
             'pertanyaan': 'q2',
             'wajib_diisi': True,
             'survei_id':1 ,
@@ -258,12 +258,12 @@ class TestGetSurveiAPI(RestTestCase):
         
         opsi_jawaban_1 = {
             'opsi_jawaban': 'Google',
-            'pertanyaan_id': 20
+            'pertanyaan_id': 999
         }
         
         opsi_jawaban_2 = {
             'opsi_jawaban': 'Chat GPT',
-            'pertanyaan_id': 20
+            'pertanyaan_id': 999
         }
         
         self.survei = Survei.objects.create(**survei_data_1, creator=self.user)
@@ -302,6 +302,27 @@ class TestGetSurveiAPI(RestTestCase):
             self.SURVEI_BY_ID_2_URL)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_survei_by_id_filled(self):
+        ISI_SURVEI_URL = '/api/v3/survei/isi'
+        self.authenticate(self.user)
+        response = self.client.get(
+            self.SURVEI_BY_ID_2_URL)
+
+        jawaban = {
+            str(self.pertanyaan1.id): 'Hihihaha',
+            str(self.pertanyaan2.id): self.opsi_jawaban_2.opsi_jawaban,
+        }
+        data = {
+            'survei_id': self.survei.id,
+            'user_id': self.user.id,
+            'jawaban': jawaban
+        }
+        #The line below dependent on create_response's success
+        create_response = self.client.post(ISI_SURVEI_URL, data, format='json')
+        get_response = self.client.get(self.SURVEI_BY_ID_1_URL)
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(get_response.status_code, status.HTTP_403_FORBIDDEN)
 
 class TestEditSurveiModels(RestTestCase):
     EDIT_SURVEI_URL = "/api/v3/survei/edit"

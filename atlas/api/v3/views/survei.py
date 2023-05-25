@@ -70,6 +70,8 @@ def register_survei(request, http_method = "POST"):
         # Delete all pertanyaan by survei id to replace  with new edited pertanyaan
         survei_service.delete_all_pertanyaan_by_survei_id(survei_id)
         survei_instance = survei_service.get_survei(survei_id)
+        survei_instance.sudah_final = False
+        survei_instance.save()
         survei_request_serializer = SurveiCreateRequestSerializer(
             instance = survei_instance, data=request.data, context={'request': request})   
 

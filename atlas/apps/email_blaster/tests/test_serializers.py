@@ -1,9 +1,13 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, Mock, call, patch
 from atlas.apps.email_blaster.models import EmailTemplate
-from atlas.apps.email_blaster.serializers import CSVFilesSerializer, EmailSendRequestSerializer, EmailTemplateSerializer
+from atlas.apps.email_blaster.serializers import CSVFilesSerializer, EmailSendRequestSerializer, EmailTemplateSerializer, EmailRecipientSerializer
 from rest_framework.test import APITestCase
 from rest_framework import serializers
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
+from atlas.apps.survei.models import Survei
+from atlas.apps.email_blaster.models import EmailRecipient
+from atlas.apps.email_blaster.services import EmailRecipientService
 
 
 class EmailTemplateSerializerTestCase(APITestCase):
@@ -136,3 +140,80 @@ class CSVFilesSerializerTestCase(APITestCase):
             self.serializer.validate_csv_files(data['csv_files'])
         self.assertIn("File 'non_csv.txt' is not a CSV file.",
                       str(cm.exception))
+
+
+class TestEmailRecipientSerializer(TestCase):
+
+    def setUp(self):
+        self.serializer_data = {
+            'id': 1,
+            'survei_id': 2,
+            'group_recipients_years' : [2021, 2022],
+            'group_recipients_terms' : [2, 1],
+            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"]
+        }
+        self.serializer = EmailRecipientSerializer(data=self.serializer_data)
+
+    def test_request_contains_expected_fields(self):
+        fields = self.serializer.get_fields()
+        self.assertEqual(set(fields), set(
+            ['id', 'survei_id', 'group_recipients_years', 'group_recipients_terms', 'individual_recipients_emails']))
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_initial_request_is_valid(self, get_survei_mock):
+        self.assertTrue(self.serializer.is_valid())
+
+    def test_survei_id_is_required(self):
+        self.serializer_data.pop('survei_id')
+        serializer = EmailRecipientSerializer(data=self.serializer_data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_data_is_not_empty(self):
+        self.serializer_data['data'] = []
+        serializer = EmailRecipientSerializer(data=self.serializer_data)
+        self.assertFalse(serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_validate_called_get_survei_once(self, get_survei_mock):
+        self.serializer.is_valid()
+        get_survei_mock.assert_called_once()
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=True))
+    def test_validate_should_succeed_if_get_survei_return_value(self):
+        self.assertTrue(self.serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
+    def test_validate_should_fail_if_get_survei_return_none(self):
+        self.assertFalse(self.serializer.is_valid())
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
+    def test_validate_should_raise_error_if_get_survei_return_none(self):
+        self.serializer.is_valid()
+        self.assertRaises(serializers.ValidationError)
+
+    @patch('atlas.apps.survei.services.SurveiService.get_survei', Mock(return_value=None))
+    def test_validate_survey_id_should_raise_with_correct_message(self):
+        with self.assertRaises(serializers.ValidationError) as exc:
+            self.serializer.validate_survei_id(2)
+        self.assertEqual(
+            str(exc.exception.detail[0]), "Survei dengan id 2 tidak ditemukan")
+
+    @patch('atlas.apps.email_blaster.services.EmailRecipientService.create_email_recipient_data')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_call_get_survei_once_with_param(self, get_survei_mock, create_data_mock):
+        self.serializer.create(self.serializer_data)
+        get_survei_mock.assert_called_once_with(
+            self.serializer_data['survei_id'])
+        
+    @patch('atlas.apps.email_blaster.services.EmailRecipientService.create_email_recipient_data')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    def test_create_should_create_email_recipient_data_once(self, get_survei_mock, create_data_mock):
+        survei_mock = MagicMock(spec=Survei)
+        get_survei_mock.configure_mock(return_value=survei_mock)
+        self.serializer.create(self.serializer_data)
+        create_data_mock.assert_called_once_with(
+            survei=survei_mock,
+            group_recipients_years=self.serializer_data.get("group_recipients_years"),
+            group_recipients_terms=self.serializer_data.get("group_recipients_terms"),
+            individual_recipients_emails=self.serializer_data.get("individual_recipients_emails"))
+    

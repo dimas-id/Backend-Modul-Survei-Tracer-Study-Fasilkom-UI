@@ -1,5 +1,7 @@
 from django.test import TestCase
-from atlas.apps.email_blaster.models import EmailTemplate
+from atlas.apps.email_blaster.models import EmailTemplate, EmailRecipient
+from atlas.apps.account.models import User
+from atlas.apps.survei.models import Survei
 
 
 class EmailTemplateModelTestCase(TestCase):
@@ -33,3 +35,38 @@ class EmailTemplateModelTestCase(TestCase):
     def test_object_name(self):
         expected_object_name = f"{self.email_template.title} - {self.email_template.email_subject}"
         self.assertEqual(str(self.email_template), expected_object_name)
+
+
+class TestEmailRecipientModels(TestCase):
+
+    def setUp(self):
+        
+
+        user_data = {
+            'first_name': "dimas",
+            'last_name': 'ilham',
+            'email': 'dimas@gmail.com'
+        }
+
+        survei_data = {
+            'nama': 'survei 2',
+            'deskripsi': 'ini adalah survei',
+        }
+
+        email_recipient_data = {
+            'tanggal_dikirim' : "2023-03-18 20:48:35",
+            'group_recipients_years' : [2021, 2022],
+            'group_recipients_terms' : [2, 1],
+            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"]
+        }
+
+        user = User.objects.create(**user_data)
+        self.survei = Survei.objects.create(
+            **survei_data, creator=user)
+        self.email_recipient_data = EmailRecipient.objects.create(
+            **email_recipient_data, survei = self.survei)
+
+    def test_valid_model_str(self):
+        self.assertEqual(
+            str(EmailRecipient.objects.get(tanggal_dikirim=self.email_recipient_data.tanggal_dikirim)), 
+            "survei 2 - {}".format(self.email_recipient_data.tanggal_dikirim))

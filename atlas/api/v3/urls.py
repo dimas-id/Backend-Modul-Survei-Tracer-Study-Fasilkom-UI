@@ -34,11 +34,13 @@ email_template = [
 
 recipients = [
     path('/recipients/csv/upload', recipients.upload_email_csv, name='upload_csv'),
+    path('/recipients/get-all', recipients.get_email_recipients, name='get_recipients'),
+    path('/recipients/group-total', recipients.get_total_recipients_of_group_email, name='get_group_total'),
 ]
 
 email_blaster = [
     path('/email-blaster/send', email_blaster.send_email, name='send_email'),
-    path('/email-blaster/preview', email_blaster.preview_email, name='preview_email')
+    path('/email-blaster/preview', email_blaster.preview_email, name='preview_email'),
 ]
 
 urlpatterns = [*survei, *visualisasi, *

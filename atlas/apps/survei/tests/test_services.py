@@ -264,7 +264,6 @@ class TestSurveiModels(TestCase):
         length = len(survei_service.list_survei())
         self.assertEqual(length, 0)
 
-    
     def test_service_list_draft(self):
         survei = Survei.objects.get(nama="survei 03")
         survei.sudah_final = True
@@ -272,7 +271,7 @@ class TestSurveiModels(TestCase):
         survei_service = SurveiService()
         length = len(survei_service.list_survei_draft())
         self.assertEqual(length, 2)
-    
+
     def test_service_list_finalized(self):
         survei = Survei.objects.get(nama="survei 01")
         survei.sudah_final = True
@@ -280,7 +279,7 @@ class TestSurveiModels(TestCase):
         survei_service = SurveiService()
         length = len(survei_service.list_survei_finalized())
         self.assertEqual(length, 1)
-        
+
     def test_service_list_sent(self):
         survei = Survei.objects.get(nama="survei 03")
         survei.sudah_final = True
@@ -405,31 +404,37 @@ class TestSurveiModels(TestCase):
         mock_survei = Survei.objects.get(nama="survei 01")
         mock_survei_id = mock_survei.id
 
-        length_before_delete = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+        length_before_delete = len(
+            survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
         self.assertNotEqual(length_before_delete, 0)
 
         success_value = SurveiService.DELETE_SUCCESS
-        actual_value = survei_service.delete_all_pertanyaan_by_survei_id(mock_survei_id)[0]
+        actual_value = survei_service.delete_all_pertanyaan_by_survei_id(mock_survei_id)[
+            0]
 
         self.assertEqual(actual_value, success_value)
-        
-        length = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+
+        length = len(
+            survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
         self.assertEqual(length, 0)
 
     def test_service_delete_all_pertanyaan_by_survei_id_survei_not_exist(self):
         survei_service = SurveiService()
         mock_survei_id = 696969
 
-        length_before_delete = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+        length_before_delete = len(
+            survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
         self.assertEqual(length_before_delete, 0)
 
         fail_value = SurveiService.DELETE_SUCCESS
-        actual_value = survei_service.delete_all_pertanyaan_by_survei_id(mock_survei_id)
+        actual_value = survei_service.delete_all_pertanyaan_by_survei_id(
+            mock_survei_id)
 
         self.assertEqual(actual_value[0], fail_value)
         self.assertEqual(actual_value[1], (0, {}))
-        
-        length = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+
+        length = len(
+            survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
         self.assertEqual(length, 0)
 
     def test_service_delete_all_pertanyaan_by_survei_id_pertanyaan_not_exist(self):
@@ -437,14 +442,35 @@ class TestSurveiModels(TestCase):
         mock_survei = Survei.objects.get(nama="survei 02")
         mock_survei_id = mock_survei.id
 
-        length_before_delete = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+        length_before_delete = len(
+            survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
         self.assertEqual(length_before_delete, 0)
 
         fail_value = SurveiService.DELETE_SUCCESS
-        actual_value = survei_service.delete_all_pertanyaan_by_survei_id(mock_survei_id)
+        actual_value = survei_service.delete_all_pertanyaan_by_survei_id(
+            mock_survei_id)
 
         self.assertEqual(actual_value[0], fail_value)
         self.assertEqual(actual_value[1], (0, {}))
-        
-        length = len(survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
+
+        length = len(
+            survei_service.get_list_pertanyaan_by_survei_id(mock_survei_id))
         self.assertEqual(length, 0)
+
+    @patch('atlas.apps.survei.models.Survei.objects')
+    def test_service_set_kirim(self, survei_objects_mock):
+        survei_service = SurveiService()
+        mock_survei = MagicMock(spec_set=Survei, id=1)
+        survei_objects_mock.filter.return_value.exists.return_value = True
+        survei_objects_mock.get.return_value = mock_survei
+
+        mock_now = datetime(2023, 5, 25)
+
+        with patch('atlas.apps.survei.services.datetime') as mock_datetime:
+            mock_datetime.datetime.now.return_value = mock_now
+
+            survei_service.set_kirim(1)
+
+            self.assertTrue(mock_survei.sudah_dikirim)
+            self.assertEqual(mock_survei.tanggal_dikirim, mock_now)
+            mock_survei.save.assert_called_once()

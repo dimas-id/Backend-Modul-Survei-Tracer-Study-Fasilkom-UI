@@ -6,6 +6,8 @@ from atlas.apps.email_blaster.serializers import EmailSendRequestSerializer
 from atlas.apps.email_blaster.services import EmailSendService, EmailTemplateService
 from django.conf import settings
 
+from atlas.apps.survei.services import SurveiService
+
 
 @api_view(http_method_names=['POST'])
 @permission_classes([IsAuthenticated, IsAdminUser])
@@ -27,6 +29,7 @@ def send_email(request):
         recipients=validated_request["recipients"]
     )
 
+    SurveiService().set_kirim(validated_request["survei_id"])
     email_send_service.send_email_batch(
         validated_request["wait_delay"], validated_request["batch_size"])
     return Response(status=status.HTTP_200_OK)

@@ -11,7 +11,7 @@ class EmailSendTaskTestCase(TestCase):
     def test_send_email_task(self, mock_email_message):
         subject = 'Test subject'
         body = 'Test body'
-        recipients = ['email1@example.com', 'email2@example.com']
+        recipients = ['email51@example.com', 'email52@example.com']
         mock_email_message_instance = Mock()
         mock_email_message_instance.send.return_value = 1
         mock_email_message.return_value = mock_email_message_instance

@@ -11,6 +11,14 @@ class ResponseService:
         return response
     
     @transaction.atomic
+    def get_response(self, user_id, survei_id):
+        try:
+            response = Response.objects.get(user_id=user_id, survei_id=survei_id)
+            return response
+        except Response.DoesNotExist:
+            return None
+
+    @transaction.atomic
     def register_jawaban(self, pertanyaan, response, jawaban):
         new_jawaban = Jawaban.objects.create(pertanyaan=pertanyaan, response=response, jawaban=jawaban)
         return new_jawaban

@@ -30,7 +30,12 @@ def isi_survei(request):
             'status': 'failed',
             'messages': jawaban_not_valid,
         }, status=status.HTTP_400_BAD_REQUEST)
-            
+
+    if response_service.get_response(user_id=user_id, survei_id=survei_id) != None:
+        return Response(data={
+            'status': 'failed',
+            'messages': None,
+        }, status=status.HTTP_403_FORBIDDEN)
     
     new_response = response_service.register_response(user_id, survei)
     for pertanyaan in list_pertanyaan:

@@ -89,3 +89,19 @@ class IsiSurveiTestCase(RestTestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['status'], 'failed')
         self.assertEqual(response.data['messages'], [str(self.pertanyaan2.id)])
+
+    def test_isi_survei_sudah_diisi(self):
+
+        jawaban = {
+            str(self.pertanyaan1.id): self.JAWABAN_PERTANYAAN_1,
+            str(self.pertanyaan2.id): 'jawaban pertanyaan 2',
+        }
+        data = {
+            'survei_id': self.survei.id,
+            'user_id': self.user.id,
+            'jawaban': jawaban
+        }
+        first_response = self.client.post(self.ISI_SURVEI_URL, data, format='json')
+        second_response = self.client.post(self.ISI_SURVEI_URL, data, format='json')
+        self.assertEqual(first_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(second_response.status_code, status.HTTP_403_FORBIDDEN)

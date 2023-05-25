@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from atlas.apps.survei.serializers import OpsiJawabanSerializer, PertanyaanCreateRequestSerializer, PertanyaanSerializer, SurveiCreateRequestSerializer, SurveiSerializer
 from atlas.apps.survei.services import SurveiService
+from atlas.apps.response.services import ResponseService
 
 @api_view()
 @permission_classes([IsAuthenticated, IsAdminUser])
@@ -28,10 +29,18 @@ def get_list_survei(_):
 def get_survei_by_id(request):
     survei_id = request.query_params.get('survei_id')
     survei_service = SurveiService()
+    response_service = ResponseService()
 
     survei = survei_service.get_survei(survei_id)
     if survei == None:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+    user_id = request.user.id
+    if response_service.get_response(user_id=user_id, survei_id=survei_id) != None:
+        return Response(data={
+            'status': 'failed',
+            'messages': None,
+        }, status=status.HTTP_403_FORBIDDEN)
 
     serialized_survei = SurveiSerializer(survei).data
     list_pertanyaan = PertanyaanSerializer(

@@ -4,6 +4,7 @@ from atlas.apps.response.models import Response, Jawaban
 from atlas.apps.survei.models import Survei, Pertanyaan
 from atlas.apps.account.models import User
 from atlas.apps.response.services import ResponseService
+from unittest.mock import MagicMock, Mock, patch
 
 class ResponseServiceTestCase(TestCase):
     def setUp(self):
@@ -41,6 +42,31 @@ class ResponseServiceTestCase(TestCase):
         self.assertIsInstance(response, Response)
         self.assertEqual(response.user, self.user)
         self.assertEqual(response.survei, self.survei)
+
+    @transaction.atomic
+    @patch('atlas.apps.response.models.Response.objects')
+    def test_get_response_success(self, response_objects_mock):
+        mock_response = MagicMock(spec_set=Response, user_id=self.user.id, survei=self.survei)
+        response_objects_mock.get.return_value = mock_response
+
+        success_value = mock_response
+        actual_value = self.response_service.get_response(self.user.id, self.survei.id)
+
+        response_objects_mock.get.assert_called_once_with(user_id=self.user.id, survei_id=self.survei.id)
+
+        self.assertEqual(success_value, actual_value)
+
+    @transaction.atomic
+    @patch('atlas.apps.response.models.Response.objects')
+    def test_get_response_not_found(self, response_objects_mock):
+        response_objects_mock.get.side_effect = Response.DoesNotExist
+
+        fail_value = None
+        actual_value = self.response_service.get_response(self.user.id, self.survei.id)
+
+        response_objects_mock.get.assert_called_once_with(user_id=self.user.id, survei_id=self.survei.id)
+
+        self.assertEqual(fail_value, actual_value)
 
     @transaction.atomic
     def test_register_jawaban(self):

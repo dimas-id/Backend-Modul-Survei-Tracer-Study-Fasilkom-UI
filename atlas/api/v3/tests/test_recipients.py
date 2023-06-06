@@ -6,6 +6,8 @@ from rest_framework.test import APIClient, APIRequestFactory
 from rest_framework import status
 from atlas.libs.test import RestTestCase
 
+from atlas.apps.survei.models import Survei
+
 
 class UploadEmailCSVTest(RestTestCase):
 
@@ -72,14 +74,14 @@ class TestGetEmailRecipients(RestTestCase):
         response = self.client.post(self.GET_EMAIL_RECIPIENT, request=request)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    @patch('atlas.api.v3.views.email_blaster.EmailRecipientSerializer')
+    @patch('atlas.api.v3.views.recipients.EmailRecipientSerializer')
     def test_post_email_recipient_call_request_serializer(self, serializer_mock):
         self.authenticate(self.user)
         request = self.factory.post(path=self.GET_EMAIL_RECIPIENT)
         self.client.post(self.GET_EMAIL_RECIPIENT, request=request)
         serializer_mock.assert_called_once()
 
-    @patch('atlas.api.v3.views.email_blaster.EmailRecipientSerializer')
+    @patch('atlas.api.v3.views.recipients.EmailRecipientSerializer')
     def test_post_email_recipient_return_400_when_serializer_is_not_valid(self, serializer_mock):
         self.authenticate(self.user)
         serializer_mock.return_value.is_valid.return_value = False
@@ -87,7 +89,7 @@ class TestGetEmailRecipients(RestTestCase):
         response = self.client.post(self.GET_EMAIL_RECIPIENT, request=request)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch('atlas.api.v3.views.email_blaster.EmailRecipientSerializer')
+    @patch('atlas.api.v3.views.recipients.EmailRecipientSerializer')
     def test_post_email_recipient_return_201_when_serializer_is_valid(self, serializer_mock):
         self.authenticate(self.user)
         serializer_mock.return_value.is_valid.return_value = True
@@ -97,4 +99,49 @@ class TestGetEmailRecipients(RestTestCase):
 
 
 class TestGetGroupTotals(RestTestCase):
-    pass
+    
+    GET_GROUP_TOTAL = "/api/v3/recipients/group-total"
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.user = RestTestCase.create_admin()
+        self.survei_id = 1
+        self.year = 2021
+        self.term = 2
+
+        self.survei = Survei.objects.create(
+            id=self.survei_id,
+            nama='Survei Test',
+            deskripsi='Deskripsi Survei Test',
+            creator=self.user
+        )
+
+    def test_post_group_total_not_authenticated(self):
+        request = self.factory.post(path=self.GET_GROUP_TOTAL)
+        response = self.client.post(self.GET_GROUP_TOTAL, request=request)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_post_group_total_return_400(self):
+        
+        data = {
+            "year": self.year,
+            "term" : self.term
+        }
+
+        self.authenticate(self.user)
+        response = self.client.post(self.GET_GROUP_TOTAL, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)       
+
+    def test_post_group_total_return_200(self):
+        
+        data = {
+            "survei_id": self.survei_id,
+            "year": self.year,
+            "term": self.term
+        }
+
+        self.authenticate(self.user)
+        response = self.client.post(self.GET_GROUP_TOTAL, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

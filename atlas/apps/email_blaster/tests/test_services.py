@@ -3,6 +3,7 @@ from django.test import TestCase
 from atlas.apps.email_blaster.models import EmailTemplate
 from atlas.apps.email_blaster.services import CSVEmailParser, EmailTemplateService, send_email_task, EmailSendService, EmailRecipientService
 from atlas.apps.survei.models import Survei
+from atlas.apps.response.models import Response
 from atlas.apps.account.models import User
 from atlas.apps.email_blaster.models import EmailRecipient
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -162,12 +163,14 @@ class TestEmailRecipientService(TestCase):
             'tanggal_dikirim' : "2023-03-18 20:48:35.792775+07",
             'group_recipients_years' : [2021, 2022],
             'group_recipients_terms' : [2, 1],
-            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"]
+            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"],
+            'csv_emails' : ["csv@gmail.com", "csv@yahoo.com"]
         }
 
         self.user = User.objects.create(**user_data)
         self.survei = Survei.objects.create(**survei_data, creator=self.user)
         self.email_recipient_data = EmailRecipient.objects.create(**email_recipient_data, survei = self.survei)
+        self.email_recipient_service = EmailRecipientService()
 
         self.email_input_list = ["a@abc.com", "b@bcd.com", "dimas@gmail.com"]
         self.email_correct_output = ["dimas@gmail.com"]
@@ -179,7 +182,8 @@ class TestEmailRecipientService(TestCase):
             'survei': self.survei,
             'group_recipients_years' : [2021, 2022],
             'group_recipients_terms' : [2, 1],
-            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"]
+            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"],
+            'csv_emails' : ["csv@gmail.com", "csv@yahoo.com"]
         }
         email_recipient_data = email_recipient_service.create_email_recipient_data(**create_parameters)
         objects_create_mock.assert_called_once_with(**create_parameters)
@@ -191,7 +195,8 @@ class TestEmailRecipientService(TestCase):
             'survei': self.survei,
             'group_recipients_years' : [2021, 2022],
             'group_recipients_terms' : [2, 1],
-            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"]
+            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"],
+            'csv_emails' : ["csv@gmail.com", "csv@yahoo.com"]
         }
         email_recipient_data = email_recipient_service.create_email_recipient_data(**create_parameters)
         self.assertEqual(email_recipient_data, objects_create_mock.return_value)
@@ -205,3 +210,36 @@ class TestEmailRecipientService(TestCase):
         email_recipient_service = EmailRecipientService()
         email_found = email_recipient_service.get_user_email_by_id('12345')
         self.assertIsNone(email_found)
+
+    @patch('atlas.apps.email_blaster.services.EmailRecipientService.get_all_student_by_graduation_year_and_term')
+    def test_get_group_of_alumni_by_graduation_year_and_term_with_data(self, get_all_student_mock):
+        tahun_list = [2021, 2022]
+        term_list = [1, 2]
+        student_data = [
+            {"id": 1, "name": "John", "year": 2021, "term": 1},
+            {"id": 2, "name": "Jane", "year": 2022, "term": 2},
+            {"id": 3, "name": "Bob", "year": 2022, "term": 2},
+        ]
+        get_all_student_mock.side_effect = lambda tahun, term: [s for s in student_data if s["year"] == tahun and s["term"] == term]
+
+        expected_result = {
+            "2021 term 1": [{"id": 1, "name": "John", "year": 2021, "term": 1}],
+            "2022 term 2": [
+                {"id": 2, "name": "Jane", "year": 2022, "term": 2},
+                {"id": 3, "name": "Bob", "year": 2022, "term": 2},
+            ],
+        }
+
+        result = self.email_recipient_service.get_group_of_alumni_by_graduation_year_and_term(tahun_list, term_list)
+
+        self.assertEqual(result, expected_result)
+
+    @patch('atlas.apps.email_blaster.services.EmailRecipientService.get_all_student_by_graduation_year_and_term')
+    def test_get_group_of_alumni_by_graduation_year_and_term_with_empty_data(self, get_all_student_mock):
+        tahun_list = [2023]
+        term_list = [1]
+        get_all_student_mock.return_value = []
+
+        result = self.email_recipient_service.get_group_of_alumni_by_graduation_year_and_term(tahun_list, term_list)
+
+        self.assertEqual(result, {})

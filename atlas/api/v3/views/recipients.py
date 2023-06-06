@@ -53,10 +53,16 @@ def get_total_recipients_of_group_email(request):
 
     email_recipient_service = EmailRecipientService()
 
-    alumni_emails = email_recipient_service.get_all_student_by_graduation_year_and_term(data["year"], data["term"])
-    total_alumni_non_response = email_recipient_service.get_total_alumni_of_a_group_that_havent_filled_survey(alumni_emails, data["survei_id"])
+    try :
+        alumni_emails = email_recipient_service.get_all_student_by_graduation_year_and_term(data["year"], data["term"])
+        total_alumni_non_response = email_recipient_service.get_total_alumni_of_a_group_that_havent_filled_survey(alumni_emails, data["survei_id"])
 
-    return Response(
-        data={"total_all": len(alumni_emails), 
-              "total_non_response": total_alumni_non_response},
-        status=status.HTTP_200_OK)
+        return Response(
+            data={"total_all": len(alumni_emails), 
+                  "total_non_response": total_alumni_non_response},
+            status=status.HTTP_200_OK)
+    
+    except Exception as error:
+        return Response(
+            data={'messages': error},
+            status=status.HTTP_400_BAD_REQUEST)

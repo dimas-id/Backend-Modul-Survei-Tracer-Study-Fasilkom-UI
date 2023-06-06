@@ -8,6 +8,7 @@ from django.test import TestCase
 from atlas.apps.survei.models import Survei
 from atlas.apps.email_blaster.models import EmailRecipient
 from atlas.apps.email_blaster.services import EmailRecipientService
+from atlas.libs.test import RestTestCase
 
 
 class EmailTemplateSerializerTestCase(APITestCase):
@@ -150,14 +151,23 @@ class TestEmailRecipientSerializer(TestCase):
             'survei_id': 2,
             'group_recipients_years' : [2021, 2022],
             'group_recipients_terms' : [2, 1],
-            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"]
+            'individual_recipients_emails' : ["dimas@gmail.com", "dimas@yahoo.com"],
+            'csv_emails' : ["csv@gmail.com", "csv@yahoo.com"]
         }
         self.serializer = EmailRecipientSerializer(data=self.serializer_data)
+
+        self.user = RestTestCase.create_admin()
+        self.survei = Survei.objects.create(
+            id=self.serializer_data.get("survei_id"),
+            nama='Survei Test',
+            deskripsi='Deskripsi Survei Test',
+            creator=self.user
+        )
 
     def test_request_contains_expected_fields(self):
         fields = self.serializer.get_fields()
         self.assertEqual(set(fields), set(
-            ['id', 'survei_id', 'group_recipients_years', 'group_recipients_terms', 'individual_recipients_emails']))
+            ['id', 'survei_id', 'group_recipients_years', 'group_recipients_terms', 'individual_recipients_emails', 'csv_emails']))
 
     @patch('atlas.apps.survei.services.SurveiService.get_survei')
     def test_initial_request_is_valid(self, get_survei_mock):
@@ -169,7 +179,7 @@ class TestEmailRecipientSerializer(TestCase):
         self.assertFalse(serializer.is_valid())
 
     def test_data_is_not_empty(self):
-        self.serializer_data['data'] = []
+        self.serializer_data = []
         serializer = EmailRecipientSerializer(data=self.serializer_data)
         self.assertFalse(serializer.is_valid())
 
@@ -215,5 +225,32 @@ class TestEmailRecipientSerializer(TestCase):
             survei=survei_mock,
             group_recipients_years=self.serializer_data.get("group_recipients_years"),
             group_recipients_terms=self.serializer_data.get("group_recipients_terms"),
-            individual_recipients_emails=self.serializer_data.get("individual_recipients_emails"))
-    
+            individual_recipients_emails=self.serializer_data.get("individual_recipients_emails"),
+            csv_emails=self.serializer_data.get("csv_emails"))
+        
+    @patch('atlas.apps.email_blaster.services.EmailRecipientService.exclude_alumni_that_has_responded')
+    @patch('atlas.apps.email_blaster.services.EmailRecipientService.get_email_recipients')
+    @patch('atlas.apps.survei.services.SurveiService.get_survei')
+    @patch('atlas.apps.email_blaster.services.EmailRecipientService.create_email_recipient_data')
+    def test_create_should_return_as_expected(self, create_data_mock, get_survei_mock, get_email_recipients_mock, exclude_alumni_mock):
+        
+        expected_emails = []
+        expected_emails.extend(self.serializer_data["individual_recipients_emails"])
+        expected_emails.extend(self.serializer_data["csv_emails"])
+
+        survei_mock = MagicMock(spec=Survei)
+        survei_mock.id = 1
+        get_survei_mock.return_value = survei_mock
+
+        email_recipient_data_mock = MagicMock()
+        email_recipient_data_mock.group_recipients_years = [2020, 2021]
+        email_recipient_data_mock.group_recipients_terms = [1, 2]
+        email_recipient_data_mock.individual_recipients_emails = self.serializer_data["individual_recipients_emails"]
+        email_recipient_data_mock.csv_emails = self.serializer_data["csv_emails"]
+        create_data_mock.return_value = email_recipient_data_mock
+
+        get_email_recipients_mock.return_value = expected_emails
+        exclude_alumni_mock.return_value = expected_emails
+        email_fetched = self.serializer.create(self.serializer_data)
+
+        self.assertEqual(email_fetched.get("emails"), expected_emails)

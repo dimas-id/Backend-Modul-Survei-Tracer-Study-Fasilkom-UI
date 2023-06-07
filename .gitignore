@@ -123,3 +123,5 @@ env-python3.7.9/
 
 # sonarqube reports
 .reports/
+
+data/db

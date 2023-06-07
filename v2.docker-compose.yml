@@ -1,0 +1,33 @@
+version: "1"
+services:
+  web:
+    build:
+      context: .
+      dockerfile: v2.Dockerfile
+    ports:
+      - ${PORT}:8000
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+  celery_email_blaster:
+    build:
+      context: .
+      dockerfile: v2.celery.Dockerfile
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+      - web
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=atlas
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
